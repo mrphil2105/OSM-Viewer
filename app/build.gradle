@@ -16,7 +16,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'bfst22.addressparser.Address'
+    mainClass = 'bfst22.addressparser.GUI'
 }
 
 tasks.named('test') {
