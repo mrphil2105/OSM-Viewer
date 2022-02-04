@@ -1,0 +1,24 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.11'
+}
+
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+}
+
+application {
+    mainClass = 'bfst22.addressparser.Address'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
