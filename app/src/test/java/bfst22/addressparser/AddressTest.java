@@ -21,4 +21,9 @@ class AddressTest {
         assertEquals("2300", addr.postcode);
         assertEquals("København S", addr.city);
     }
+    @Test void ituSimple() {
+        var addr = Address.parse("Rued Langgaards Vej 7");
+        assertEquals("Rued Langgaards Vej", addr.street);
+        assertEquals("7", addr.house);
+    }
 }
