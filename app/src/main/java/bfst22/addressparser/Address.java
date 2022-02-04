@@ -1,5 +1,7 @@
 package bfst22.addressparser;
 
+import java.util.regex.Pattern;
+
 public class Address {
   public final String street, house, floor, side, postcode, city;
 
@@ -19,8 +21,19 @@ public class Address {
       + postcode + " " + city;
   }
 
+  private final static String REGEX = "^(?<street>[A-Za-zæøå ]+) (?<house>[0-9]+), (?<postcode>[0-9]{4}) (?<city>[A-Za-zæøå ]+)$";
+  private final static Pattern PATTERN = Pattern.compile(REGEX);
+
   public static Address parse(String input) {
-    return new Builder().build();
+    var builder = new Builder();
+    var matcher = PATTERN.matcher(input);
+    if (matcher.matches()) {
+      builder.street(matcher.group("street"));
+      builder.house(matcher.group("house"));
+      builder.postcode(matcher.group("postcode"));
+      builder.city(matcher.group("city"));
+    }
+    return builder.build();
   }
 
   public static class Builder {
