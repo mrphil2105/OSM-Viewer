@@ -8,6 +8,7 @@ repositories {
 }
 
 javafx {
+    version = "17"
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
@@ -22,7 +23,7 @@ tasks.withType(JavaCompile) {
 }
 
 application {
-    mainClass = 'bfst22.addressparser.GUI'
+    mainClass = 'bfst22.vector.App'
 }
 
 tasks.named('test') {
