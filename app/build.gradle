@@ -3,17 +3,36 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.0.11'
 }
 
+application {
+    applicationDefaultJvmArgs = ['--add-opens', 'javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED', '--add-opens', 'javafx.graphics/javafx.stage=ALL-UNNAMED', '--add-opens', 'javafx.graphics/com.sun.javafx.tk.quantum=ALL-UNNAMED', '--add-opens', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED']
+}
+
 repositories {
     mavenCentral()
 }
 
 javafx {
     version = "17"
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = [ 'javafx.base', 'javafx.controls', 'javafx.fxml', 'javafx.graphics' ]
 }
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+
+    implementation files('lib/jars/jogamp-fat.jar')
+
+    implementation 'org.openjfx:javafx-base:0.0.11:win'
+    implementation 'org.openjfx:javafx-base:0.0.11:mac'
+    implementation 'org.openjfx:javafx-base:0.0.11:linux'
+    implementation 'org.openjfx:javafx-controls:0.0.11:win'
+    implementation 'org.openjfx:javafx-controls:0.0.11:mac'
+    implementation 'org.openjfx:javafx-controls:0.0.11:linux'
+    implementation 'org.openjfx:javafx-fxml:0.0.11:win'
+    implementation 'org.openjfx:javafx-fxml:0.0.11:mac'
+    implementation 'org.openjfx:javafx-fxml:0.0.11:linux'
+    implementation 'org.openjfx:javafx-graphics:0.0.11:win'
+    implementation 'org.openjfx:javafx-graphics:0.0.11:mac'
+    implementation 'org.openjfx:javafx-graphics:0.0.11:linux'
 }
 
 compileJava.options.encoding = 'UTF-8'
