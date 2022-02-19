@@ -59,6 +59,13 @@ public class LinesRenderer implements GLEventListener {
 
         gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, ids[2]);
         gl.glBufferData(GL3.GL_ARRAY_BUFFER, colorBuffer.capacity() * Float.BYTES, colorBuffer.rewind(), GL.GL_STATIC_DRAW);
+
+        gl.glEnable(GL3.GL_LINE_SMOOTH);
+        gl.glEnable(GL3.GL_POLYGON_SMOOTH);
+        gl.glHint(GL3.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
+        gl.glEnable(GL3.GL_BLEND);
+        gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glEnable(GL3.GL_MULTISAMPLE);
     }
 
     @Override
@@ -84,7 +91,7 @@ public class LinesRenderer implements GLEventListener {
 
         gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, ids[0]);
         gl.glEnableVertexAttribArray(shaderProgram.getShaderLocation(EShaderAttribute.POSITION));
-        gl.glVertexAttribPointer(shaderProgram.getShaderLocation(EShaderAttribute.POSITION), 3, GL3.GL_FLOAT, false, Float.BYTES * 3, 0);
+        gl.glVertexAttribPointer(shaderProgram.getShaderLocation(EShaderAttribute.POSITION), 2, GL3.GL_FLOAT, false, Float.BYTES * 2, 0);
 
         gl.glUniformMatrix4fv(shaderProgram.getShaderLocation(EShaderAttribute.TRANS), 1, false, model.getAffinity().rewind());
         gl.glUniformMatrix4fv(shaderProgram.getShaderLocation(EShaderAttribute.ORTHO), 1, false, ortho.rewind());
@@ -100,13 +107,18 @@ public class LinesRenderer implements GLEventListener {
     @Override
     public void reshape(GLAutoDrawable glAutoDrawable, int x, int y, int width,
                         int height) {
-        var widthf = (float)width;
-        var heightf = (float)height;
+        final float left = 0.0f;
+        final float right = width;
+        final float top = 0.0f;
+        final float bottom = height;
+        final float near = 0.0f;
+        final float far = 1.0f;
+
         this.ortho = Buffers.newDirectFloatBuffer(new float[] {
-                2 / (0 - widthf), 0, 0, 0,
-                0, 2 / (0 - heightf), 0, 0,
-                0, 0, -2 / (1 - 0), 0,
-                (widthf + 0) / (widthf - 0), -(0 + heightf) / (0 - heightf), (1 + 0) / (1 - 0), 1
+                2 / (right - left), 0, 0, 0,
+                0, 2 / (top - bottom), 0, 0,
+                0, 0, -2 / (far - near), 0,
+                -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1
         });
     }
 }

@@ -23,6 +23,7 @@ public class JOGLView {
         final var display = NewtFactory.createDisplay(null, false);
         final var screen = NewtFactory.createScreen(display, 0);
         final var caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
+        caps.setSampleBuffers(true);
         final var window = GLWindow.create(screen, caps);
         final var canvas = new NewtCanvasJFX(window);
         final var pane = new StackPane(canvas);
@@ -36,15 +37,15 @@ public class JOGLView {
         canvas.setWidth(gd.getDisplayMode().getWidth() >> 1);
         canvas.setHeight(gd.getDisplayMode().getHeight() >> 1);
 
-        stage.show();
-        stage.setTitle("openGL rendering is faster :)");
-        stage.setScene(new Scene(pane));
-
         // Stop on application close
         stage.setOnCloseRequest(event -> animator.stop());
 
         window.display();
         window.addGLEventListener(new LinesRenderer(model));
+
+        stage.setTitle("openGL rendering is faster :)");
+        stage.setScene(new Scene(pane));
+        stage.show();
 
         // yes yes this is controller logic, but I don't have time since it's 11:40 right now and this is due in 20 minutes
         window.addMouseListener(new MouseListener() {
