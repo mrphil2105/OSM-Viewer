@@ -60,11 +60,6 @@ public class LinesRenderer implements GLEventListener {
         gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, ids[2]);
         gl.glBufferData(GL3.GL_ARRAY_BUFFER, colorBuffer.capacity() * Float.BYTES, colorBuffer.rewind(), GL.GL_STATIC_DRAW);
 
-        gl.glEnable(GL3.GL_LINE_SMOOTH);
-        gl.glEnable(GL3.GL_POLYGON_SMOOTH);
-        gl.glHint(GL3.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
-        gl.glEnable(GL3.GL_BLEND);
-        gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
         gl.glEnable(GL3.GL_MULTISAMPLE);
     }
 
@@ -93,7 +88,7 @@ public class LinesRenderer implements GLEventListener {
         gl.glEnableVertexAttribArray(shaderProgram.getShaderLocation(EShaderAttribute.POSITION));
         gl.glVertexAttribPointer(shaderProgram.getShaderLocation(EShaderAttribute.POSITION), 2, GL3.GL_FLOAT, false, Float.BYTES * 2, 0);
 
-        gl.glUniformMatrix4fv(shaderProgram.getShaderLocation(EShaderAttribute.TRANS), 1, false, model.getAffinity().rewind());
+        gl.glUniformMatrix4fv(shaderProgram.getShaderLocation(EShaderAttribute.TRANS), 1, false, model.getTransformBuffer().rewind());
         gl.glUniformMatrix4fv(shaderProgram.getShaderLocation(EShaderAttribute.ORTHO), 1, false, ortho.rewind());
 
         gl.glDrawElements(GL3.GL_TRIANGLES, model.getIndices().length, GL3.GL_UNSIGNED_INT, 0);

@@ -17,10 +17,13 @@ javafx {
 }
 
 dependencies {
+    // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
 
+    // Java OpenGL
     implementation files('lib/jars/jogamp-fat.jar')
 
+    // JavaFX
     implementation 'org.openjfx:javafx-base:0.0.11:win'
     implementation 'org.openjfx:javafx-base:0.0.11:mac'
     implementation 'org.openjfx:javafx-base:0.0.11:linux'

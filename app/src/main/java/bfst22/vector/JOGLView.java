@@ -23,7 +23,11 @@ public class JOGLView {
         final var display = NewtFactory.createDisplay(null, false);
         final var screen = NewtFactory.createScreen(display, 0);
         final var caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
+
+        // 8x anti-aliasing
         caps.setSampleBuffers(true);
+        caps.setNumSamples(8);
+
         final var window = GLWindow.create(screen, caps);
         final var canvas = new NewtCanvasJFX(window);
         final var pane = new StackPane(canvas);
@@ -37,13 +41,13 @@ public class JOGLView {
         canvas.setWidth(gd.getDisplayMode().getWidth() >> 1);
         canvas.setHeight(gd.getDisplayMode().getHeight() >> 1);
 
-        // Stop on application close
+        // Stop on application close. Animator keeps running in the background otherwise.
         stage.setOnCloseRequest(event -> animator.stop());
 
         window.display();
         window.addGLEventListener(new LinesRenderer(model));
 
-        stage.setTitle("openGL rendering is faster :)");
+        stage.setTitle("OSM Viewer (OpenGL)");
         stage.setScene(new Scene(pane));
         stage.show();
 
@@ -92,7 +96,7 @@ public class JOGLView {
 
             @Override
             public void mouseWheelMoved(MouseEvent mouseEvent) {
-                model.zoom(mouseEvent.getRotation()[1] / 10);
+                model.zoom((float)Math.pow(1.05, mouseEvent.getRotation()[1]), mouseEvent.getX(), mouseEvent.getY());
             }
         });
         animator = new Animator(window);
