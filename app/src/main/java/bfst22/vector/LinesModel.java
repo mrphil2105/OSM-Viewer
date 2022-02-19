@@ -1,5 +1,6 @@
 package bfst22.vector;
 
+import com.jogamp.opengl.GLContext;
 import javafx.scene.transform.Affine;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ public class LinesModel {
     private final float[] verticesBuffer;
     private final int[] indicesBuffer;
     private final float[] colorBuffer;
-    private static final float lineWidth = 0.3f;
+    private static final float lineWidth = 0.1f;
     private FloatBuffer transformBuffer;
     private Affine transform;
 

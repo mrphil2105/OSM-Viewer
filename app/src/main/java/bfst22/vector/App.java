@@ -10,6 +10,7 @@ public class App extends Application {
         var linesmodel = new LinesModel("data/lines336k.txt");
         //var view = new View(model, primaryStage);
         var joglview = new JOGLView(new Stage(), linesmodel);
+        var joglview2 = new JOGLView(new Stage(), linesmodel);
         //var controller = new Controller(model, view);
     }
 }
