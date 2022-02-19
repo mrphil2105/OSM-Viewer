@@ -44,7 +44,6 @@ public class JOGLView {
         // Stop on application close. Animator keeps running in the background otherwise.
         stage.setOnCloseRequest(event -> animator.stop());
 
-        window.display();
         window.addGLEventListener(new LinesRenderer(model));
 
         stage.setTitle("OSM Viewer (OpenGL)");
