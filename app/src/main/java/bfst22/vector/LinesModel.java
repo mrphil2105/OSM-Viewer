@@ -1,6 +1,6 @@
 package bfst22.vector;
 
-import com.jogamp.common.nio.Buffers;
+import javafx.scene.transform.Affine;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -12,14 +12,13 @@ public class LinesModel {
     private final float[] verticesBuffer;
     private final int[] indicesBuffer;
     private final float[] colorBuffer;
-    private static final float lineWidth = 0.2f;
-    private float zoom = 1;
-    private float x = 0;
-    private float y = 0;
-    private FloatBuffer affinity;
+    private static final float lineWidth = 0.3f;
+    private FloatBuffer transformBuffer;
+    private Affine transform;
 
     public LinesModel(String filename) throws IOException {
-        recalculateAffinity();
+        transform = new Affine();
+        recalculateTransform();
 
         var array  = Files.lines(Paths.get(filename))
                     .flatMapToDouble(l -> Arrays.stream(l.split(" "))
@@ -56,8 +55,8 @@ public class LinesModel {
             indices[indexIndex + 0] = arrayIndex + 0;
             indices[indexIndex + 1] = arrayIndex + 1;
             indices[indexIndex + 2] = arrayIndex + 2;
-            indices[indexIndex + 3] = arrayIndex + 2;
-            indices[indexIndex + 4] = arrayIndex + 0;
+            indices[indexIndex + 3] = arrayIndex + 0;
+            indices[indexIndex + 4] = arrayIndex + 2;
             indices[indexIndex + 5] = arrayIndex + 3;
             colors[colorIndex + 0] = 0.0f;
             colors[colorIndex + 1] = 0.0f;
@@ -68,8 +67,6 @@ public class LinesModel {
         indicesBuffer = indices;
         colorBuffer = colors;
     }
-
-
 
     public float[] getVertices() {
         return verticesBuffer;
@@ -83,27 +80,39 @@ public class LinesModel {
         return colorBuffer;
     }
 
-    public FloatBuffer getAffinity() {
-        return affinity;
+    public FloatBuffer getTransformBuffer() {
+        return transformBuffer;
     }
 
-    public void zoom(float zoom) {
-        this.zoom += zoom;
-        recalculateAffinity();
+    public void zoom(float zoom, float x, float y) {
+        transform.prependTranslation(-x, -y);
+        transform.prependScale(zoom, zoom);
+        transform.prependTranslation(x, y);
+        recalculateTransform();
     }
 
     public void addXY(float x, float y) {
-        this.x += x;
-        this.y += y;
-        recalculateAffinity();
+        transform.prependTranslation(x, y);
+        recalculateTransform();
     }
 
-    private void recalculateAffinity() {
-        affinity = Buffers.newDirectFloatBuffer(new float[] {
-                zoom, 0, 0, 0,
-                0, zoom, 0, 0,
-                0, 0, zoom, 0,
-                x, y, 0, 1
-        });
+    private void recalculateTransform() {
+        transformBuffer = FloatBuffer.allocate(16);
+        transformBuffer.put((float)transform.getMxx());
+        transformBuffer.put((float)transform.getMxy());
+        transformBuffer.put((float)transform.getMxz());
+        transformBuffer.put(0);
+        transformBuffer.put((float)transform.getMyx());
+        transformBuffer.put((float)transform.getMyy());
+        transformBuffer.put((float)transform.getMyz());
+        transformBuffer.put(0);
+        transformBuffer.put((float)transform.getMzx());
+        transformBuffer.put((float)transform.getMzy());
+        transformBuffer.put((float)transform.getMzz());
+        transformBuffer.put(0);
+        transformBuffer.put((float)transform.getTx());
+        transformBuffer.put((float)transform.getTy());
+        transformBuffer.put((float)transform.getTz());
+        transformBuffer.put(1);
     }
 }
