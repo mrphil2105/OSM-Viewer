@@ -12,7 +12,7 @@ public class LinesModel {
     private final float[] verticesBuffer;
     private final int[] indicesBuffer;
     private final float[] colorBuffer;
-    private static final float lineWidth = 1f;
+    private static final float lineWidth = 0.2f;
     private float zoom = 1;
     private float x = 0;
     private float y = 0;
@@ -26,12 +26,12 @@ public class LinesModel {
                         .skip(1)
                         .mapToDouble(n -> Double.parseDouble(n))).toArray();
 
-        var vertices = new float[array.length * 3];
+        var vertices = new float[array.length * 2];
         var indices = new int[array.length / 4 * 6];
         var colors = new float[array.length / 4 * 3];
         for (int i = 0; i < array.length / 4; i++) {
             var arrayIndex = i * 4;
-            var bufferIndex = i * 12;
+            var bufferIndex = i * 8;
             var indexIndex = i * 6; // lol
             var colorIndex = i * 3;
             var start = new Vector((float)array[arrayIndex], (float)array[arrayIndex + 1]);
@@ -47,16 +47,12 @@ public class LinesModel {
             p3 = p3.add(start);
             vertices[bufferIndex + 0] = p0.x();
             vertices[bufferIndex + 1] = p0.y();
-            vertices[bufferIndex + 2] = 0.0f;
-            vertices[bufferIndex + 3] = p1.x();
-            vertices[bufferIndex + 4] = p1.y();
-            vertices[bufferIndex + 5] = 0.0f;
-            vertices[bufferIndex + 6] = p2.x();
-            vertices[bufferIndex + 7] = p2.y();
-            vertices[bufferIndex + 8] = 0.0f;
-            vertices[bufferIndex + 9] = p3.x();
-            vertices[bufferIndex + 10] = p3.y();
-            vertices[bufferIndex + 11] = 0.0f;
+            vertices[bufferIndex + 2] = p1.x();
+            vertices[bufferIndex + 3] = p1.y();
+            vertices[bufferIndex + 4] = p2.x();
+            vertices[bufferIndex + 5] = p2.y();
+            vertices[bufferIndex + 6] = p3.x();
+            vertices[bufferIndex + 7] = p3.y();
             indices[indexIndex + 0] = arrayIndex + 0;
             indices[indexIndex + 1] = arrayIndex + 1;
             indices[indexIndex + 2] = arrayIndex + 2;
@@ -107,7 +103,7 @@ public class LinesModel {
                 zoom, 0, 0, 0,
                 0, zoom, 0, 0,
                 0, 0, zoom, 0,
-                -x, y, 0, 1
+                x, y, 0, 1
         });
     }
 }
