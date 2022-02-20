@@ -1,21 +1,19 @@
 package bfst22.vector;
 
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import static java.util.stream.Collectors.toList;
 
@@ -29,8 +27,8 @@ public class Model implements Iterable<Drawable> {
             loadOSM(filename);
         } else {
             lines = Files.lines(Paths.get(filename))
-                .map(Line::new)
-                .collect(toList());
+                    .map(Line::new)
+                    .collect(toList());
         }
     }
 
@@ -65,9 +63,9 @@ public class Model implements Iterable<Drawable> {
                     switch (reader.getLocalName()) {
                         case "way":
                             // if (!nodes.isEmpty()) {
-                                var way = new OSMWay(nodes);
-                                lines.add(way);
-                                nodes.clear();
+                            var way = new OSMWay(nodes);
+                            lines.add(way);
+                            nodes.clear();
                             // }
                             break;
                     }

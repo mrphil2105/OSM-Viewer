@@ -6,7 +6,7 @@ public record Vector(float x, float y) {
     }
 
     public float length() {
-        return (float)Math.sqrt(x * x + y * y);
+        return (float) Math.sqrt(x * x + y * y);
     }
 
     public Vector scale(float s) {

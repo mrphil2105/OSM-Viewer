@@ -1,28 +1,24 @@
 package bfst22.vector;
 
-import java.io.File;
-import java.nio.FloatBuffer;
-
 import com.jogamp.common.nio.Buffers;
-import com.jogamp.opengl.*;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
 import shaders.Location;
 import shaders.ShaderProgram;
 
-/**
- * Performs the rendering.
- *
- * @author serhiy
- */
+import java.io.File;
+import java.nio.FloatBuffer;
+
 public class LinesRenderer implements GLEventListener {
-
     private final LinesModel model;
-    private final JOGLView view;
+    private final MapCanvas canvas;
     private ShaderProgram shaderProgram;
-    private FloatBuffer ortho;
+    private FloatBuffer orthographic;
 
-    public LinesRenderer(LinesModel model, JOGLView view) {
+    public LinesRenderer(LinesModel model, MapCanvas canvas) {
         this.model = model;
-        this.view = view;
+        this.canvas = canvas;
     }
 
     @Override
@@ -33,9 +29,7 @@ public class LinesRenderer implements GLEventListener {
         File fragmentShader = new File("shaders/default.fs");
 
         shaderProgram = new ShaderProgram();
-        if (!shaderProgram.init(gl, vertexShader, fragmentShader)) {
-            throw new IllegalStateException("Unable to initiate the shaders!");
-        }
+        shaderProgram.init(gl, vertexShader, fragmentShader);
 
         gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(LinesModel.VBOType.Vertex));
         gl.glVertexAttribPointer(shaderProgram.getLocation(Location.POSITION), 2, GL3.GL_FLOAT, false, Float.BYTES * 2, 0);
@@ -63,8 +57,8 @@ public class LinesRenderer implements GLEventListener {
 
         gl.glUseProgram(shaderProgram.getProgramId());
 
-        gl.glUniformMatrix4fv(shaderProgram.getLocation(Location.TRANS), 1, false, view.getTransformBuffer().rewind());
-        gl.glUniformMatrix4fv(shaderProgram.getLocation(Location.ORTHO), 1, false, ortho.rewind());
+        gl.glUniformMatrix4fv(shaderProgram.getLocation(Location.TRANS), 1, false, canvas.getTransformBuffer().rewind());
+        gl.glUniformMatrix4fv(shaderProgram.getLocation(Location.ORTHOGRAPHIC), 1, false, orthographic.rewind());
 
         gl.glDrawElements(GL3.GL_TRIANGLES, model.getCount(), GL3.GL_UNSIGNED_INT, 0);
 
@@ -82,7 +76,7 @@ public class LinesRenderer implements GLEventListener {
         final float far = 1.0f;
 
         // Recalculate orthographic projection matrix
-        this.ortho = Buffers.newDirectFloatBuffer(new float[] {
+        this.orthographic = Buffers.newDirectFloatBuffer(new float[]{
                 2 / (right - left), 0, 0, 0,
                 0, 2 / (top - bottom), 0, 0,
                 0, 0, -2 / (far - near), 0,
