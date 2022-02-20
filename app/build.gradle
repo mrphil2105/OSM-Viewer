@@ -16,6 +16,12 @@ javafx {
     modules = [ 'javafx.base', 'javafx.controls', 'javafx.fxml', 'javafx.graphics' ]
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 dependencies {
     // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
