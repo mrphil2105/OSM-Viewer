@@ -10,7 +10,7 @@ package shaders;
 public enum Location {
     POSITION("inPosition", LocationType.Attrib),
     COLOR("inColor", LocationType.Attrib),
-    ORTHO("inOrtho", LocationType.Uniform),
+    ORTHOGRAPHIC("inOrthographic", LocationType.Uniform),
     TRANS("inTrans", LocationType.Uniform);
 
     private final String name;

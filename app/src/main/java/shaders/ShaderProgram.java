@@ -27,7 +27,7 @@ public class ShaderProgram {
      * @param fragmentShader file.
      * @return true if initialization was successful, false otherwise.
      */
-    public boolean init(GL3 gl, File vertexShader, File fragmentShader) {
+    public void init(GL3 gl, File vertexShader, File fragmentShader) {
         if (initialized) {
             throw new IllegalStateException(
                     "Unable to initialize the shader program! (it was already initialized)");
@@ -61,8 +61,9 @@ public class ShaderProgram {
             e.printStackTrace();
         }
 
-        return initialized;
-
+        if (!initialized) {
+            throw new IllegalStateException("Unable to initiate the shaders!");
+        }
     }
 
     /**

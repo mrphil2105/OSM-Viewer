@@ -2,9 +2,7 @@ package bfst22.vector;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.*;
-import shaders.ShaderProgram;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -80,14 +78,6 @@ public class LinesModel {
 
         sharedDrawable.invoke(true, glAutoDrawable -> {
             var gl = glAutoDrawable.getGL().getGL3();
-
-            File vertexShader = new File("shaders/default.vs");
-            File fragmentShader = new File("shaders/default.fs");
-
-            var shaderProgram = new ShaderProgram();
-            if (!shaderProgram.init(gl, vertexShader, fragmentShader)) {
-                throw new IllegalStateException("Unable to initiate the shaders!");
-            }
 
             gl.glGenBuffers(vbo.length, vbo, 0);
 
