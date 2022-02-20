@@ -2,11 +2,10 @@ package bfst22.vector;
 
 import java.io.File;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.*;
-import shaders.EShaderAttribute;
+import shaders.Location;
 import shaders.ShaderProgram;
 
 /**
@@ -17,12 +16,13 @@ import shaders.ShaderProgram;
 public class LinesRenderer implements GLEventListener {
 
     private final LinesModel model;
+    private final JOGLView view;
     private ShaderProgram shaderProgram;
-    private int[] vao;
     private FloatBuffer ortho;
 
-    public LinesRenderer(LinesModel model) {
+    public LinesRenderer(LinesModel model, JOGLView view) {
         this.model = model;
+        this.view = view;
     }
 
     @Override
@@ -37,35 +37,15 @@ public class LinesRenderer implements GLEventListener {
             throw new IllegalStateException("Unable to initiate the shaders!");
         }
 
-        FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(model.getVertices().length);
-        IntBuffer indexBuffer = Buffers.newDirectIntBuffer(model.getIndices().length);
-        FloatBuffer colorBuffer = Buffers.newDirectFloatBuffer(model.getColors().length);
+        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(LinesModel.VBOType.Vertex));
+        gl.glVertexAttribPointer(shaderProgram.getLocation(Location.POSITION), 2, GL3.GL_FLOAT, false, Float.BYTES * 2, 0);
+        gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.POSITION));
 
-        vertexBuffer.put(model.getVertices());
-        indexBuffer.put(model.getIndices());
-        colorBuffer.put(model.getColors());
+        gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, model.getVBO(LinesModel.VBOType.Index));
 
-        vao = new int[1];
-        gl.glGenVertexArrays(1, vao, 0);
-        gl.glBindVertexArray(vao[0]);
-
-        var vbo = new int[3];
-        gl.glGenBuffers(3, vbo, 0);
-
-        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, vbo[0]);
-        gl.glBufferData(GL3.GL_ARRAY_BUFFER, (long) vertexBuffer.capacity() * Float.BYTES, vertexBuffer.rewind(), GL.GL_STATIC_DRAW);
-        gl.glVertexAttribPointer(shaderProgram.getShaderLocation(EShaderAttribute.POSITION), 2, GL3.GL_FLOAT, false, Float.BYTES * 2, 0);
-        gl.glEnableVertexAttribArray(shaderProgram.getShaderLocation(EShaderAttribute.POSITION));
-
-        gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
-        gl.glBufferData(GL3.GL_ELEMENT_ARRAY_BUFFER, (long) indexBuffer.capacity() * Float.BYTES, indexBuffer.rewind(), GL.GL_STATIC_DRAW);
-
-        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, vbo[2]);
-        gl.glBufferData(GL3.GL_ARRAY_BUFFER, (long) colorBuffer.capacity() * Float.BYTES, colorBuffer.rewind(), GL.GL_STATIC_DRAW);
-        gl.glVertexAttribPointer(shaderProgram.getShaderLocation(EShaderAttribute.COLOR), 3, GL3.GL_FLOAT, false, Float.BYTES * 3, 0);
-        gl.glEnableVertexAttribArray(shaderProgram.getShaderLocation(EShaderAttribute.COLOR));
-
-        gl.glEnable(GL3.GL_MULTISAMPLE);
+        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(LinesModel.VBOType.Color));
+        gl.glVertexAttribPointer(shaderProgram.getLocation(Location.COLOR), 3, GL3.GL_FLOAT, false, Float.BYTES * 3, 0);
+        gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.COLOR));
     }
 
     @Override
@@ -83,10 +63,10 @@ public class LinesRenderer implements GLEventListener {
 
         gl.glUseProgram(shaderProgram.getProgramId());
 
-        gl.glUniformMatrix4fv(shaderProgram.getShaderLocation(EShaderAttribute.TRANS), 1, false, model.getTransformBuffer().rewind());
-        gl.glUniformMatrix4fv(shaderProgram.getShaderLocation(EShaderAttribute.ORTHO), 1, false, ortho.rewind());
+        gl.glUniformMatrix4fv(shaderProgram.getLocation(Location.TRANS), 1, false, view.getTransformBuffer().rewind());
+        gl.glUniformMatrix4fv(shaderProgram.getLocation(Location.ORTHO), 1, false, ortho.rewind());
 
-        gl.glDrawElements(GL3.GL_TRIANGLES, model.getIndices().length, GL3.GL_UNSIGNED_INT, 0);
+        gl.glDrawElements(GL3.GL_TRIANGLES, model.getCount(), GL3.GL_UNSIGNED_INT, 0);
 
         gl.glUseProgram(0);
     }
