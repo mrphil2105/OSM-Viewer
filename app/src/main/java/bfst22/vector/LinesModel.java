@@ -1,28 +1,30 @@
 package bfst22.vector;
 
-import com.jogamp.opengl.GLContext;
-import javafx.scene.transform.Affine;
+import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.*;
+import shaders.ShaderProgram;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class LinesModel {
-    private final float[] verticesBuffer;
-    private final int[] indicesBuffer;
-    private final float[] colorBuffer;
     private static final float lineWidth = 0.1f;
-    private FloatBuffer transformBuffer;
-    private Affine transform;
+    private final FloatBuffer vertexBuffer;
+    private final IntBuffer indexBuffer;
+    private final FloatBuffer colorBuffer;
+    private final GLCapabilities caps;
+    private final GLAutoDrawable sharedDrawable;
+    private final int[] vbo = new int[VBOType.values().length];
 
     public LinesModel(String filename) throws IOException {
-        transform = new Affine();
-        recalculateTransform();
 
-        var array  = Files.lines(Paths.get(filename))
-                    .flatMapToDouble(l -> Arrays.stream(l.split(" "))
+        var array = Files.lines(Paths.get(filename))
+                .flatMapToDouble(l -> Arrays.stream(l.split(" "))
                         .skip(1)
                         .mapToDouble(n -> Double.parseDouble(n))).toArray();
 
@@ -34,8 +36,8 @@ public class LinesModel {
             var bufferIndex = i * 8;
             var indexIndex = i * 6; // lol
             var colorIndex = i * 3;
-            var start = new Vector((float)array[arrayIndex], (float)array[arrayIndex + 1]);
-            var end = new Vector((float)array[arrayIndex + 2], (float)array[arrayIndex + 3]);
+            var start = new Vector((float) array[arrayIndex], (float) array[arrayIndex + 1]);
+            var end = new Vector((float) array[arrayIndex + 2], (float) array[arrayIndex + 3]);
             var vec = end.sub(start);
             var p0 = vec.hat().normalize().scale(lineWidth / 2);
             var p3 = p0.scale(-1.0f);
@@ -64,56 +66,67 @@ public class LinesModel {
             colors[colorIndex + 2] = 0.0f;
         }
 
-        verticesBuffer = vertices;
-        indicesBuffer = indices;
-        colorBuffer = colors;
+        vertexBuffer = Buffers.newDirectFloatBuffer(vertices);
+        indexBuffer = Buffers.newDirectIntBuffer(indices);
+        colorBuffer = Buffers.newDirectFloatBuffer(colors);
+
+        caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
+        // 8x anti-aliasing
+        caps.setSampleBuffers(true);
+        caps.setNumSamples(8);
+
+        sharedDrawable = GLDrawableFactory.getFactory(caps.getGLProfile()).createDummyAutoDrawable(null, true, caps, null);
+        sharedDrawable.display();
+
+        sharedDrawable.invoke(true, glAutoDrawable -> {
+            var gl = glAutoDrawable.getGL().getGL3();
+
+            File vertexShader = new File("shaders/default.vs");
+            File fragmentShader = new File("shaders/default.fs");
+
+            var shaderProgram = new ShaderProgram();
+            if (!shaderProgram.init(gl, vertexShader, fragmentShader)) {
+                throw new IllegalStateException("Unable to initiate the shaders!");
+            }
+
+            gl.glGenBuffers(vbo.length, vbo, 0);
+
+            gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.Vertex));
+            gl.glBufferData(GL3.GL_ARRAY_BUFFER, (long) vertexBuffer.capacity() * Float.BYTES, vertexBuffer.rewind(), GL.GL_STATIC_DRAW);
+
+            gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, getVBO(VBOType.Index));
+            gl.glBufferData(GL3.GL_ELEMENT_ARRAY_BUFFER, (long) indexBuffer.capacity() * Float.BYTES, indexBuffer.rewind(), GL.GL_STATIC_DRAW);
+
+            gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.Color));
+            gl.glBufferData(GL3.GL_ARRAY_BUFFER, (long) colorBuffer.capacity() * Float.BYTES, colorBuffer.rewind(), GL.GL_STATIC_DRAW);
+
+            gl.glEnable(GL3.GL_MULTISAMPLE);
+
+            return true;
+        });
+
+        sharedDrawable.display();
     }
 
-    public float[] getVertices() {
-        return verticesBuffer;
+    public GLCapabilities getCaps() {
+        return caps;
     }
 
-    public int[] getIndices() {
-        return indicesBuffer;
+    public GLAutoDrawable getSharedDrawable() {
+        return sharedDrawable;
     }
 
-    public float[] getColors() {
-        return colorBuffer;
+    public int getVBO(VBOType type) {
+        return vbo[type.ordinal()];
     }
 
-    public FloatBuffer getTransformBuffer() {
-        return transformBuffer;
+    public int getCount() {
+        return indexBuffer.capacity();
     }
 
-    public void zoom(float zoom, float x, float y) {
-        transform.prependTranslation(-x, -y);
-        transform.prependScale(zoom, zoom);
-        transform.prependTranslation(x, y);
-        recalculateTransform();
-    }
-
-    public void addXY(float x, float y) {
-        transform.prependTranslation(x, y);
-        recalculateTransform();
-    }
-
-    private void recalculateTransform() {
-        transformBuffer = FloatBuffer.allocate(16);
-        transformBuffer.put((float)transform.getMxx());
-        transformBuffer.put((float)transform.getMxy());
-        transformBuffer.put((float)transform.getMxz());
-        transformBuffer.put(0);
-        transformBuffer.put((float)transform.getMyx());
-        transformBuffer.put((float)transform.getMyy());
-        transformBuffer.put((float)transform.getMyz());
-        transformBuffer.put(0);
-        transformBuffer.put((float)transform.getMzx());
-        transformBuffer.put((float)transform.getMzy());
-        transformBuffer.put((float)transform.getMzz());
-        transformBuffer.put(0);
-        transformBuffer.put((float)transform.getTx());
-        transformBuffer.put((float)transform.getTy());
-        transformBuffer.put((float)transform.getTz());
-        transformBuffer.put(1);
+    enum VBOType {
+        Vertex,
+        Index,
+        Color
     }
 }

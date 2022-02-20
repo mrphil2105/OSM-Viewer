@@ -11,24 +11,26 @@ import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
+import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
 
 import java.awt.*;
+import java.nio.FloatBuffer;
 
 public class JOGLView {
     private Animator animator;
+    private FloatBuffer transformBuffer;
+    private final Affine transform;
 
     public JOGLView(Stage stage, LinesModel model) {
+        transform = new Affine();
+        recalculateTransform();
+
         Platform.setImplicitExit(true);
-        final var display = NewtFactory.createDisplay(null, false);
-        final var screen = NewtFactory.createScreen(display, 0);
-        final var caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
-
-        // 8x anti-aliasing
-        caps.setSampleBuffers(true);
-        caps.setNumSamples(8);
-
-        final var window = GLWindow.create(screen, caps);
+        //final var display = NewtFactory.createDisplay(null, false);
+        //final var screen = NewtFactory.createScreen(display, 0);
+        final var window = GLWindow.create(model.getCaps());
+        window.setSharedAutoDrawable(model.getSharedDrawable());
         final var canvas = new NewtCanvasJFX(window);
         final var pane = new StackPane(canvas);
         final var gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -44,7 +46,7 @@ public class JOGLView {
         // Stop on application close. Animator keeps running in the background otherwise.
         stage.setOnCloseRequest(event -> animator.stop());
 
-        window.addGLEventListener(new LinesRenderer(model));
+        window.addGLEventListener(new LinesRenderer(model, this));
 
         stage.setTitle("OSM Viewer (OpenGL)");
         stage.setScene(new Scene(pane));
@@ -86,7 +88,7 @@ public class JOGLView {
 
             @Override
             public void mouseDragged(MouseEvent mouseEvent) {
-                model.addXY(
+                addXY(
                         (float)(mouseEvent.getX() - prev.getX()),
                         (float)(mouseEvent.getY() - prev.getY())
                 );
@@ -95,10 +97,48 @@ public class JOGLView {
 
             @Override
             public void mouseWheelMoved(MouseEvent mouseEvent) {
-                model.zoom((float)Math.pow(1.05, mouseEvent.getRotation()[1]), mouseEvent.getX(), mouseEvent.getY());
+                zoom((float)Math.pow(1.05, mouseEvent.getRotation()[1]), mouseEvent.getX(), mouseEvent.getY());
             }
         });
+        window.setVisible(true);
         animator = new Animator(window);
         animator.start();
+    }
+
+    public FloatBuffer getTransformBuffer() {
+        return transformBuffer;
+    }
+
+    public void zoom(float zoom, float x, float y) {
+        transform.prependTranslation(-x, -y);
+        transform.prependScale(zoom, zoom);
+        transform.prependTranslation(x, y);
+        recalculateTransform();
+    }
+
+    public void addXY(float x, float y) {
+        transform.prependTranslation(x, y);
+        recalculateTransform();
+    }
+
+    private void recalculateTransform() {
+        // Extract column major 4x4 matrix from Affine
+        transformBuffer = FloatBuffer.allocate(16);
+        transformBuffer.put((float)transform.getMxx());
+        transformBuffer.put((float)transform.getMxy());
+        transformBuffer.put((float)transform.getMxz());
+        transformBuffer.put(0);
+        transformBuffer.put((float)transform.getMyx());
+        transformBuffer.put((float)transform.getMyy());
+        transformBuffer.put((float)transform.getMyz());
+        transformBuffer.put(0);
+        transformBuffer.put((float)transform.getMzx());
+        transformBuffer.put((float)transform.getMzy());
+        transformBuffer.put((float)transform.getMzz());
+        transformBuffer.put(0);
+        transformBuffer.put((float)transform.getTx());
+        transformBuffer.put((float)transform.getTy());
+        transformBuffer.put((float)transform.getTz());
+        transformBuffer.put(1);
     }
 }
