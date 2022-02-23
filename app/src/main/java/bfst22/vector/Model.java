@@ -1,5 +1,7 @@
 package bfst22.vector;
 
+import osm.OSMNode;
+
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -17,18 +19,18 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-public class Model implements Iterable<Drawable> {
+public class Model {
     float minlat, minlon, maxlat, maxlon;
-    List<Drawable> lines = new ArrayList<>();
+    //List<Drawable> lines = new ArrayList<>();
     List<Runnable> observers = new ArrayList<>();
 
     public Model(String filename) throws IOException, XMLStreamException, FactoryConfigurationError {
         if (filename.endsWith(".osm")) {
             loadOSM(filename);
         } else {
-            lines = Files.lines(Paths.get(filename))
-                    .map(Line::new)
-                    .collect(toList());
+            //lines = Files.lines(Paths.get(filename))
+            //        .map(Line::new)
+            //        .collect(toList());
         }
     }
 
@@ -51,7 +53,7 @@ public class Model implements Iterable<Drawable> {
                             var id = Long.parseLong(reader.getAttributeValue(null, "id"));
                             var lat = Float.parseFloat(reader.getAttributeValue(null, "lat"));
                             var lon = Float.parseFloat(reader.getAttributeValue(null, "lon"));
-                            id2node.put(id, new OSMNode(0.56f * lon, -lat));
+                            //id2node.put(id, new OSMNode(0.56f * lon, -lat));
                             break;
                         case "nd":
                             var ref = Long.parseLong(reader.getAttributeValue(null, "ref"));
@@ -63,8 +65,8 @@ public class Model implements Iterable<Drawable> {
                     switch (reader.getLocalName()) {
                         case "way":
                             // if (!nodes.isEmpty()) {
-                            var way = new OSMWay(nodes);
-                            lines.add(way);
+                            //var way = new OSMWay(nodes);
+                            //lines.add(way);
                             nodes.clear();
                             // }
                             break;
@@ -82,15 +84,5 @@ public class Model implements Iterable<Drawable> {
         for (var observer : observers) {
             observer.run();
         }
-    }
-
-    @Override
-    public Iterator<Drawable> iterator() {
-        return lines.iterator();
-    }
-
-    public void add(Line line) {
-        lines.add(line);
-        notifyObservers();
     }
 }
