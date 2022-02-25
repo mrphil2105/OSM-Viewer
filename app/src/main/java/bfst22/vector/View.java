@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class View {
-    public View(LinesModel model, Stage stage) throws IOException {
+    public View(Model model, Stage stage) throws IOException {
         var loader = new FXMLLoader(View.class.getResource("View.fxml"));
 
         stage.setScene(loader.load());

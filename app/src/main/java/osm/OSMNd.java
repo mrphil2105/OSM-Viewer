@@ -1,3 +1,4 @@
 package osm;
 
-public record OSMNd(long ref) {}
+public record OSMNd(long ref) {
+}

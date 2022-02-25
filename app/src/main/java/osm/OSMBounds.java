@@ -1,3 +1,4 @@
 package osm;
 
-public record OSMBounds(float minlat, float minlon, float maxlat, float maxlon) {}
+public record OSMBounds(float minlat, float minlon, float maxlat, float maxlon) {
+}
