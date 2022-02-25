@@ -29,6 +29,9 @@ dependencies {
     // Java OpenGL
     implementation files('lib/jars/jogamp-fat.jar')
 
+    // Polygon Triangulation
+    implementation 'io.github.earcut4j:earcut4j:2.2.2'
+
     // JavaFX
     implementation 'org.openjfx:javafx-base:0.0.11:win'
     implementation 'org.openjfx:javafx-base:0.0.11:mac'

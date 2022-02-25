@@ -11,7 +11,7 @@ public class Controller implements MouseListener {
     @FXML
     MapCanvas canvas;
 
-    public void init(LinesModel model) {
+    public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
     }

@@ -16,7 +16,7 @@ public class MapCanvas extends Region {
     FloatBuffer transformBuffer;
     GLWindow window;
 
-    void init(LinesModel model) {
+    void init(Model model) {
         recalculateTransform();
 
         Platform.setImplicitExit(true);
@@ -32,7 +32,7 @@ public class MapCanvas extends Region {
         canvas.setWidth(getPrefWidth());
         canvas.setHeight(getPrefHeight());
 
-        window.addGLEventListener(new LinesRenderer(model, this));
+        window.addGLEventListener(new Renderer(model, this));
         animator = new Animator(window);
         animator.start();
     }
@@ -50,14 +50,14 @@ public class MapCanvas extends Region {
     }
 
     void zoom(float zoom, float x, float y) {
-        transform.prependTranslation(-x, -y);
+        transform.prependTranslation(-x, y);
         transform.prependScale(zoom, zoom);
-        transform.prependTranslation(x, y);
+        transform.prependTranslation(x, -y);
         recalculateTransform();
     }
 
     void pan(float dx, float dy) {
-        transform.prependTranslation(dx, dy);
+        transform.prependTranslation(dx, -dy);
         recalculateTransform();
     }
 

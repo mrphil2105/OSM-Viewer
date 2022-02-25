@@ -2,4 +2,5 @@ package osm;
 
 import java.util.List;
 
-public record OSMWay(List<OSMNode> nodes, List<OSMTag> tags) {}
+public record OSMWay(List<OSMNode> nodes, List<OSMTag> tags) {
+}

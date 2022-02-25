@@ -4,8 +4,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -23,8 +22,8 @@ public class OSMReader {
     int event;
     boolean advanceAfter;
 
-    public OSMReader(String filename) throws IOException, XMLStreamException {
-        reader = XMLInputFactory.newInstance().createXMLStreamReader(new FileInputStream(filename));
+    public OSMReader(InputStream stream) throws XMLStreamException {
+        reader = XMLInputFactory.newInstance().createXMLStreamReader(stream);
         event = reader.next();
         parseBounds();
         parseAll("node", this::parseNode);
@@ -78,8 +77,8 @@ public class OSMReader {
 
     void parseNode() {
         var id = getLong("id");
-        var lon = getFloat("lon");
-        var lat = getFloat("lat");
+        var lon = (getFloat("lon") - bounds.minlon()) * 5600;
+        var lat = (getFloat("lat") - bounds.minlat()) * 10000;
         advance();
         parseAll("tag", this::parseTag);
         nodes.put(id, new OSMNode(id, lon, lat, new ArrayList<>(tags)));
@@ -137,5 +136,17 @@ public class OSMReader {
 
     float getFloat(String attr) {
         return Float.parseFloat(get(attr));
+    }
+
+    public HashMap<Long, OSMNode> getNodes() {
+        return nodes;
+    }
+
+    public HashMap<Long, OSMWay> getWays() {
+        return ways;
+    }
+
+    public ArrayList<OSMRelation> getRelations() {
+        return relations;
     }
 }
