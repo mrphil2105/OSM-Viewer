@@ -30,7 +30,6 @@ public class Model {
                 filename.endsWith(".xml") ||
                 filename.endsWith(".osm.zip") ||
                 filename.endsWith(".xml.zip")) {
-            polygons = new Polygons();
 
             InputStream stream = new BufferedInputStream(new FileInputStream(filename));
             if (filename.endsWith(".zip")) {
@@ -38,16 +37,9 @@ public class Model {
                 var entry = zipFile.entries().nextElement();
                 stream = zipFile.getInputStream(entry);
             }
+
             var reader = new OSMReader(stream);
-
-            var drawables = reader.getWays().values().stream().filter(w -> !w.tags().isEmpty()).map(Drawable::new).filter(d -> d.getType() != null).sorted().toList();
-
-            for (var drawable : drawables) {
-                switch (drawable.getType().shape) {
-                    case Polyline -> polygons.addLines(drawable.points, drawable.getType().size, drawable.getType().color);
-                    case Fill -> polygons.addPolygon(drawable.points, drawable.getType().color);
-                }
-            }
+            polygons = reader.createPolygons();
 
             filename = filename.split("\\.")[0] + ".ser.zip";
             var zipStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));

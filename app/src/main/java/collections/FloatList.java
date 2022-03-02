@@ -1,6 +1,7 @@
 package collections;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class FloatList implements Serializable {
     float[] array = new float[1];
@@ -9,12 +10,12 @@ public class FloatList implements Serializable {
     public FloatList() {
     }
 
-    public int add(float l) {
+    public int add(float value) {
         if (n == array.length) {
             grow();
         }
 
-        array[n] = l;
+        array[n] = value;
         return n++;
     }
 
@@ -26,8 +27,16 @@ public class FloatList implements Serializable {
         return copyToSize(n);
     }
 
+    public float[] getArray() {
+        return array;
+    }
+
     public int size() {
         return n;
+    }
+
+    public void truncate(int count) {
+        n -= count;
     }
 
     void grow() {
@@ -42,5 +51,15 @@ public class FloatList implements Serializable {
         var tmp = new float[sz];
         System.arraycopy(array, 0, tmp, 0, n);
         return tmp;
+    }
+
+    void swap(int i, int j) {
+        var tmp = array[i];
+        array[i] = array[j];
+        array[j] = tmp;
+    }
+
+    int search(float value) {
+        return Arrays.binarySearch(array, value);
     }
 }
