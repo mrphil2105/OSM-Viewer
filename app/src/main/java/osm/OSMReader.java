@@ -10,20 +10,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 public class OSMReader {
-    enum Parseable {
-        Node("node"),
-        Way("way"),
-        Relation("relation"),
-        Tag("tag"),
-        Nd("nd"),
-        Member("member");
-
-        public final String name;
-
-        Parseable(String name) {
-            this.name = name;
-        }
-    }
+    enum Parseable { node, way, relation, tag, nd, member }
 
     final XMLStreamReader reader;
 
@@ -34,21 +21,21 @@ public class OSMReader {
     final RefTable nodeRefs = new RefTable();
     // `i` is lon and `i + 1` is lat
     final DoubleList nodeCoords = new DoubleList();
-    // `i` is tag index and `i + 1` is count
+    // `i` is tag start index and `i + 1` is end index
     final IntList nodeTags = new IntList();
 
     // Maps from a way ref to an index for the below lists
     final RefTable wayRefs = new RefTable();
     // Contains lists of node indices
     final ArrayList<IntList> wayNodes = new ArrayList<>();
-    // `i` is tag index and `i + 1` is count
+    // `i` is tag start index and `i + 1` is end index
     final IntList wayTags = new IntList();
     // Tag indices for way tags with way-drawable
     final IntList wayDrawables = new IntList();
 
     // Contains lists of way indices
     final ArrayList<IntList> relationWays = new ArrayList<>();
-    // `i` is tag index and `i + 1` is count
+    // `i` is tag start index and `i + 1` is end index
     final IntList relationTags = new IntList();
 
     OSMBounds bounds;
@@ -62,16 +49,16 @@ public class OSMReader {
 
         parseBounds();
 
-        parsing = Parseable.Node;
-        parseAll(Parseable.Node, this::parseNode);
+        parsing = Parseable.node;
+        parseAll(Parseable.node, this::parseNode);
         System.out.println("Parsed: " + nodeRefs.size() + " nodes");
 
-        parsing = Parseable.Way;
-        parseAll(Parseable.Way, this::parseWay);
+        parsing = Parseable.way;
+        parseAll(Parseable.way, this::parseWay);
         System.out.println("Parsed: " + wayRefs.size() + " ways");
 
-        parsing = Parseable.Relation;
-        parseAll(Parseable.Relation, this::parseRelation);
+        parsing = Parseable.relation;
+        parseAll(Parseable.relation, this::parseRelation);
         System.out.println("Parsed: " + relationWays.size() + " relations");
 
         // Sort in draw order, with undrawable ways last
@@ -120,7 +107,7 @@ public class OSMReader {
                 advance();
             }
 
-            if (!reader.getLocalName().equals(parseable.name)) {
+            if (!reader.getLocalName().equals(parseable.name())) {
                 advanceAfter = false;
                 return;
             }
@@ -141,11 +128,11 @@ public class OSMReader {
         var tagStart = tags.size();
 
         advance();
-        parseAll(Parseable.Tag, this::parseTag);
+        parseAll(Parseable.tag, this::parseTag);
 
-        var tagCount = tags.size() - tagStart;
+        var tagEnd = tags.size();
         nodeTags.add(tagStart);
-        nodeTags.add(tagCount);
+        nodeTags.add(tagEnd);
     }
 
     void parseWay() {
@@ -156,12 +143,12 @@ public class OSMReader {
         var tagStart = tags.size();
 
         advance();
-        parseAll(Parseable.Nd, this::parseNd);
-        parseAll(Parseable.Tag, this::parseTag);
+        parseAll(Parseable.nd, this::parseNd);
+        parseAll(Parseable.tag, this::parseTag);
 
-        var tagCount = (tags.size() - tagStart) / 2;
+        var tagEnd = tags.size();
         wayTags.add(tagStart);
-        wayTags.add(tagCount);
+        wayTags.add(tagEnd);
 
         var diff = wayDrawables.size() - wayDrawablesSize;
         switch (diff) {
@@ -180,20 +167,21 @@ public class OSMReader {
         var tagStart = tags.size();
 
         advance();
-        parseAll(Parseable.Member, this::parseMember);
-        parseAll(Parseable.Tag, this::parseTag);
+        parseAll(Parseable.member, this::parseMember);
+        parseAll(Parseable.tag, this::parseTag);
 
-        var tagCount = tags.size() - tagStart;
+        var tagEnd = tags.size();
         relationTags.add(tagStart);
-        relationTags.add(tagCount);
+        relationTags.add(tagEnd);
     }
 
     void parseTag() {
         var k = get("k");
-        var split = k.split(":", 2);
-        if (wayNodes.size() > 0 && split[0].equals("way-drawable")) {
+        var tag = Tag.from(k);
+        if (tag == null) return;
+
+        if (parsing == Parseable.way && tag.drawable) {
             wayDrawables.add(tags.size());
-            k = split[1];
         }
 
         tags.add(k.intern());
@@ -237,7 +225,7 @@ public class OSMReader {
             if (wd == -1) break;
 
             var drawable = Drawable.fromTag(tags.get(wd), tags.get(wd + 1));
-            if (drawable.isUnknown()) continue;
+            //if (drawable == Drawable.Unknown) continue;
 
             var nodes = wayNodes.get(way);
             for (int j = 0; j < nodes.size(); j++) {
