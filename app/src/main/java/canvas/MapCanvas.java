@@ -1,14 +1,13 @@
-package bfst22.vector;
+package canvas;
 
 import com.jogamp.newt.event.MouseListener;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
+import java.nio.FloatBuffer;
 import javafx.application.Platform;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
-
-import java.nio.FloatBuffer;
 
 public class MapCanvas extends Region {
     final Affine transform = new Affine();
@@ -26,8 +25,14 @@ public class MapCanvas extends Region {
         getChildren().add(canvas);
 
         // Resize window when region resizes
-        widthProperty().addListener((observable, oldValue, newValue) -> window.setSize(newValue.intValue(), window.getHeight()));
-        heightProperty().addListener((observable, oldValue, newValue) -> window.setSize(window.getWidth(), newValue.intValue()));
+        widthProperty()
+                .addListener(
+                        (observable, oldValue, newValue) ->
+                                window.setSize(newValue.intValue(), window.getHeight()));
+        heightProperty()
+                .addListener(
+                        (observable, oldValue, newValue) ->
+                                window.setSize(window.getWidth(), newValue.intValue()));
 
         canvas.setWidth(getPrefWidth());
         canvas.setHeight(getPrefHeight());

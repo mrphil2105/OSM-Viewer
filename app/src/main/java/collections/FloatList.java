@@ -7,8 +7,7 @@ public class FloatList implements Serializable {
     float[] array = new float[1];
     int n = 0;
 
-    public FloatList() {
-    }
+    public FloatList() {}
 
     public int add(float value) {
         if (n == array.length) {

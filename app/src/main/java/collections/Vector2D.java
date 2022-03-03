@@ -1,15 +1,15 @@
 package collections;
 
-public record Vector2D(float x, float y) {
+public record Vector2D(double x, double y) {
     public Vector2D normalize() {
         return scale(1.0f / length());
     }
 
-    public float length() {
-        return (float) Math.sqrt(x * x + y * y);
+    public double length() {
+        return Math.sqrt(x * x + y * y);
     }
 
-    public Vector2D scale(float s) {
+    public Vector2D scale(double s) {
         return new Vector2D(x * s, y * s);
     }
 

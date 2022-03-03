@@ -15,15 +15,13 @@ public enum Location {
 
     private final String name;
     private final LocationType type;
+
     Location(String name, LocationType type) {
         this.name = name;
         this.type = type;
     }
 
-    /**
-     * @return shader attribute name as it is appearing in the shader source
-     * code.
-     */
+    /** @return shader attribute name as it is appearing in the shader source code. */
     public String getName() {
         return name;
     }
@@ -33,6 +31,7 @@ public enum Location {
     }
 
     enum LocationType {
-        Attrib, Uniform
-	}
+        Attrib,
+        Uniform
+    }
 }
