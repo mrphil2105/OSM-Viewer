@@ -1,9 +1,11 @@
 package bfst22.vector;
 
+import java.io.IOException;
+
+import canvas.Controller;
+import canvas.Model;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class View {
     public View(Model model, Stage stage) throws IOException {

@@ -7,8 +7,7 @@ public class LongList implements Serializable {
     long[] array = new long[1];
     int n = 0;
 
-    public LongList() {
-    }
+    public LongList() {}
 
     public int add(long value) {
         if (n == array.length) {

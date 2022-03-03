@@ -3,13 +3,13 @@ package collections;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class IntList implements Serializable {
-    int[] array = new int[1];
+public class DoubleList implements Serializable {
+    double[] array = new double[1];
     int n = 0;
 
-    public IntList() {}
+    public DoubleList() {}
 
-    public int add(int value) {
+    public int add(double value) {
         if (n == array.length) {
             grow();
         }
@@ -18,15 +18,15 @@ public class IntList implements Serializable {
         return n++;
     }
 
-    public int get(int index) {
+    public double get(int index) {
         return array[index];
     }
 
-    public int[] toArray() {
+    public double[] toArray() {
         return copyToSize(n);
     }
 
-    public int[] getArray() {
+    public double[] getArray() {
         return array;
     }
 
@@ -46,8 +46,8 @@ public class IntList implements Serializable {
         array = copyToSize(sz);
     }
 
-    int[] copyToSize(int sz) {
-        var tmp = new int[sz];
+    double[] copyToSize(int sz) {
+        var tmp = new double[sz];
         System.arraycopy(array, 0, tmp, 0, n);
         return tmp;
     }
@@ -58,7 +58,7 @@ public class IntList implements Serializable {
         array[j] = tmp;
     }
 
-    int search(int value) {
+    int search(double value) {
         return Arrays.binarySearch(array, value);
     }
 }

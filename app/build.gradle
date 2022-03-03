@@ -1,6 +1,7 @@
 plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.11'
+    id "com.diffplug.spotless" version "6.3.0"
 }
 
 application {
@@ -59,4 +60,19 @@ application {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        // use the default importorder configuration
+        importOrder()
+
+        removeUnusedImports()
+
+        googleJavaFormat()
+        indentWithTabs(2)
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }

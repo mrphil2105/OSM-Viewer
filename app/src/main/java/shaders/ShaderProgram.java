@@ -4,7 +4,6 @@
 package shaders;
 
 import com.jogamp.opengl.GL3;
-
 import java.io.File;
 
 /**
@@ -22,8 +21,8 @@ public class ShaderProgram {
     /**
      * Initializes the shader program.
      *
-     * @param gl             context.
-     * @param vertexShader   file.
+     * @param gl context.
+     * @param vertexShader file.
      * @param fragmentShader file.
      * @return true if initialization was successful, false otherwise.
      */
@@ -34,16 +33,14 @@ public class ShaderProgram {
         }
 
         try {
-            String vertexShaderCode = ShaderUtils.loadResource(vertexShader
-                    .getPath());
-            String fragmentShaderCode = ShaderUtils.loadResource(fragmentShader
-                    .getPath());
+            String vertexShaderCode = ShaderUtils.loadResource(vertexShader.getPath());
+            String fragmentShaderCode = ShaderUtils.loadResource(fragmentShader.getPath());
 
             programId = gl.glCreateProgram();
-            vertexShaderId = ShaderUtils.createShader(gl, programId,
-                    vertexShaderCode, GL3.GL_VERTEX_SHADER);
-            fragmentShaderId = ShaderUtils.createShader(gl, programId,
-                    fragmentShaderCode, GL3.GL_FRAGMENT_SHADER);
+            vertexShaderId =
+                    ShaderUtils.createShader(gl, programId, vertexShaderCode, GL3.GL_VERTEX_SHADER);
+            fragmentShaderId =
+                    ShaderUtils.createShader(gl, programId, fragmentShaderCode, GL3.GL_FRAGMENT_SHADER);
 
             ShaderUtils.link(gl, programId);
 
@@ -78,9 +75,7 @@ public class ShaderProgram {
         gl.glDeleteProgram(programId);
     }
 
-    /**
-     * @return shader program id.
-     */
+    /** @return shader program id. */
     public int getProgramId() {
         if (!initialized) {
             throw new IllegalStateException(

@@ -3,7 +3,8 @@ package sort;
 import java.util.function.IntBinaryOperator;
 import java.util.function.LongBinaryOperator;
 
-// Inspiration: https://cs.stackexchange.com/questions/104816/implementation-of-quicksort-to-handle-duplicates
+// Inspiration:
+// https://cs.stackexchange.com/questions/104816/implementation-of-quicksort-to-handle-duplicates
 public class QuickSort {
     record Partition(int left, int right) {}
 
@@ -16,7 +17,8 @@ public class QuickSort {
         }
     }
 
-    public static Partition partition(int[] arr, int lo, int hi, IntBinaryOperator cmp, IntBiConsumer swap) {
+    public static Partition partition(
+            int[] arr, int lo, int hi, IntBinaryOperator cmp, IntBiConsumer swap) {
         var pivot = arr[(hi + lo) / 2];
         var r = lo;
 
@@ -46,7 +48,8 @@ public class QuickSort {
         }
     }
 
-    public static Partition partition(long[] arr, int lo, int hi, LongBinaryOperator cmp, LongBiConsumer swap) {
+    public static Partition partition(
+            long[] arr, int lo, int hi, LongBinaryOperator cmp, LongBiConsumer swap) {
         var pivot = arr[(hi + lo) / 2];
         var r = lo;
 
