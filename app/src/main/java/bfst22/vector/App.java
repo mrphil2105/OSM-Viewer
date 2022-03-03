@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        var model = new Model("C:/Users/jonas/Downloads/tbornholm.xml");
+        var model = new Model("C:/Users/jonas/Downloads/bornholm.xml");
         new View(model, primaryStage);
     }
 }
