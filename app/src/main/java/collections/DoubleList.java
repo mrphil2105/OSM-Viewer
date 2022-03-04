@@ -22,6 +22,10 @@ public class DoubleList implements Serializable {
         return array[index];
     }
 
+    public double set(int index, double value) {
+        return array[index] = value;
+    }
+
     public double[] toArray() {
         return copyToSize(n);
     }
