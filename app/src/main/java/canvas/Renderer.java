@@ -7,7 +7,7 @@ import com.jogamp.opengl.GLEventListener;
 import java.io.File;
 import java.nio.FloatBuffer;
 
-import drawing.Drawable;
+import osm.Drawable;
 import javafx.scene.paint.Color;
 import shaders.Location;
 import shaders.ShaderProgram;
@@ -27,6 +27,9 @@ public class Renderer implements GLEventListener {
     @Override
     public void init(GLAutoDrawable glAutoDrawable) {
         GL3 gl = glAutoDrawable.getGL().getGL3();
+
+        gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glEnable(GL3.GL_BLEND);
 
         File vertexShader = new File("shaders/default.vs");
         File fragmentShader = new File("shaders/default.fs");

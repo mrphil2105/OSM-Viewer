@@ -22,6 +22,10 @@ public class LongList implements Serializable {
         return array[index];
     }
 
+    public long set(int index, long value) {
+        return array[index] = value;
+    }
+
     public long[] toArray() {
         return copyToSize(n);
     }

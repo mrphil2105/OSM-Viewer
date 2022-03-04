@@ -22,6 +22,10 @@ public class IntList implements Serializable {
         return array[index];
     }
 
+    public int set(int index, int value) {
+        return array[index] = value;
+    }
+
     public int[] toArray() {
         return copyToSize(n);
     }

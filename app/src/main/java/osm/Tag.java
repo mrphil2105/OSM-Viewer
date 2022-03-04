@@ -3,7 +3,7 @@ package osm;
 import java.util.List;
 
 enum Tag {
-    area(true), building(true), highway(true), natural(true), landuse(true);
+    area(true), building(true), highway(true), natural(true), landuse(true), amenity(true), leisure(true);
 
     final static List<Tag> values = List.of(values());
     public final boolean drawable;

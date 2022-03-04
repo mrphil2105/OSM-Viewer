@@ -22,6 +22,10 @@ public class FloatList implements Serializable {
         return array[index];
     }
 
+    public float set(int index, float value) {
+        return array[index] = value;
+    }
+
     public float[] toArray() {
         return copyToSize(n);
     }

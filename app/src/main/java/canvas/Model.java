@@ -12,12 +12,10 @@ import javax.xml.stream.XMLStreamException;
 import osm.OSMReader;
 
 public class Model {
-    private final FloatBuffer vertexBuffer;
-    private final IntBuffer indexBuffer;
-    private final FloatBuffer colorBuffer;
-    private final GLCapabilities caps;
-    private final GLAutoDrawable sharedDrawable;
-    private final int[] vbo = new int[Model.VBOType.values().length];
+    final GLCapabilities caps;
+    final GLAutoDrawable sharedDrawable;
+    final int[] vbo = new int[Model.VBOType.values().length];
+    int count;
 
     public Model(String filename) throws IOException, XMLStreamException {
         Polygons polygons;
@@ -68,10 +66,6 @@ public class Model {
                     "Only .osm, .xml, .ser or any of those zipped are allowed");
         }
 
-        vertexBuffer = polygons.getVertexBuffer();
-        indexBuffer = polygons.getIndexBuffer();
-        colorBuffer = polygons.getColorBuffer();
-
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
         // 8x anti-aliasing
         caps.setSampleBuffers(true);
@@ -86,6 +80,11 @@ public class Model {
                 true,
                 glAutoDrawable -> {
                     var gl = glAutoDrawable.getGL().getGL3();
+
+                    var vertexBuffer = polygons.getVertexBuffer();
+                    var indexBuffer = polygons.getIndexBuffer();
+                    var colorBuffer = polygons.getColorBuffer();
+                    count = indexBuffer.capacity();
 
                     gl.glGenBuffers(vbo.length, vbo, 0);
 
@@ -131,7 +130,7 @@ public class Model {
     }
 
     public int getCount() {
-        return indexBuffer.capacity();
+        return count;
     }
 
     enum VBOType {

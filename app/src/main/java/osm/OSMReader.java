@@ -1,7 +1,7 @@
 package osm;
 
 import collections.*;
-import drawing.Drawable;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import javax.xml.stream.XMLInputFactory;
@@ -30,7 +30,7 @@ public class OSMReader {
     final ArrayList<IntList> wayNodes = new ArrayList<>();
     // `i` is tag start index and `i + 1` is end index
     final IntList wayTags = new IntList();
-    // Tag indices for way tags with way-drawable
+    // Tag indices for way tags with drawing information
     final IntList wayDrawables = new IntList();
 
     // Contains lists of way indices
@@ -137,7 +137,8 @@ public class OSMReader {
 
     void parseWay() {
         var id = getLong("id");
-        wayRefs.put(id, wayNodes.size());
+        var way = wayNodes.size();
+        wayRefs.put(id, way);
         wayNodes.add(new IntList());
         var wayDrawablesSize = wayDrawables.size();
         var tagStart = tags.size();
@@ -154,9 +155,19 @@ public class OSMReader {
         switch (diff) {
             case 0 -> wayDrawables.add(-1);
             case 1 -> {} // 1 is expected
-            default -> {
+            default -> { // Multiple drawing candidates... Choose first valid one
+                var drawable = Drawable.Unknown;
+                var i = tagStart;
+                for (; i < tagEnd; i += 2) {
+                    drawable = Drawable.fromTag(tags.get(i), tags.get(i + 1));
+                    if (drawable != Drawable.Unknown) break;
+                }
+
+                if (drawable == Drawable.Unknown) i = -1;
+
                 System.out.printf(
-                        "Way with %s way-drawable tags (ignoring all except first): id=%d%n", diff, id);
+                        "Way with %s drawable tags (ignoring all except first): id=%d%n", diff, id);
+                wayDrawables.set(way, i);
                 wayDrawables.truncate(diff - 1);
             }
         }
@@ -225,7 +236,7 @@ public class OSMReader {
             if (wd == -1) break;
 
             var drawable = Drawable.fromTag(tags.get(wd), tags.get(wd + 1));
-            //if (drawable == Drawable.Unknown) continue;
+            if (drawable == Drawable.Ignored) continue;
 
             var nodes = wayNodes.get(way);
             for (int j = 0; j < nodes.size(); j++) {
