@@ -1,5 +1,7 @@
 package collections;
 
+import collections.lists.FloatList;
+import collections.lists.IntList;
 import com.jogamp.common.nio.Buffers;
 import earcut4j.Earcut;
 import java.io.Serializable;

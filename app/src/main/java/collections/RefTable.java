@@ -2,6 +2,9 @@ package collections;
 
 import java.util.function.IntBinaryOperator;
 import java.util.function.LongBinaryOperator;
+
+import collections.lists.IntList;
+import collections.lists.LongList;
 import sort.QuickSort;
 
 public class RefTable {
@@ -40,7 +43,7 @@ public class RefTable {
 
     public void sortByKeys(LongBinaryOperator cmp) {
         QuickSort.sort(
-                keys.array,
+                keys.getArray(),
                 0,
                 keys.size(),
                 cmp,
@@ -53,7 +56,7 @@ public class RefTable {
 
     public void sortByValues(IntBinaryOperator cmp) {
         QuickSort.sort(
-                values.array,
+                values.getArray(),
                 0,
                 values.size(),
                 cmp,
