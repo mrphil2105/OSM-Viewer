@@ -2,7 +2,9 @@ package osm;
 
 import javafx.scene.paint.Color;
 
+// TODO: Missing Area
 public enum Drawable {
+    Island(Shape.Fill, Color.web("#f2efe9"), 0),
     Sand(Shape.Fill, Color.web("#f5e9c6"), 0),
     Farmland(Shape.Fill, Color.web("#eef0d5"), 0),
     Park(Shape.Fill, Color.web("#c8facc"), 0),
@@ -30,7 +32,6 @@ public enum Drawable {
     Pitch(Shape.Fill, Color.web("#aae0cb"), 0),
     Retail(Shape.Fill, Color.web("#ffd0c6"), 0),
     Prison(Shape.Fill, Color.web("#bdbdbd"), 0),
-    Area(Shape.Polyline, Color.web("#90aa86"), 0.05),
     Cliff(Shape.Polyline, Color.web("#9a9b99"), 0.1),
     Path(Shape.Polyline, Color.web("#edb39f"), 0.1),
     Track(Shape.Polyline, Color.web("#95dcc0"), 0.2),
@@ -67,7 +68,7 @@ public enum Drawable {
 
     public static Drawable fromTag(String key, String value) {
         var tag = Tag.from(key);
-        if (tag == null) return Unknown;
+        if (tag == null || !tag.drawable) return Unknown;
         return switch (tag) {
             case landuse -> switch (value) {
                 case "allotments" -> Allotments;
@@ -119,8 +120,11 @@ public enum Drawable {
                 case "miniature_golf", "golf_course" -> Golf;
                 default -> _default(key, value);
             };
-            case area -> Area;
             case building -> Building;
+            case place -> switch (value) {
+                case "island" -> Island;
+                default -> _default(key, value);
+            };
             case highway -> switch (value) {
                 case "motorway" -> Motorway;
                 case "primary" -> Primary;
@@ -142,6 +146,7 @@ public enum Drawable {
                         "steps" -> Path;
                 default -> _default(key, value);
             };
+            default -> _default(key, value);
         };
     }
 

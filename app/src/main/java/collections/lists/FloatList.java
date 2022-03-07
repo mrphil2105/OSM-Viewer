@@ -68,8 +68,7 @@ public class FloatList implements Serializable {
 
     public void extend(FloatList other) {
         var newSize = size() + other.size();
-        if (newSize > array.length)
-            setSize(newSize);
+        if (newSize > array.length) setSize(newSize);
         System.arraycopy(other.getArray(), 0, array, n, other.size());
     }
 }
