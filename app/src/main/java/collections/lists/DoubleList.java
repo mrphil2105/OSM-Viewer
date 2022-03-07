@@ -68,8 +68,7 @@ public class DoubleList implements Serializable {
 
     public void extend(DoubleList other) {
         var newSize = size() + other.size();
-        if (newSize > array.length)
-            setSize(newSize);
+        if (newSize > array.length) setSize(newSize);
         System.arraycopy(other.getArray(), 0, array, n, other.size());
     }
 }

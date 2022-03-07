@@ -44,16 +44,20 @@ public class Polygons implements Serializable {
     }
 
     public void addPolygon(List<Vector2D> points, Color color, float layer) {
-        var verts = new double[points.size() * 3];
-        for (int i = 0; i < points.size(); i++) {
-            var p = points.get(i);
+        addPolygon(points, null, color, layer);
+    }
+
+    public void addPolygon(List<Vector2D> outer, int[] inner, Color color, float layer) {
+        var verts = new double[outer.size() * 3];
+        for (int i = 0; i < outer.size(); i++) {
+            var p = outer.get(i);
             verts[i * 3] = p.x();
             verts[i * 3 + 1] = p.y();
             verts[i * 3 + 2] = layer;
             addVertex(p, color, layer);
         }
 
-        Earcut.earcut(verts, null, 3).stream()
+        Earcut.earcut(verts, inner, 3).stream()
                 .map(i -> (vertices.size() - verts.length) / 3 + i)
                 .forEach(indices::add);
     }

@@ -1,10 +1,9 @@
 package collections;
 
-import java.util.function.IntBinaryOperator;
-import java.util.function.LongBinaryOperator;
-
 import collections.lists.IntList;
 import collections.lists.LongList;
+import java.util.function.IntBinaryOperator;
+import java.util.function.LongBinaryOperator;
 import sort.QuickSort;
 
 public class RefTable {
