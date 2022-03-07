@@ -46,14 +46,17 @@ public class FileParser {
 
     static void serializeObject(Serializable serializable, String filename) {
 
-        try(var zipStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));
-            var outputStream = new ObjectOutputStream(zipStream);
-        ){
+        try(var zipStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));){
             zipStream.putNextEntry(new ZipEntry(filename));
-            outputStream.writeObject(serializable);
+
+            try(var outputStream = new ObjectOutputStream(zipStream)){
+                outputStream.writeObject(serializable);
+            } catch(IOException e){
+                throw new RuntimeException("Could not serialize object: " + e.getMessage()); //TODO: mere præcis besked
+            }
 
         } catch(IOException e){
-            throw new RuntimeException("Could not serialize object: " + e.getMessage());
+            throw new RuntimeException("Could not serialize object: " + e.getMessage()); //TODO
         }
 
     }
