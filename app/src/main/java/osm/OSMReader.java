@@ -1,6 +1,9 @@
 package osm;
 
 import collections.*;
+import collections.lists.DoubleList;
+import collections.lists.IntList;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import javax.xml.stream.XMLInputFactory;

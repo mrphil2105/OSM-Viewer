@@ -1,15 +1,15 @@
-package collections;
+package collections.lists;
 
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class FloatList implements Serializable {
-    float[] array = new float[1];
+public class IntList implements Serializable {
+    int[] array = new int[1];
     int n = 0;
 
-    public FloatList() {}
+    public IntList() {}
 
-    public int add(float value) {
+    public int add(int value) {
         if (n == array.length) {
             grow();
         }
@@ -18,19 +18,19 @@ public class FloatList implements Serializable {
         return n++;
     }
 
-    public float get(int index) {
+    public int get(int index) {
         return array[index];
     }
 
-    public float set(int index, float value) {
+    public int set(int index, int value) {
         return array[index] = value;
     }
 
-    public float[] toArray() {
+    public int[] toArray() {
         return copyToSize(n);
     }
 
-    public float[] getArray() {
+    public int[] getArray() {
         return array;
     }
 
@@ -50,19 +50,26 @@ public class FloatList implements Serializable {
         array = copyToSize(sz);
     }
 
-    float[] copyToSize(int sz) {
-        var tmp = new float[sz];
+    int[] copyToSize(int sz) {
+        var tmp = new int[sz];
         System.arraycopy(array, 0, tmp, 0, n);
         return tmp;
     }
 
-    void swap(int i, int j) {
+    public void swap(int i, int j) {
         var tmp = array[i];
         array[i] = array[j];
         array[j] = tmp;
     }
 
-    int search(float value) {
+    public int search(int value) {
         return Arrays.binarySearch(array, value);
+    }
+
+    public void extend(IntList other) {
+        var newSize = size() + other.size();
+        if (newSize > array.length)
+            setSize(newSize);
+        System.arraycopy(other.getArray(), 0, array, n, other.size());
     }
 }
