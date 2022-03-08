@@ -63,7 +63,7 @@ public class FloatList implements Serializable {
     }
 
     public int search(float value) {
-        return Arrays.binarySearch(array, value);
+        return Arrays.binarySearch(array, 0, n, value);
     }
 
     public void extend(FloatList other) {

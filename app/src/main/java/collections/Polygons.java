@@ -65,9 +65,6 @@ public class Polygons implements Serializable {
     public void addLines(List<Vector2D> points, double width, Color color, float layer) {
         if (points.size() < 2) {
             return;
-        } else if (points.size() == 2) {
-            addLine(points.get(0), points.get(1), width, color, layer);
-            return;
         }
 
         var from = points.get(0);
@@ -132,26 +129,6 @@ public class Polygons implements Serializable {
 
         addVertex(p0.add(to), color, layer);
         addVertex(p3.add(to), color, layer);
-    }
-
-    public void addLine(Vector2D from, Vector2D to, double width, Color color, float layer) {
-        var vec = from.sub(to);
-        var p0 = vec.hat().normalize().scale(width);
-        var p3 = p0.scale(-1.0f);
-        var p1 = p0.add(vec);
-        var p2 = p3.add(vec);
-
-        indices.add(vertices.size() / 3 + 0);
-        indices.add(vertices.size() / 3 + 1);
-        indices.add(vertices.size() / 3 + 2);
-        indices.add(vertices.size() / 3 + 0);
-        indices.add(vertices.size() / 3 + 2);
-        indices.add(vertices.size() / 3 + 3);
-
-        addVertex(p0.add(from), color, layer);
-        addVertex(p1.add(from), color, layer);
-        addVertex(p2.add(from), color, layer);
-        addVertex(p3.add(from), color, layer);
     }
 
     void addVertex(Vector2D vertex, Color color, float layer) {
