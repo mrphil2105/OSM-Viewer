@@ -63,7 +63,7 @@ public class DoubleList implements Serializable {
     }
 
     public int search(double value) {
-        return Arrays.binarySearch(array, value);
+        return Arrays.binarySearch(array, 0, n, value);
     }
 
     public void extend(DoubleList other) {

@@ -63,7 +63,7 @@ public class LongList implements Serializable {
     }
 
     public int search(long value) {
-        return Arrays.binarySearch(array, value);
+        return Arrays.binarySearch(array, 0, n, value);
     }
 
     public void extend(LongList other) {

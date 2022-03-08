@@ -63,7 +63,7 @@ public class IntList implements Serializable {
     }
 
     public int search(int value) {
-        return Arrays.binarySearch(array, value);
+        return Arrays.binarySearch(array, 0, n, value);
     }
 
     public void extend(IntList other) {
