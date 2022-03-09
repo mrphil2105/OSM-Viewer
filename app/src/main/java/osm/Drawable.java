@@ -70,7 +70,7 @@ public enum Drawable {
         return ordinal() / length;
     }
 
-    static Drawable _default(String key, String value) {
+    private static Drawable _default(String key, String value) {
         System.out.printf("Way with unknown tag: k=%s v=%s%n", key, value);
         return Unknown;
     }

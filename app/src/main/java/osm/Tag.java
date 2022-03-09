@@ -15,7 +15,7 @@ enum Tag {
     place(true),
     type(false);
 
-    static final List<Tag> values = List.of(values());
+    private static final List<Tag> values = List.of(values());
     public final boolean drawable;
 
     Tag(boolean drawable) {

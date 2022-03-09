@@ -12,11 +12,11 @@ import shaders.Location;
 import shaders.ShaderProgram;
 
 public class Renderer implements GLEventListener {
-    final Color clear = Drawable.Water.color;
-    final Model model;
-    final MapCanvas canvas;
-    ShaderProgram shaderProgram;
-    FloatBuffer orthographic;
+    private final Color clear = Drawable.Water.color;
+    private final Model model;
+    private final MapCanvas canvas;
+    private ShaderProgram shaderProgram;
+    private FloatBuffer orthographic;
 
     public Renderer(Model model, MapCanvas canvas) {
         this.model = model;

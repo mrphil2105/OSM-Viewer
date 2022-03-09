@@ -11,14 +11,14 @@ import java.util.List;
 import javafx.scene.paint.Color;
 
 public class Polygons implements Serializable {
-    FloatList vertices = new FloatList();
-    IntList indices = new IntList();
-    FloatList colors = new FloatList();
+    private FloatList vertices = new FloatList();
+    private IntList indices = new IntList();
+    private FloatList colors = new FloatList();
 
     public Polygons() {}
 
     // Credit: https://flassari.is/2008/11/line-line-intersection-in-cplusplus/
-    static Vector2D intersection(Vector2D p1, Vector2D p2, Vector2D p3, Vector2D p4) {
+    private static Vector2D intersection(Vector2D p1, Vector2D p2, Vector2D p3, Vector2D p4) {
         // Store the values for fast access and easy
         // equations-to-code conversion
         double x1 = p1.x(), x2 = p2.x(), x3 = p3.x(), x4 = p4.x();
@@ -131,14 +131,14 @@ public class Polygons implements Serializable {
         addVertex(p3.add(to), color, layer);
     }
 
-    void addVertex(Vector2D vertex, Color color, float layer) {
+    private void addVertex(Vector2D vertex, Color color, float layer) {
         vertices.add((float) vertex.x());
         vertices.add((float) vertex.y());
         vertices.add(layer);
         addColor(color);
     }
 
-    void addColor(Color color) {
+    private void addColor(Color color) {
         colors.add((float) color.getRed());
         colors.add((float) color.getGreen());
         colors.add((float) color.getBlue());
