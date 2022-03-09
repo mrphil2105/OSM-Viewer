@@ -3,11 +3,8 @@ package canvas;
 import collections.Polygons;
 import com.jogamp.opengl.*;
 import java.io.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 import javax.xml.stream.XMLStreamException;
-import osm.OSMReader;
+
 
 public class Model {
     final GLCapabilities caps;
@@ -16,53 +13,8 @@ public class Model {
     int count;
 
     public Model(String filename) throws IOException, XMLStreamException {
-        Polygons polygons;
 
-        // TODO: Clean up file reading/writing. Also, I was using Serializable before it
-        // was cool...
-        if (filename.endsWith(".osm")
-                || filename.endsWith(".xml")
-                || filename.endsWith(".osm.zip")
-                || filename.endsWith(".xml.zip")) {
-
-            InputStream stream = new BufferedInputStream(new FileInputStream(filename));
-            if (filename.endsWith(".zip")) {
-                var zipFile = new ZipFile(filename);
-                var entry = zipFile.entries().nextElement();
-                stream = zipFile.getInputStream(entry);
-            }
-
-            var reader = new OSMReader(stream);
-            polygons = reader.createPolygons();
-
-            filename = filename.split("\\.")[0] + ".ser.zip";
-            var zipStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));
-            zipStream.putNextEntry(new ZipEntry(filename));
-            var outputStream = new ObjectOutputStream(zipStream);
-            outputStream.writeObject(polygons);
-            outputStream.flush();
-            outputStream.close();
-        } else if (filename.endsWith(".ser") || filename.endsWith(".ser.zip")) {
-            try {
-                InputStream stream;
-                if (filename.endsWith(".zip")) {
-                    var zipFile = new ZipFile(filename);
-                    var entry = zipFile.entries().nextElement();
-                    stream = zipFile.getInputStream(entry);
-                } else {
-                    stream = new BufferedInputStream(new FileInputStream(filename));
-                }
-
-                stream = new ObjectInputStream(stream);
-                polygons = (Polygons) ((ObjectInputStream) stream).readObject();
-                stream.close();
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException("Could not read serialized file: " + e.getMessage());
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "Only .osm, .xml, .ser or any of those zipped are allowed");
-        }
+        final Polygons polygons = FileParser.readFile(filename);
 
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
         // 8x anti-aliasing
