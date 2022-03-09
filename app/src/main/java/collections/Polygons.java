@@ -1,5 +1,7 @@
 package collections;
 
+import collections.lists.FloatList;
+import collections.lists.IntList;
 import com.jogamp.common.nio.Buffers;
 import earcut4j.Earcut;
 import java.io.Serializable;
@@ -42,25 +44,26 @@ public class Polygons implements Serializable {
     }
 
     public void addPolygon(List<Vector2D> points, Color color, float layer) {
-        var verts = new double[points.size() * 3];
-        for (int i = 0; i < points.size(); i++) {
-            var p = points.get(i);
+        addPolygon(points, null, color, layer);
+    }
+
+    public void addPolygon(List<Vector2D> outer, int[] inner, Color color, float layer) {
+        var verts = new double[outer.size() * 3];
+        for (int i = 0; i < outer.size(); i++) {
+            var p = outer.get(i);
             verts[i * 3] = p.x();
             verts[i * 3 + 1] = p.y();
             verts[i * 3 + 2] = layer;
             addVertex(p, color, layer);
         }
 
-        Earcut.earcut(verts, null, 3).stream()
+        Earcut.earcut(verts, inner, 3).stream()
                 .map(i -> (vertices.size() - verts.length) / 3 + i)
                 .forEach(indices::add);
     }
 
     public void addLines(List<Vector2D> points, double width, Color color, float layer) {
         if (points.size() < 2) {
-            return;
-        } else if (points.size() == 2) {
-            addLine(points.get(0), points.get(1), width, color, layer);
             return;
         }
 
@@ -126,26 +129,6 @@ public class Polygons implements Serializable {
 
         addVertex(p0.add(to), color, layer);
         addVertex(p3.add(to), color, layer);
-    }
-
-    public void addLine(Vector2D from, Vector2D to, double width, Color color, float layer) {
-        var vec = from.sub(to);
-        var p0 = vec.hat().normalize().scale(width);
-        var p3 = p0.scale(-1.0f);
-        var p1 = p0.add(vec);
-        var p2 = p3.add(vec);
-
-        indices.add(vertices.size() / 3 + 0);
-        indices.add(vertices.size() / 3 + 1);
-        indices.add(vertices.size() / 3 + 2);
-        indices.add(vertices.size() / 3 + 0);
-        indices.add(vertices.size() / 3 + 2);
-        indices.add(vertices.size() / 3 + 3);
-
-        addVertex(p0.add(from), color, layer);
-        addVertex(p1.add(from), color, layer);
-        addVertex(p2.add(from), color, layer);
-        addVertex(p3.add(from), color, layer);
     }
 
     void addVertex(Vector2D vertex, Color color, float layer) {
