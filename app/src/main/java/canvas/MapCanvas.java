@@ -70,10 +70,10 @@ public class MapCanvas extends Region {
         // Extract column major 4x4 matrix from Affine to buffer
         transformBuffer = FloatBuffer.allocate(16);
         transformBuffer.put((float) transform.getMxx());
-        transformBuffer.put((float) transform.getMxy());
-        transformBuffer.put(0);
-        transformBuffer.put(0);
         transformBuffer.put((float) transform.getMyx());
+        transformBuffer.put(0);
+        transformBuffer.put(0);
+        transformBuffer.put((float) transform.getMxy());
         transformBuffer.put((float) transform.getMyy());
         transformBuffer.put(0);
         transformBuffer.put(0);
