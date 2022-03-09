@@ -1,4 +1,4 @@
-package collections;
+package collections.lists;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -56,13 +56,19 @@ public class IntList implements Serializable {
         return tmp;
     }
 
-    void swap(int i, int j) {
+    public void swap(int i, int j) {
         var tmp = array[i];
         array[i] = array[j];
         array[j] = tmp;
     }
 
-    int search(int value) {
-        return Arrays.binarySearch(array, value);
+    public int search(int value) {
+        return Arrays.binarySearch(array, 0, n, value);
+    }
+
+    public void extend(IntList other) {
+        var newSize = size() + other.size();
+        if (newSize > array.length) setSize(newSize);
+        System.arraycopy(other.getArray(), 0, array, n, other.size());
     }
 }

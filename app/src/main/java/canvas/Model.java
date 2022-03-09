@@ -59,8 +59,6 @@ public class Model {
                             colorBuffer.rewind(),
                             GL.GL_STATIC_DRAW);
 
-                    gl.glEnable(GL3.GL_MULTISAMPLE);
-
                     return true;
                 });
 
