@@ -1,13 +1,12 @@
 package canvas;
 
 import collections.Polygons;
-import osm.OSMReader;
-
-import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+import javax.xml.stream.XMLStreamException;
+import osm.OSMReader;
 
 public class FileParser {
 
@@ -33,7 +32,7 @@ public class FileParser {
         return polygons;
     }
 
-    static InputStream getInputStream(String filename) throws IOException{
+    static InputStream getInputStream(String filename) throws IOException {
 
         if (filename.endsWith(".zip")) {
             var zipFile = new ZipFile(filename);
@@ -46,31 +45,29 @@ public class FileParser {
 
     static void serializeObject(Serializable serializable, String filename) {
 
-        try(var zipStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));){
+        try (var zipStream =
+                new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename))); ) {
             zipStream.putNextEntry(new ZipEntry(filename));
 
-            try(var outputStream = new ObjectOutputStream(zipStream)){
+            try (var outputStream = new ObjectOutputStream(zipStream)) {
                 outputStream.writeObject(serializable);
-            } catch(IOException e){
-                throw new RuntimeException("Could not serialize object: " + e.getMessage()); //TODO: mere præcis besked
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        "Could not serialize object: " + e.getMessage()); // TODO: mere præcis besked
             }
 
-        } catch(IOException e){
-            throw new RuntimeException("Could not serialize object: " + e.getMessage()); //TODO
+        } catch (IOException e) {
+            throw new RuntimeException("Could not serialize object: " + e.getMessage()); // TODO
         }
-
     }
 
-    static Polygons deserializeToPolygons(String filename){
+    static Polygons deserializeToPolygons(String filename) {
         try (InputStream inputStream = getInputStream(filename);
-             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)
-        ){
+                ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
 
             return (Polygons) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Could not read serialized file: " + e.getMessage());
         }
-
     }
 }
-
