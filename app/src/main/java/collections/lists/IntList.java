@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class IntList implements Serializable {
-    int[] array = new int[1];
-    int n = 0;
+    private int[] array = new int[1];
+    private int n = 0;
 
     public IntList() {}
 

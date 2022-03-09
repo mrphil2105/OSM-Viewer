@@ -7,9 +7,9 @@ import java.util.function.LongBinaryOperator;
 import sort.QuickSort;
 
 public class RefTable {
-    LongList keys = new LongList();
-    IntList values = new IntList();
-    boolean isSorted;
+    private LongList keys = new LongList();
+    private IntList values = new IntList();
+    private boolean isSorted;
 
     public RefTable() {}
 

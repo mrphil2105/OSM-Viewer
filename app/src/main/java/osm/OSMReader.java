@@ -15,7 +15,7 @@ import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 
 public class OSMReader {
-    enum Parseable {
+    private enum Parseable {
         node,
         way,
         relation,
@@ -24,39 +24,39 @@ public class OSMReader {
         member
     }
 
-    final XMLStreamReader reader;
+    private final XMLStreamReader reader;
 
     // `i` is tag key and `i + 1` is tag value
-    final ArrayList<String> tags = new ArrayList<>();
+    private final ArrayList<String> tags = new ArrayList<>();
 
     // Maps from a node ref to an index for the below lists
-    final RefTable nodeRefs = new RefTable();
+    private final RefTable nodeRefs = new RefTable();
     // `i` is lon and `i + 1` is lat
-    final DoubleList nodeCoords = new DoubleList();
+    private final DoubleList nodeCoords = new DoubleList();
     // `i` is tag start index and `i + 1` is end index
-    final IntList nodeTags = new IntList();
+    private final IntList nodeTags = new IntList();
 
     // Maps from a way ref to an index for the below lists
-    final RefTable wayRefs = new RefTable();
+    private final RefTable wayRefs = new RefTable();
     // Contains lists of node indices
-    final ArrayList<IntList> wayNodes = new ArrayList<>();
+    private final ArrayList<IntList> wayNodes = new ArrayList<>();
     // `i` is tag start index and `i + 1` is end index
-    final IntList wayTags = new IntList();
+    private final IntList wayTags = new IntList();
     // Tag indices for way tags with drawing information
-    final IntList wayDrawables = new IntList();
+    private final IntList wayDrawables = new IntList();
 
     // Contains lists of inner way indices
-    final ArrayList<IntList> relationInnerWays = new ArrayList<>();
+    private final ArrayList<IntList> relationInnerWays = new ArrayList<>();
     // Contains lists of outer way indices
-    final ArrayList<IntList> relationOuterWays = new ArrayList<>();
+    private final ArrayList<IntList> relationOuterWays = new ArrayList<>();
     // `i` is tag start index and `i + 1` is end index
-    final IntList relationTags = new IntList();
+    private final IntList relationTags = new IntList();
     // Tag indices for relation tags with drawing information
-    final IntList relationDrawables = new IntList();
+    private final IntList relationDrawables = new IntList();
 
-    OSMBounds bounds;
-    int event;
-    boolean advanceAfter;
+    private OSMBounds bounds;
+    private int event;
+    private boolean advanceAfter;
 
     public OSMReader(InputStream stream) throws XMLStreamException {
         reader = XMLInputFactory.newInstance().createXMLStreamReader(stream);
@@ -74,7 +74,7 @@ public class OSMReader {
         System.out.println("Parsed: " + relationOuterWays.size() + " relations");
     }
 
-    void advance() {
+    private void advance() {
         try {
             event = reader.next();
         } catch (XMLStreamException e) {
@@ -84,7 +84,7 @@ public class OSMReader {
         }
     }
 
-    void parseBounds() {
+    private void parseBounds() {
         while (event != XMLStreamConstants.START_ELEMENT || !reader.getLocalName().equals("bounds")) {
             advance();
         }
@@ -95,7 +95,7 @@ public class OSMReader {
         advance();
     }
 
-    void parseAll(Parseable parseable, Runnable runnable) {
+    private void parseAll(Parseable parseable, Runnable runnable) {
         while (true) {
             advanceAfter = true;
             while (event != XMLStreamConstants.START_ELEMENT) {
@@ -117,7 +117,7 @@ public class OSMReader {
         }
     }
 
-    void parseNode() {
+    private void parseNode() {
         nodeRefs.put(getLong("id"), nodeCoords.size());
 
         //TODO: Find equations that can translate sphere to a flat earth (eller noget i den stil)
@@ -133,7 +133,7 @@ public class OSMReader {
         nodeTags.add(tagEnd);
     }
 
-    void parseWay() {
+    private void parseWay() {
         var id = getLong("id");
         var way = wayNodes.size();
         wayRefs.put(id, way);
@@ -171,7 +171,7 @@ public class OSMReader {
         }
     }
 
-    void parseRelation() {
+    private void parseRelation() {
         var relation = relationInnerWays.size();
         relationInnerWays.add(new IntList());
         relationOuterWays.add(new IntList());
@@ -210,7 +210,7 @@ public class OSMReader {
         }
     }
 
-    void parseRelationTag() {
+    private void parseRelationTag() {
         var k = get("k");
         var tag = Tag.from(k);
         if (tag == null) return;
@@ -223,7 +223,7 @@ public class OSMReader {
         tags.add(get("v").intern());
     }
 
-    void parseNodeTag() {
+    private void parseNodeTag() {
         var k = get("k");
         var tag = Tag.from(k);
         if (tag == null) return;
@@ -232,7 +232,7 @@ public class OSMReader {
         tags.add(get("v").intern());
     }
 
-    void parseWayTag() {
+    private void parseWayTag() {
         var k = get("k");
         var tag = Tag.from(k);
         if (tag == null) return;
@@ -245,12 +245,12 @@ public class OSMReader {
         tags.add(get("v").intern());
     }
 
-    void parseNd() {
+    private void parseNd() {
         var last = wayNodes.get(wayNodes.size() - 1);
         last.add(nodeRefs.get(getLong("ref")));
     }
 
-    void parseMember() {
+    private void parseMember() {
         if (get("type").equals("way")) {
             IntList last;
             switch (get("role")) {
@@ -264,19 +264,19 @@ public class OSMReader {
         }
     }
 
-    String get(String attr) {
+    private String get(String attr) {
         return reader.getAttributeValue(null, attr);
     }
 
-    long getLong(String attr) {
+    private long getLong(String attr) {
         return Long.parseLong(get(attr));
     }
 
-    double getDouble(String attr) {
+    private double getDouble(String attr) {
         return Double.parseDouble(get(attr));
     }
 
-    void extendWithNodes(ArrayList<Vector2D> points, int way) {
+    private void extendWithNodes(ArrayList<Vector2D> points, int way) {
         var nodes = wayNodes.get(way);
         var start = 0;
         var stop = nodes.size();
