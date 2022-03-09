@@ -5,7 +5,6 @@ import com.jogamp.opengl.*;
 import java.io.*;
 import javax.xml.stream.XMLStreamException;
 
-
 public class Model {
     final GLCapabilities caps;
     final GLAutoDrawable sharedDrawable;
