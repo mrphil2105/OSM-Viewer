@@ -9,6 +9,9 @@ enum Tag {
     landuse(true),
     amenity(true),
     leisure(true),
+    barrier(true),
+    tourism(true),
+    man_made(true),
     place(true),
     type(false);
 

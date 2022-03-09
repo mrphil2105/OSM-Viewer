@@ -3,9 +3,15 @@ package osm;
 import collections.*;
 import collections.lists.DoubleList;
 import collections.lists.IntList;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.operation.linemerge.LineMerger;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -273,7 +279,18 @@ public class OSMReader {
 
     void extendWithNodes(ArrayList<Vector2D> points, int way) {
         var nodes = wayNodes.get(way);
-        for (int j = 0; j < nodes.size(); j++) {
+        var start = 0;
+        var stop = nodes.size();
+        var step = 1;
+
+        var last = nodes.get(nodes.size() - 1);
+        if (points.size() > 0 && points.get(points.size() - 1).equals(new Vector2D(nodeCoords.get(last), nodeCoords.get(last + 1)))) {
+            start = stop;
+            stop = 0;
+            step = -1;
+        }
+
+        for (int j = start; j < stop; j += step) {
             var node = nodes.get(j);
             if (node == -1) continue;
             points.add(new Vector2D(nodeCoords.get(node), nodeCoords.get(node + 1)));
@@ -294,22 +311,32 @@ public class OSMReader {
             var drawable = Drawable.fromTag(tags.get(rd), tags.get(rd + 1));
             if (drawable == Drawable.Ignored) continue;
 
+            var lines = new ArrayList<Geometry>();
+            var geometryFactory = new GeometryFactory();
+
             var outerWays = relationOuterWays.get(i);
             for (int j = 0; j < outerWays.size(); j++) {
                 int way = outerWays.get(j);
                 if (way == -1) continue;
                 wayDrawables.set(way, -1); // Don't draw later in the individual way drawing step
-                extendWithNodes(points, way);
+                var nodes = wayNodes.get(way);
+                var arr = Arrays.stream(nodes.toArray()).mapToObj(n -> new Coordinate(nodeCoords.get(n), nodeCoords.get(n + 1))).toArray();
+                lines.add(geometryFactory.createLineString(Arrays.copyOf(arr, arr.length, Coordinate[].class)));
             }
 
             var innerWays = relationInnerWays.get(i);
-            for (int j = 0; j < innerWays.size(); j++) {
-                int way = innerWays.get(j);
-                if (way == -1) continue;
-                holeIndices.add(innerPoints.size());
-                extendWithNodes(innerPoints, way);
-                if (innerPoints.size() == holeIndices.get(holeIndices.size() - 1)) holeIndices.truncate(1);
-            }
+            //for (int j = 0; j < innerWays.size(); j++) {
+            //    int way = innerWays.get(j);
+            //    if (way == -1) continue;
+            //    holeIndices.add(innerPoints.size());
+            //    extendWithNodes(innerPoints, way);
+            //    if (innerPoints.size() == holeIndices.get(holeIndices.size() - 1)) holeIndices.truncate(1);
+            //}
+
+            var merger = new LineMerger();
+            merger.add(lines);
+            var merged = (Collection<LineString>) merger.getMergedLineStrings();
+            points.addAll(merged.stream().flatMap(l -> Arrays.stream(l.getCoordinates()).map(c -> new Vector2D(c.x, c.y))).toList());
 
             if (points.size() > 0 && innerPoints.size() > 0) {
                 var indices = Arrays.stream(holeIndices.toArray()).map(h -> h + points.size()).toArray();
