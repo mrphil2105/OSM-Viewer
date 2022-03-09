@@ -122,6 +122,8 @@ public class OSMReader {
 
     void parseNode() {
         nodeRefs.put(getLong("id"), nodeCoords.size());
+
+        //TODO: Find equations that can translate sphere to a flat earth (eller noget i den stil)
         nodeCoords.add((getDouble("lon") - (bounds.minlon() + bounds.maxlon()) / 2) * 5600);
         nodeCoords.add((getDouble("lat") - (bounds.minlat() + bounds.maxlat()) / 2) * 10000);
         var tagStart = tags.size();
