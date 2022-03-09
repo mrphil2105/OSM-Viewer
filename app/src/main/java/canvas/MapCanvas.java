@@ -18,6 +18,7 @@ public class MapCanvas extends Region {
     void init(Model model) {
         recalculateTransform();
 
+        // Boilerplate to let us use OpenGL from a JavaFX node hierarchy
         Platform.setImplicitExit(true);
         window = GLWindow.create(model.getCaps());
         window.setSharedAutoDrawable(model.getSharedDrawable());
@@ -37,6 +38,7 @@ public class MapCanvas extends Region {
         canvas.setWidth(getPrefWidth());
         canvas.setHeight(getPrefHeight());
 
+        // Start rendering the model
         window.addGLEventListener(new Renderer(model, this));
         animator = new Animator(window);
         animator.start();
