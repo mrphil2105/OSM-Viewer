@@ -48,6 +48,7 @@ public class Polygons implements Serializable {
     }
 
     public void addPolygon(List<Vector2D> outer, int[] inner, Color color, float layer) {
+        // Copy all coordinates into an array
         var verts = new double[outer.size() * 3];
         for (int i = 0; i < outer.size(); i++) {
             var p = outer.get(i);
@@ -57,40 +58,54 @@ public class Polygons implements Serializable {
             addVertex(p, color, layer);
         }
 
+        // Calculate indices for each vertex in triangulated polygon
         Earcut.earcut(verts, inner, 3).stream()
-                .map(i -> (vertices.size() - verts.length) / 3 + i)
+                .map(i -> (vertices.size() - verts.length) / 3 + i) // Offset each index before adding to indices
                 .forEach(indices::add);
     }
 
     public void addLines(List<Vector2D> points, double width, Color color, float layer) {
+        // Lines must exist of at least two points
         if (points.size() < 2) {
             return;
         }
+
+
+        // To draw a line with triangles, we must find p0-3 and connect them accordingly.
+        // Diagram showing what each variable corrosponds to:
+        //  p0 ------------ p1
+        //   |               |
+        // from --- dir --> to
+        //   |               |
+        //  p3 ------------ p2
 
         var from = points.get(0);
         var to = points.get(1);
         var dir = to.sub(from);
 
-        // p0 -- p1
-        // |     |
-        // p3 -- p2
+        // find p0-3 by manipulating vectors
         var p3 = dir.hat().normalize().scale(width);
         var p0 = p3.scale(-1.0f);
         var p1 = p0.add(dir);
         var p2 = p3.add(dir);
 
+        // These points are final, we can add them now
         addVertex(p0.add(from), color, layer);
         addVertex(p3.add(from), color, layer);
 
+        // Loop through remaining points in line, calculating a pair of points in each iteration
         for (int i = 2; i < points.size(); i++) {
+            // Where we're going next
             var nextTo = points.get(i);
             var nextDir = nextTo.sub(to);
 
+            // Corners drawn from the next point
             var p3Next = nextDir.hat().normalize().scale(width);
             var p0Next = p3Next.scale(-1.0f);
             var p1Next = p0Next.add(nextDir);
             var p2Next = p3Next.add(nextDir);
 
+            // Add two triangles: p0, p2, p3 and p0, p3, p1
             indices.add(vertices.size() / 3 - 2);
             indices.add(vertices.size() / 3 + 0);
             indices.add(vertices.size() / 3 + 1);
@@ -98,9 +113,11 @@ public class Polygons implements Serializable {
             indices.add(vertices.size() / 3 + 1);
             indices.add(vertices.size() / 3 - 1);
 
+            // Find intersections between previous two lines and next two lines
             var intersect1 = intersection(p0.add(to), p1.add(to), p0Next.add(nextTo), p1Next.add(nextTo));
             var intersect2 = intersection(p3.add(to), p2.add(to), p3Next.add(nextTo), p2Next.add(nextTo));
 
+            // Intersection is null if lines are parallel
             if (intersect1 != null) {
                 addVertex(intersect1, color, layer);
             } else {
@@ -113,6 +130,7 @@ public class Polygons implements Serializable {
                 addVertex(p2.add(to), color, layer);
             }
 
+            // Move forward one point, setting the "current" points to the "next points"
             to = nextTo;
             p0 = p0Next;
             p1 = p1Next;
@@ -120,6 +138,7 @@ public class Polygons implements Serializable {
             p2 = p2Next;
         }
 
+        // Add triangles for the last point
         indices.add(vertices.size() / 3 - 2);
         indices.add(vertices.size() / 3 + 0);
         indices.add(vertices.size() / 3 + 1);
@@ -131,6 +150,12 @@ public class Polygons implements Serializable {
         addVertex(p3.add(to), color, layer);
     }
 
+    /**
+     * Add a vertex with a color and layer into the correct position in `vertices` and `colors`
+     * @param vertex
+     * @param color
+     * @param layer
+     */
     void addVertex(Vector2D vertex, Color color, float layer) {
         vertices.add((float) vertex.x());
         vertices.add((float) vertex.y());
