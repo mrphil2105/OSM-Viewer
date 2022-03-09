@@ -1,15 +1,15 @@
-package collections;
+package collections.lists;
 
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class LongList implements Serializable {
-    long[] array = new long[1];
+public class DoubleList implements Serializable {
+    double[] array = new double[1];
     int n = 0;
 
-    public LongList() {}
+    public DoubleList() {}
 
-    public int add(long value) {
+    public int add(double value) {
         if (n == array.length) {
             grow();
         }
@@ -18,19 +18,19 @@ public class LongList implements Serializable {
         return n++;
     }
 
-    public long get(int index) {
+    public double get(int index) {
         return array[index];
     }
 
-    public long set(int index, long value) {
+    public double set(int index, double value) {
         return array[index] = value;
     }
 
-    public long[] toArray() {
+    public double[] toArray() {
         return copyToSize(n);
     }
 
-    public long[] getArray() {
+    public double[] getArray() {
         return array;
     }
 
@@ -50,19 +50,25 @@ public class LongList implements Serializable {
         array = copyToSize(sz);
     }
 
-    long[] copyToSize(int sz) {
-        var tmp = new long[sz];
+    double[] copyToSize(int sz) {
+        var tmp = new double[sz];
         System.arraycopy(array, 0, tmp, 0, n);
         return tmp;
     }
 
-    void swap(int i, int j) {
+    public void swap(int i, int j) {
         var tmp = array[i];
         array[i] = array[j];
         array[j] = tmp;
     }
 
-    int search(long value) {
-        return Arrays.binarySearch(array, value);
+    public int search(double value) {
+        return Arrays.binarySearch(array, 0, n, value);
+    }
+
+    public void extend(DoubleList other) {
+        var newSize = size() + other.size();
+        if (newSize > array.length) setSize(newSize);
+        System.arraycopy(other.getArray(), 0, array, n, other.size());
     }
 }
