@@ -1,6 +1,6 @@
 package canvas;
 
-import collections.Polygons;
+import drawing.Polygons;
 import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -11,15 +11,15 @@ import osm.OSMReader;
 public class FileParser {
 
     public static Polygons readFile(String filename) throws IOException, XMLStreamException {
-
         Polygons polygons;
 
         if (filename.matches(".*(\\.osm|\\.xml)(\\.zip)?$")) {
+            var reader = new OSMReader();
+            polygons = new Polygons();
+            reader.addObserver(polygons);
+            reader.parse(getInputStream(filename));
 
-            var reader = new OSMReader(getInputStream(filename));
-            polygons = reader.createPolygons();
             filename = filename.split("\\.")[0] + ".ser.zip";
-
             serializeObject(polygons, filename);
         } else if (filename.endsWith(".ser") || filename.endsWith(".ser.zip")) {
             polygons = deserializeToPolygons(filename);
