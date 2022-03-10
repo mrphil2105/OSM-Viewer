@@ -1,6 +1,8 @@
-package osm;
+package drawing;
 
 import javafx.scene.paint.Color;
+import osm.elements.OSMElement;
+import osm.elements.OSMTag;
 
 // TODO: Missing Area
 public enum Drawable {
@@ -70,16 +72,24 @@ public enum Drawable {
         return ordinal() / length;
     }
 
-    static Drawable _default(String key, String value) {
-        System.out.printf("Way with unknown tag: k=%s v=%s%n", key, value);
+    private static Drawable _default(OSMTag tag) {
+        System.out.println("Unknown tag " + tag.toString());
         return Unknown;
     }
 
-    public static Drawable fromTag(String key, String value) {
-        var tag = Tag.from(key);
-        if (tag == null || !tag.drawable) return Unknown;
-        return switch (tag) {
-            case landuse -> switch (value) {
+    public static Drawable from(OSMElement element) {
+        var drawable = Drawable.Unknown;
+        for (var tag : element.tags()) {
+            drawable = Drawable.from(tag);
+            if (drawable != Drawable.Unknown) break;
+        }
+        return drawable;
+    }
+
+    public static Drawable from(OSMTag tag) {
+        if (tag == null) return Unknown;
+        return switch (tag.key()) {
+            case Landuse -> switch (tag.value()) {
                 case "allotments" -> Allotments;
                 case "plant_nursery" -> PlantNursery;
                 case "basin" -> Water;
@@ -97,9 +107,9 @@ public enum Drawable {
                 case "isolated_dwelling" -> Dwelling;
                 case "grass", "meadow" -> Grass;
                 case "tree", "forest", "wood", "green_field" -> Forest;
-                default -> _default(key, value);
+                default -> _default(tag);
             };
-            case natural -> switch (value) {
+            case Natural -> switch (tag.value()) {
                 case "wood" -> Forest;
                 case "water" -> Water;
                 case "cliff" -> Cliff;
@@ -108,22 +118,21 @@ public enum Drawable {
                 case "grassland" -> Grass;
                 case "bare_rock" -> BareRock;
                 case "valley" -> Ignored;
-                case "coastline" -> Island; // TODO: This is a line indicator, not an area.
                 case "wetland", "heath" -> Heath;
                 case "beach" -> Beach;
                 case "sand" -> Sand;
-                default -> _default(key, value);
+                default -> _default(tag);
             };
-            case amenity -> switch (value) {
+            case Amenity -> switch (tag.value()) {
                 case "toilets", "shelter", "biergarten" -> Building;
                 case "grave_yard" -> Park;
                 case "prison" -> Prison;
                 case "recycling" -> Industrial;
                 case "parking", "bicycle_parking", "parking_space", "bus_station", "taxi" -> Parking;
                 case "school", "kindergarten", "hospital" -> AmenityArea;
-                default -> _default(key, value);
+                default -> _default(tag);
             };
-            case leisure -> switch (value) {
+            case Leisure -> switch (tag.value()) {
                 case "beach_resort" -> Sand;
                 case "park" -> Park;
                 case "track" -> Track;
@@ -134,34 +143,34 @@ public enum Drawable {
                 case "garden" -> Grass;
                 case "nature_reserve" -> NatureReserve;
                 case "miniature_golf", "golf_course" -> Golf;
-                default -> _default(key, value);
+                default -> _default(tag);
             };
-            case building -> Building;
-            case barrier -> switch (value) {
+            case Building -> Building;
+            case Barrier -> switch (tag.value()) {
                 case "yes" -> Ignored;
                 case "hedge" -> Hedge;
                 case "wall", "fence", "retaining_wall" -> Wall;
-                default -> _default(key, value);
+                default -> _default(tag);
             };
-            case tourism -> switch (value) {
+            case Tourism -> switch (tag.value()) {
                 case "camp_site" -> CampSite;
                 case "museum" -> Museum;
-                default -> _default(key, value);
+                default -> _default(tag);
             };
-            case man_made -> switch (value) {
+            case Man_made -> switch (tag.value()) {
                 case "pier" -> Pier;
                 case "storage_tank", "silo" -> Building;
                 case "breakwater" -> BreakWater;
                 case "bunker_silo" -> Ignored;
                 case "wastewater_plant", "water_works" -> Industrial;
-                default -> _default(key, value);
+                default -> _default(tag);
             };
-            case place -> switch (value) {
+            case Place -> switch (tag.value()) {
                 case "island" -> Island;
                 case "square", "archipelago" -> Ignored;
-                default -> _default(key, value);
+                default -> _default(tag);
             };
-            case highway -> switch (value) {
+            case Highway -> switch (tag.value()) {
                 case "motorway" -> Motorway;
                 case "primary" -> Primary;
                 case "secondary" -> Secondary;
@@ -181,9 +190,9 @@ public enum Drawable {
                         "path",
                         "pedestrian",
                         "steps" -> Path;
-                default -> _default(key, value);
+                default -> _default(tag);
             };
-            default -> _default(key, value);
+            default -> _default(tag);
         };
     }
 
