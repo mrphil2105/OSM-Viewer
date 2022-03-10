@@ -193,26 +193,26 @@ public class Polygons implements OSMObserver, Serializable {
     @Override
     public void onWay(OSMWay way) {
         var drawable = Drawable.from(way);
-        if (drawable == Drawable.Unknown) return;
+        if (drawable == Drawable.UNKNOWN) return;
 
         var points = way.nodes().stream().map(n -> new Vector2D(n.lon(), n.lat())).toList();
         switch (drawable.shape) {
-            case Polyline -> addLine(points, drawable.size, drawable.color, drawable.layer());
-            case Fill -> addPolygon(points, drawable.color, drawable.layer());
+            case POLYLINE -> addLine(points, drawable.size, drawable.color, drawable.layer());
+            case FILL -> addPolygon(points, drawable.color, drawable.layer());
         }
     }
 
     @Override
     public void onRelation(OSMRelation relation) {
         var drawable = Drawable.from(relation);
-        if (drawable == Drawable.Unknown) return;
+        if (drawable == Drawable.UNKNOWN) return;
 
         var lines = new ArrayList<Geometry>();
         var geometryFactory = new GeometryFactory();
 
         Iterable<OSMWay> iter =
                 relation.members().stream()
-                                .filter(m -> m.role() == OSMMemberWay.Role.Outer)
+                                .filter(m -> m.role() == OSMMemberWay.Role.OUTER)
                                 .map(OSMMemberWay::way)
                         ::iterator;
         for (var way : iter) {

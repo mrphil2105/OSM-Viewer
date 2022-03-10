@@ -2,31 +2,31 @@ package osm.elements;
 
 public record OSMTag(Key key, String value) {
     public enum Key {
-        Building,
-        Highway,
-        Natural,
-        Landuse,
-        Amenity,
-        Leisure,
-        Barrier,
-        Tourism,
-        Man_made,
-        Place,
-        Type;
+        BUILDING,
+        HIGHWAY,
+        NATURAL,
+        LANDUSE,
+        AMENITY,
+        LEISURE,
+        BARRIER,
+        TOURISM,
+        MAN_MADE,
+        PLACE,
+        TYPE;
 
         public static Key from(String key) {
             return switch (key) {
-                case "building" -> Building;
-                case "highway" -> Highway;
-                case "natural" -> Natural;
-                case "landuse" -> Landuse;
-                case "amenity" -> Amenity;
-                case "leisure" -> Leisure;
-                case "barrier" -> Barrier;
-                case "tourism" -> Tourism;
-                case "man_made" -> Man_made;
-                case "place" -> Place;
-                case "type" -> Type;
+                case "building" -> BUILDING;
+                case "highway" -> HIGHWAY;
+                case "natural" -> NATURAL;
+                case "landuse" -> LANDUSE;
+                case "amenity" -> AMENITY;
+                case "leisure" -> LEISURE;
+                case "barrier" -> BARRIER;
+                case "tourism" -> TOURISM;
+                case "man_made" -> MAN_MADE;
+                case "place" -> PLACE;
+                case "type" -> TYPE;
                 default -> null;
             };
         }
