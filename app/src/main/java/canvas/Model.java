@@ -1,7 +1,7 @@
 package canvas;
 
-import collections.Polygons;
 import com.jogamp.opengl.*;
+import drawing.Polygons;
 import java.io.*;
 import javax.xml.stream.XMLStreamException;
 
@@ -45,7 +45,8 @@ public class Model {
                     // Set the data for the current buffer to the data of the vertex buffer
                     gl.glBufferData(
                             GL3.GL_ARRAY_BUFFER,
-                            (long) vertexBuffer.capacity() * Float.BYTES, // Allocate this many bytes for the buffer
+                            (long) vertexBuffer.capacity()
+                                    * Float.BYTES, // Allocate this many bytes for the buffer
                             vertexBuffer.rewind(),
                             GL.GL_STATIC_DRAW);
 
@@ -58,8 +59,9 @@ public class Model {
                             indexBuffer.rewind(),
                             GL.GL_STATIC_DRAW);
 
-                    // Set the color buffer as the current buffer. This unsets the vertex buffer as the current one
-                    // and, since we have already set all the data for the vertex buffer, this is fine.
+                    // Set the color buffer as the current buffer. This unsets the vertex buffer as the
+                    // current one and, since we have already set all the data for the vertex buffer, this is
+                    // fine.
                     gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(Model.VBOType.Color));
                     // Set the data for the current buffer to the data of the color buffer
                     gl.glBufferData(
@@ -84,6 +86,7 @@ public class Model {
 
     /**
      * Get the generated id of the buffer with the given type
+     *
      * @param type
      * @return Buffer id as seen from OpenGL
      */
@@ -93,6 +96,7 @@ public class Model {
 
     /**
      * Get the amount of vertices
+     *
      * @return How many vertices are stored in the model
      */
     public int getCount() {
