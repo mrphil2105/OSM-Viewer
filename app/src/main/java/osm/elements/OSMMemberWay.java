@@ -2,13 +2,13 @@ package osm.elements;
 
 public record OSMMemberWay(OSMWay way, Role role) {
     public enum Role {
-        Inner,
-        Outer;
+        INNER,
+        OUTER;
 
         public static Role from(String role) {
             return switch (role) {
-                case "inner" -> Inner;
-                case "outer" -> Outer;
+                case "inner" -> INNER;
+                case "outer" -> OUTER;
                 default -> null;
             };
         }
