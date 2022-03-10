@@ -4,10 +4,10 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import drawing.Drawable;
 import java.io.File;
 import java.nio.FloatBuffer;
 import javafx.scene.paint.Color;
-import osm.Drawable;
 import shaders.Location;
 import shaders.ShaderProgram;
 
@@ -97,7 +97,8 @@ public class Renderer implements GLEventListener {
     @Override
     public void reshape(GLAutoDrawable glAutoDrawable, int x, int y, int width, int height) {
         // When the window changes size, we need to recalculate the orthographic projection matrix
-        // See this for some idea of how that works: https://learnwebgl.brown37.net/08_projections/projections_ortho.html
+        // See this for some idea of how that works:
+        // https://learnwebgl.brown37.net/08_projections/projections_ortho.html
 
         final float left = 0.0f;
         final float right = width;
