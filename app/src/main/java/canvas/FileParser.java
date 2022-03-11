@@ -6,17 +6,21 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import javax.xml.stream.XMLStreamException;
+import navigation.Dijkstra;
 import osm.OSMReader;
 
 public class FileParser {
 
-    public static Polygons readFile(String filename) throws IOException, XMLStreamException {
+    public static ReadResult readFile(String filename) throws IOException, XMLStreamException {
         Polygons polygons;
+        Dijkstra dijkstra;
 
         if (filename.matches(".*(\\.osm|\\.xml)(\\.zip)?$")) {
             var reader = new OSMReader();
             polygons = new Polygons();
+            dijkstra = new Dijkstra();
             reader.addObserver(polygons);
+            reader.addObserver(dijkstra);
             reader.parse(getInputStream(filename));
 
             filename = filename.split("\\.")[0] + ".ser.zip";
@@ -29,7 +33,8 @@ public class FileParser {
             throw new IllegalArgumentException(
                     "Only .osm, .xml, .ser or any of those zipped are allowed");
         }
-        return polygons;
+
+        return new ReadResult(polygons, dijkstra);
     }
 
     private static InputStream getInputStream(String filename) throws IOException {

@@ -13,7 +13,8 @@ public class Model {
 
     public Model(String filename) throws IOException, XMLStreamException {
 
-        final Polygons polygons = FileParser.readFile(filename);
+        final ReadResult result = FileParser.readFile(filename);
+        final Polygons polygons = result.polygons();
 
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
         // 8x anti-aliasing
