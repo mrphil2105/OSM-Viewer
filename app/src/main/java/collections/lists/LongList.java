@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class LongList implements Serializable {
-    long[] array = new long[1];
-    int n = 0;
+    private long[] array = new long[1];
+    private int n = 0;
 
     public LongList() {}
 

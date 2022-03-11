@@ -12,7 +12,9 @@ public record OSMTag(Key key, String value) {
         TOURISM,
         MAN_MADE,
         PLACE,
-        TYPE;
+        TYPE,
+        NAME,
+        MAXSPEED;
 
         public static Key from(String key) {
             return switch (key) {
@@ -27,6 +29,8 @@ public record OSMTag(Key key, String value) {
                 case "man_made" -> MAN_MADE;
                 case "place" -> PLACE;
                 case "type" -> TYPE;
+                case "name" -> NAME;
+                case "maxspeed" -> MAXSPEED;
                 default -> null;
             };
         }

@@ -6,14 +6,15 @@ import java.io.*;
 import javax.xml.stream.XMLStreamException;
 
 public class Model {
-    final GLCapabilities caps;
-    final GLAutoDrawable sharedDrawable;
-    final int[] vbo = new int[Model.VBOType.values().length];
-    int count;
+    private final GLCapabilities caps;
+    private final GLAutoDrawable sharedDrawable;
+    private final int[] vbo = new int[Model.VBOType.values().length];
+    private int count;
 
     public Model(String filename) throws IOException, XMLStreamException {
 
-        final Polygons polygons = FileParser.readFile(filename);
+        final ReadResult result = FileParser.readFile(filename);
+        final Polygons polygons = result.polygons();
 
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
         // 8x anti-aliasing

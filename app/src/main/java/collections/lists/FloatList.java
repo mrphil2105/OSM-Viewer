@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class FloatList implements Serializable {
-    float[] array = new float[1];
-    int n = 0;
+    private float[] array = new float[1];
+    private int n = 0;
 
     public FloatList() {}
 
