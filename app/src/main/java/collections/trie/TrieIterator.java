@@ -10,9 +10,9 @@ import java.util.NoSuchElementException;
 
 /** PrefixIterator iterates over keys with a given prefix. */
 public class TrieIterator<Value> implements Iterator<Entry<String, Value>> {
-    final String prefix;
-    StringBuilder rest;
-    List<Iterator<FinalTrie<Value>>> branch;
+    private final String prefix;
+    private StringBuilder rest;
+    private List<Iterator<FinalTrie<Value>>> branch;
 
     protected TrieIterator(FinalTrie<Value> trie, String prefix) {
         this.prefix = prefix;

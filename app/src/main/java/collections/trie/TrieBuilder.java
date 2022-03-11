@@ -1,30 +1,27 @@
 package collections.trie;
 
+import java.util.ArrayList;
+
 /**
  * TrieBuilder is an interface for creating FinalTries.
  *
  * @param <Value> The type that can be looked up using String keys.
  */
 public class TrieBuilder<Value> {
-    char key;
-    Value value;
-    int childrenIdx;
-    TrieBuilder<Value>[] children;
+    private char key;
+    private Value value;
+    private ArrayList<TrieBuilder<Value>> children;
 
-    @SuppressWarnings("unchecked")
-    public TrieBuilder(int radix) {
-        children = new TrieBuilder[radix];
+    public TrieBuilder() {
+        children = new ArrayList<>();
     }
 
     @SuppressWarnings("unchecked")
     public FinalTrie<Value> build() {
-        var trie = new FinalTrie<Value>();
-        trie.key = key;
-        trie.value = value;
-        trie.children = new FinalTrie[childrenIdx];
+        var trie = new FinalTrie<Value>(key, value, new FinalTrie[children.size()]);
 
-        for (int i = 0; i < childrenIdx; i++) {
-            trie.children[i] = children[i].build();
+        for (int i = 0; i < children.size(); i++) {
+            trie.children[i] = children.get(i).build();
         }
 
         return trie;
@@ -36,13 +33,13 @@ public class TrieBuilder<Value> {
         put(key, 0, value);
     }
 
-    void put(String key, int idx, Value value) {
+    private void put(String key, int idx, Value value) {
         var child = getChild(key.charAt(idx));
 
         if (child == null) {
-            child = new TrieBuilder<Value>(children.length);
+            child = new TrieBuilder<Value>();
             child.key = key.charAt(idx);
-            addChild(child);
+            children.add(child);
         }
 
         if (idx == key.length() - 1) {
@@ -52,16 +49,10 @@ public class TrieBuilder<Value> {
         }
     }
 
-    void addChild(TrieBuilder<Value> child) {
-        // Assume we aren't adding beyond the radix.
-        // I don't care to handle this case.
-        children[childrenIdx++] = child;
-    }
-
-    TrieBuilder<Value> getChild(char c) {
-        for (int i = 0; i < childrenIdx; i++) {
-            if (children[i].key == c) {
-                return children[i];
+    private TrieBuilder<Value> getChild(char c) {
+        for (var child : children) {
+            if (child.key == c) {
+                return child;
             }
         }
 

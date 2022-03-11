@@ -7,11 +7,15 @@ import java.util.Map.Entry;
 
 /** FinalTrie is a readonly Trie */
 public class FinalTrie<Value> implements Trie<Value>, Iterable<Entry<String, Value>>, Serializable {
-    char key;
-    Value value;
-    FinalTrie<Value>[] children;
+    final char key;
+    final Value value;
+    final FinalTrie<Value>[] children;
 
-    protected FinalTrie() {}
+    protected FinalTrie(char key, Value value, FinalTrie<Value>[] children) {
+        this.key = key;
+        this.value = value;
+        this.children = children;
+    }
 
     public FinalTrie<Value> narrow(String prefix) {
         return find(prefix, 0);
@@ -45,7 +49,7 @@ public class FinalTrie<Value> implements Trie<Value>, Iterable<Entry<String, Val
         }
     }
 
-    FinalTrie<Value> find(String prefix, int idx) {
+    private FinalTrie<Value> find(String prefix, int idx) {
         if (idx == prefix.length()) return this;
 
         var child = getChild(prefix.charAt(idx));
@@ -54,7 +58,7 @@ public class FinalTrie<Value> implements Trie<Value>, Iterable<Entry<String, Val
         return child.find(prefix, idx + 1);
     }
 
-    FinalTrie<Value> getChild(char c) {
+    private FinalTrie<Value> getChild(char c) {
         // Linear search is probably the fastest in this situation,
         // yet I don't know without benchamrking :)
         //
