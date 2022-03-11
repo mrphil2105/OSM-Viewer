@@ -11,7 +11,7 @@ public class FinalTrie<Value> implements Trie<Value>, Iterable<Entry<String, Val
     final Value value;
     final FinalTrie<Value>[] children;
 
-    protected FinalTrie(char key, Value value, FinalTrie<Value>[] children) {
+    FinalTrie(char key, Value value, FinalTrie<Value>[] children) {
         this.key = key;
         this.value = value;
         this.children = children;

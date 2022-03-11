@@ -16,6 +16,11 @@ public class TrieBuilder<Value> {
         this.key = key;
     }
 
+    /**
+     * Construct a trie from the current state of the builder
+     *
+     * @return A new trie
+     */
     @SuppressWarnings("unchecked")
     public FinalTrie<Value> build() {
         var trie = new FinalTrie<Value>(key, value, new FinalTrie[children.size()]);
@@ -27,6 +32,12 @@ public class TrieBuilder<Value> {
         return trie;
     }
 
+    /**
+     * Add a new entry pair to the trie
+     *
+     * @param key Key of the entry
+     * @param value Value of the entry
+     */
     public void put(String key, Value value) {
         if (value == null) throw new IllegalArgumentException("value must not be null");
 
