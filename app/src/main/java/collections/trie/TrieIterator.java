@@ -14,7 +14,7 @@ public class TrieIterator<Value> implements Iterator<Entry<String, Value>> {
     private final StringBuilder rest = new StringBuilder();
     private final List<Iterator<FinalTrie<Value>>> branch = new ArrayList<>();
 
-    protected TrieIterator(FinalTrie<Value> trie, String prefix) {
+    TrieIterator(FinalTrie<Value> trie, String prefix) {
         this.prefix = prefix;
         branch.add(Arrays.stream(trie.children).iterator());
     }
