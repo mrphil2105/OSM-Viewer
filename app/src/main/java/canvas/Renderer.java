@@ -4,15 +4,15 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import drawing.Drawable;
 import java.io.File;
 import java.nio.FloatBuffer;
 import javafx.scene.paint.Color;
-import osm.Drawable;
 import shaders.Location;
 import shaders.ShaderProgram;
 
 public class Renderer implements GLEventListener {
-    final Color clear = Drawable.Water.color;
+    final Color clear = Drawable.WATER.color;
     final Model model;
     final MapCanvas canvas;
     ShaderProgram shaderProgram;
@@ -45,17 +45,17 @@ public class Renderer implements GLEventListener {
         shaderProgram.init(gl, vertexShader, fragmentShader);
 
         // Set the current buffer to the vertex vbo
-        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.Vertex));
+        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.VERTEX));
         // Tell OpenGL that the current buffer holds position data. 3 floats per position.
         gl.glVertexAttribPointer(
                 shaderProgram.getLocation(Location.POSITION), 3, GL3.GL_FLOAT, false, Float.BYTES * 3, 0);
         gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.POSITION));
 
         // Set the current index buffer to the index buffer from the model
-        gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, model.getVBO(Model.VBOType.Index));
+        gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, model.getVBO(Model.VBOType.INDEX));
 
         // Set the current buffer to the color vbo. We're done initialising the vertex vbo now.
-        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.Color));
+        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.COLOR));
         // Tell OpenGL that the current buffer holds color data. 3 floats per color.
         gl.glVertexAttribPointer(
                 shaderProgram.getLocation(Location.COLOR), 3, GL3.GL_FLOAT, false, Float.BYTES * 3, 0);
@@ -97,7 +97,8 @@ public class Renderer implements GLEventListener {
     @Override
     public void reshape(GLAutoDrawable glAutoDrawable, int x, int y, int width, int height) {
         // When the window changes size, we need to recalculate the orthographic projection matrix
-        // See this for some idea of how that works: https://learnwebgl.brown37.net/08_projections/projections_ortho.html
+        // See this for some idea of how that works:
+        // https://learnwebgl.brown37.net/08_projections/projections_ortho.html
 
         final float left = 0.0f;
         final float right = width;

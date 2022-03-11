@@ -1,7 +1,7 @@
 package canvas;
 
-import collections.Polygons;
 import com.jogamp.opengl.*;
+import drawing.Polygons;
 import java.io.*;
 import javax.xml.stream.XMLStreamException;
 
@@ -41,16 +41,17 @@ public class Model {
                     gl.glGenBuffers(vbo.length, vbo, 0);
 
                     // Set the vertex buffer as the current buffer
-                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(Model.VBOType.Vertex));
+                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(Model.VBOType.VERTEX));
                     // Set the data for the current buffer to the data of the vertex buffer
                     gl.glBufferData(
                             GL3.GL_ARRAY_BUFFER,
-                            (long) vertexBuffer.capacity() * Float.BYTES, // Allocate this many bytes for the buffer
+                            (long) vertexBuffer.capacity()
+                                    * Float.BYTES, // Allocate this many bytes for the buffer
                             vertexBuffer.rewind(),
                             GL.GL_STATIC_DRAW);
 
                     // Set the index buffer as the current index buffer
-                    gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, getVBO(Model.VBOType.Index));
+                    gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, getVBO(Model.VBOType.INDEX));
                     // Set the data for the current index buffer to the data of the index buffer
                     gl.glBufferData(
                             GL3.GL_ELEMENT_ARRAY_BUFFER,
@@ -58,9 +59,10 @@ public class Model {
                             indexBuffer.rewind(),
                             GL.GL_STATIC_DRAW);
 
-                    // Set the color buffer as the current buffer. This unsets the vertex buffer as the current one
-                    // and, since we have already set all the data for the vertex buffer, this is fine.
-                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(Model.VBOType.Color));
+                    // Set the color buffer as the current buffer. This unsets the vertex buffer as the
+                    // current one and, since we have already set all the data for the vertex buffer, this is
+                    // fine.
+                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(Model.VBOType.COLOR));
                     // Set the data for the current buffer to the data of the color buffer
                     gl.glBufferData(
                             GL3.GL_ARRAY_BUFFER,
@@ -84,6 +86,7 @@ public class Model {
 
     /**
      * Get the generated id of the buffer with the given type
+     *
      * @param type
      * @return Buffer id as seen from OpenGL
      */
@@ -93,6 +96,7 @@ public class Model {
 
     /**
      * Get the amount of vertices
+     *
      * @return How many vertices are stored in the model
      */
     public int getCount() {
@@ -100,8 +104,8 @@ public class Model {
     }
 
     enum VBOType {
-        Vertex,
-        Index,
-        Color
+        VERTEX,
+        INDEX,
+        COLOR
     }
 }

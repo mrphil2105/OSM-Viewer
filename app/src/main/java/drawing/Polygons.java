@@ -1,5 +1,6 @@
-package collections;
+package drawing;
 
+import collections.Vector2D;
 import collections.lists.FloatList;
 import collections.lists.IntList;
 import com.jogamp.common.nio.Buffers;
@@ -7,10 +8,19 @@ import earcut4j.Earcut;
 import java.io.Serializable;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.List;
+import java.util.*;
 import javafx.scene.paint.Color;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.operation.linemerge.LineMerger;
+import osm.OSMObserver;
+import osm.elements.OSMMemberWay;
+import osm.elements.OSMRelation;
+import osm.elements.OSMWay;
 
-public class Polygons implements Serializable {
+public class Polygons implements OSMObserver, Serializable {
     FloatList vertices = new FloatList();
     IntList indices = new IntList();
     FloatList colors = new FloatList();
@@ -18,7 +28,7 @@ public class Polygons implements Serializable {
     public Polygons() {}
 
     // Credit: https://flassari.is/2008/11/line-line-intersection-in-cplusplus/
-    static Vector2D intersection(Vector2D p1, Vector2D p2, Vector2D p3, Vector2D p4) {
+    private static Vector2D intersection(Vector2D p1, Vector2D p2, Vector2D p3, Vector2D p4) {
         // Store the values for fast access and easy
         // equations-to-code conversion
         double x1 = p1.x(), x2 = p2.x(), x3 = p3.x(), x4 = p4.x();
@@ -44,14 +54,10 @@ public class Polygons implements Serializable {
     }
 
     public void addPolygon(List<Vector2D> points, Color color, float layer) {
-        addPolygon(points, null, color, layer);
-    }
-
-    public void addPolygon(List<Vector2D> outer, int[] inner, Color color, float layer) {
         // Copy all coordinates into an array
-        var verts = new double[outer.size() * 3];
-        for (int i = 0; i < outer.size(); i++) {
-            var p = outer.get(i);
+        var verts = new double[points.size() * 3];
+        for (int i = 0; i < points.size(); i++) {
+            var p = points.get(i);
             verts[i * 3] = p.x();
             verts[i * 3 + 1] = p.y();
             verts[i * 3 + 2] = layer;
@@ -59,17 +65,19 @@ public class Polygons implements Serializable {
         }
 
         // Calculate indices for each vertex in triangulated polygon
-        Earcut.earcut(verts, inner, 3).stream()
-                .map(i -> (vertices.size() - verts.length) / 3 + i) // Offset each index before adding to indices
+        Earcut.earcut(verts, null, 3).stream()
+                .map(
+                        i ->
+                                (vertices.size() - verts.length) / 3
+                                        + i) // Offset each index before adding to indices
                 .forEach(indices::add);
     }
 
-    public void addLines(List<Vector2D> points, double width, Color color, float layer) {
+    public void addLine(List<Vector2D> points, double width, Color color, float layer) {
         // Lines must exist of at least two points
         if (points.size() < 2) {
             return;
         }
-
 
         // To draw a line with triangles, we must find p0-3 and connect them accordingly.
         // Diagram showing what each variable corrosponds to:
@@ -152,18 +160,19 @@ public class Polygons implements Serializable {
 
     /**
      * Add a vertex with a color and layer into the correct position in `vertices` and `colors`
+     *
      * @param vertex
      * @param color
      * @param layer
      */
-    void addVertex(Vector2D vertex, Color color, float layer) {
+    private void addVertex(Vector2D vertex, Color color, float layer) {
         vertices.add((float) vertex.x());
         vertices.add((float) vertex.y());
         vertices.add(layer);
         addColor(color);
     }
 
-    void addColor(Color color) {
+    private void addColor(Color color) {
         colors.add((float) color.getRed());
         colors.add((float) color.getGreen());
         colors.add((float) color.getBlue());
@@ -179,5 +188,50 @@ public class Polygons implements Serializable {
 
     public FloatBuffer getColorBuffer() {
         return Buffers.newDirectFloatBuffer(colors.toArray());
+    }
+
+    @Override
+    public void onWay(OSMWay way) {
+        var drawable = Drawable.from(way);
+        if (drawable == Drawable.UNKNOWN) return;
+
+        var points = way.nodes().stream().map(n -> new Vector2D(n.lon(), n.lat())).toList();
+        switch (drawable.shape) {
+            case POLYLINE -> addLine(points, drawable.size, drawable.color, drawable.layer());
+            case FILL -> addPolygon(points, drawable.color, drawable.layer());
+        }
+    }
+
+    @Override
+    public void onRelation(OSMRelation relation) {
+        var drawable = Drawable.from(relation);
+        if (drawable == Drawable.UNKNOWN) return;
+
+        var lines = new ArrayList<Geometry>();
+        var geometryFactory = new GeometryFactory();
+
+        Iterable<OSMWay> iter =
+                relation.members().stream()
+                                .filter(m -> m.role() == OSMMemberWay.Role.OUTER)
+                                .map(OSMMemberWay::way)
+                        ::iterator;
+        for (var way : iter) {
+            lines.add(
+                    geometryFactory.createLineString(
+                            way.nodes().stream()
+                                    .map(n -> new Coordinate(n.lon(), n.lat()))
+                                    .toArray(Coordinate[]::new)));
+        }
+
+        var merger = new LineMerger();
+        merger.add(lines);
+        Collection<LineString> merged = merger.getMergedLineStrings();
+
+        addPolygon(
+                merged.stream()
+                        .flatMap(l -> Arrays.stream(l.getCoordinates()).map(c -> new Vector2D(c.x, c.y)))
+                        .toList(),
+                drawable.color,
+                drawable.layer());
     }
 }

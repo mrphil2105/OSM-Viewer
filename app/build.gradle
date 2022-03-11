@@ -67,7 +67,7 @@ tasks.named('test') {
 
 spotless {
     java {
-        // use the default importorder configuration
+        // use the default importOrder configuration
         importOrder()
 
         removeUnusedImports()
