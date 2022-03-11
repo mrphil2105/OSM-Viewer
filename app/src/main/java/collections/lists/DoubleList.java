@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class DoubleList implements Serializable {
-    double[] array = new double[1];
-    int n = 0;
+    private double[] array = new double[1];
+    private int n = 0;
 
     public DoubleList() {}
 

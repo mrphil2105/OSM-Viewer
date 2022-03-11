@@ -10,12 +10,12 @@ import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 
 public class MapCanvas extends Region {
-    final Affine transform = new Affine();
-    Animator animator;
-    FloatBuffer transformBuffer;
-    GLWindow window;
+    private final Affine transform = new Affine();
+    private Animator animator;
+    private FloatBuffer transformBuffer;
+    private GLWindow window;
 
-    void init(Model model) {
+    public void init(Model model) {
         recalculateTransform();
 
         // Boilerplate to let us use OpenGL from a JavaFX node hierarchy
@@ -56,19 +56,19 @@ public class MapCanvas extends Region {
         return transformBuffer;
     }
 
-    void zoom(float zoom, float x, float y) {
+    public void zoom(float zoom, float x, float y) {
         transform.prependTranslation(-x, y);
         transform.prependScale(zoom, zoom);
         transform.prependTranslation(x, -y);
         recalculateTransform();
     }
 
-    void pan(float dx, float dy) {
+    public void pan(float dx, float dy) {
         transform.prependTranslation(dx, -dy);
         recalculateTransform();
     }
 
-    void recalculateTransform() {
+    private void recalculateTransform() {
         // Extract column major 4x4 matrix from Affine to buffer
         transformBuffer = FloatBuffer.allocate(16);
         transformBuffer.put((float) transform.getMxx());
