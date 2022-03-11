@@ -32,7 +32,7 @@ public class FileParser {
         return polygons;
     }
 
-    static InputStream getInputStream(String filename) throws IOException {
+    private static InputStream getInputStream(String filename) throws IOException {
 
         if (filename.endsWith(".zip")) {
             var zipFile = new ZipFile(filename);
@@ -43,7 +43,7 @@ public class FileParser {
         return new BufferedInputStream(new FileInputStream(filename));
     }
 
-    static void serializeObject(Serializable serializable, String filename) {
+    private static void serializeObject(Serializable serializable, String filename) {
 
         try (var zipStream =
                 new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename))); ) {
@@ -61,7 +61,7 @@ public class FileParser {
         }
     }
 
-    static Polygons deserializeToPolygons(String filename) {
+    private static Polygons deserializeToPolygons(String filename) {
         try (InputStream inputStream = getInputStream(filename);
                 ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
 
