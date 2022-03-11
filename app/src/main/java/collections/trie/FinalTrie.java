@@ -1,20 +1,17 @@
 package collections.trie;
 
 import java.io.Serializable;
-import java.util.Map.Entry;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map.Entry;
 
-/**
- * FinalTrie is a readonly Trie
- */
+/** FinalTrie is a readonly Trie */
 public class FinalTrie<Value> implements Trie<Value>, Iterable<Entry<String, Value>>, Serializable {
     char key;
     Value value;
     FinalTrie<Value>[] children;
 
-    protected FinalTrie() {
-    }
+    protected FinalTrie() {}
 
     public FinalTrie<Value> narrow(String prefix) {
         return find(prefix, 0);
@@ -49,12 +46,10 @@ public class FinalTrie<Value> implements Trie<Value>, Iterable<Entry<String, Val
     }
 
     FinalTrie<Value> find(String prefix, int idx) {
-        if (idx == prefix.length())
-            return this;
+        if (idx == prefix.length()) return this;
 
         var child = getChild(prefix.charAt(idx));
-        if (child == null)
-            return null;
+        if (child == null) return null;
 
         return child.find(prefix, idx + 1);
     }
@@ -67,8 +62,7 @@ public class FinalTrie<Value> implements Trie<Value>, Iterable<Entry<String, Val
         // compared to the cost of all the indirections involved
         // in traversing the tree.
         for (var child : children) {
-            if (child.key == c)
-                return child;
+            if (child.key == c) return child;
         }
 
         return null;
