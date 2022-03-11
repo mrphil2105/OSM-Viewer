@@ -8,12 +8,12 @@ import java.util.ArrayList;
  * @param <Value> The type that can be looked up using String keys.
  */
 public class TrieBuilder<Value> {
-    private char key;
+    private final char key;
     private Value value;
-    private ArrayList<TrieBuilder<Value>> children;
+    private final ArrayList<TrieBuilder<Value>> children = new ArrayList<>();
 
-    public TrieBuilder() {
-        children = new ArrayList<>();
+    public TrieBuilder(char key) {
+        this.key = key;
     }
 
     @SuppressWarnings("unchecked")
@@ -37,8 +37,7 @@ public class TrieBuilder<Value> {
         var child = getChild(key.charAt(idx));
 
         if (child == null) {
-            child = new TrieBuilder<Value>();
-            child.key = key.charAt(idx);
+            child = new TrieBuilder<Value>(key.charAt(idx));
             children.add(child);
         }
 
