@@ -19,6 +19,7 @@ import osm.OSMObserver;
 import osm.elements.OSMMemberWay;
 import osm.elements.OSMRelation;
 import osm.elements.OSMWay;
+import osm.elements.SlimOSMWay;
 
 public class Polygons implements OSMObserver, Serializable {
     FloatList vertices = new FloatList();
@@ -210,7 +211,7 @@ public class Polygons implements OSMObserver, Serializable {
         var lines = new ArrayList<Geometry>();
         var geometryFactory = new GeometryFactory();
 
-        Iterable<OSMWay> iter =
+        Iterable<SlimOSMWay> iter =
                 relation.members().stream()
                                 .filter(m -> m.role() == OSMMemberWay.Role.OUTER)
                                 .map(OSMMemberWay::way)
