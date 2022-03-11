@@ -2,7 +2,7 @@ package collections.trie;
 
 /**
  * TrieBuilder is an interface for creating FinalTries.
- * 
+ *
  * @param <Value> The type that can be looked up using String keys.
  */
 public class TrieBuilder<Value> {
@@ -31,8 +31,7 @@ public class TrieBuilder<Value> {
     }
 
     public void put(String key, Value value) {
-        if (value == null)
-            throw new IllegalArgumentException("value must not be null");
+        if (value == null) throw new IllegalArgumentException("value must not be null");
 
         put(key, 0, value);
     }
