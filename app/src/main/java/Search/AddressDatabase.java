@@ -21,7 +21,7 @@ public class AddressDatabase implements OSMObserver {
     }
 
     public void addAddress(Address a){
-        trieBuilder.put(a.getStreet(), a);
+        trieBuilder.put(a.street(), a);
     }
 
     @Override
@@ -43,15 +43,15 @@ public class AddressDatabase implements OSMObserver {
     public static void main(String[] args) {
         var db = new AddressDatabase();
 
-        Address[] addresses = new Address[]{new Address("Svend Gønges Vej"), new Address("Rued"), new Address("Noget"), new Address("Svaneke vej")}; //TODO:
-
+        Address[] addresses = new Address[2]; //TODO
+        
         Arrays.stream(addresses).forEach(db::addAddress);
 
         var results = db.search("Sv");
 
         while(results.hasNext()){
             var element = results.next();
-            System.out.println(element.getValue().getStreet());
+            System.out.println(element.getValue().street());
         }
     }
 
