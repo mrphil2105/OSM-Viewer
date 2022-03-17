@@ -1,5 +1,6 @@
 package canvas;
 
+import Search.AddressDatabase;
 import drawing.Polygons;
 import java.io.*;
 import java.util.zip.ZipEntry;
@@ -10,13 +11,14 @@ import osm.OSMReader;
 
 public class FileParser {
 
-    public static Polygons readFile(String filename) throws IOException, XMLStreamException {
+    public static ReadResult readFile(String filename) throws IOException, XMLStreamException {
         Polygons polygons;
-
+        AddressDatabase addresses= new AddressDatabase();;
         if (filename.matches(".*(\\.osm|\\.xml)(\\.zip)?$")) {
             var reader = new OSMReader();
             polygons = new Polygons();
             reader.addObserver(polygons);
+            reader.addObserver(addresses);
             reader.parse(getInputStream(filename));
 
             filename = filename.split("\\.")[0] + ".ser.zip";
@@ -29,7 +31,7 @@ public class FileParser {
             throw new IllegalArgumentException(
                     "Only .osm, .xml, .ser or any of those zipped are allowed");
         }
-        return polygons;
+        return new ReadResult(polygons,addresses);
     }
 
     static InputStream getInputStream(String filename) throws IOException {
