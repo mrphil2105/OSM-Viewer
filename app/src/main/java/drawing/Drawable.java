@@ -73,7 +73,7 @@ public enum Drawable {
     }
 
     private static Drawable _default(OSMTag tag) {
-        System.out.println("Unknown tag " + tag.toString());
+        // System.out.println("Unknown tag " + tag.toString());
         return UNKNOWN;
     }
 
