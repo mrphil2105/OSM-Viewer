@@ -4,6 +4,7 @@ import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
+import javafx.scene.control.*;
 
 public class Controller implements MouseListener {
     private Point2D lastMouse;
@@ -11,9 +12,49 @@ public class Controller implements MouseListener {
     @FXML
     private MapCanvas canvas;
 
+    @FXML
+    private TextField searchTextField;
+
+    @FXML
+    private TextField fromRouteTextField;
+
+    @FXML
+    private TextField toRouteTextfield;
+
+    @FXML
+    private Button routeButton;
+
+    @FXML
+    private RadioButton radioButtonCar;
+
+    @FXML
+    private RadioButton radioButtonBikeOrWalk;
+
+    @FXML
+    private CheckBox checkBoxBuildings;
+
+    @FXML
+    private CheckBox checkBoxHighways;
+
+    @FXML
+    private CheckBox checkBoxWater;
+
+    @FXML
+    private RadioButton radioButtonColorBlind;
+
+    @FXML
+    private RadioButton radioButtonDefaultMode;
+
+    @FXML
+    private RadioButton radioButtonPartyMode;
+
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
+        checkBoxBuildings.setSelected(true);
+        checkBoxHighways.setSelected(true);
+        checkBoxWater.setSelected(true);
+        radioButtonDefaultMode.setSelected(true);
     }
 
     public void dispose() {
