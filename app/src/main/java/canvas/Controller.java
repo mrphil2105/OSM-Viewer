@@ -2,6 +2,8 @@ package canvas;
 
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
+
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
@@ -48,6 +50,12 @@ public class Controller implements MouseListener {
     @FXML
     private RadioButton radioButtonPartyMode;
 
+    @FXML
+    private ToggleGroup groupRoute;
+
+    @FXML
+    private ToggleGroup groupMode;
+
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
@@ -55,6 +63,7 @@ public class Controller implements MouseListener {
         checkBoxHighways.setSelected(true);
         checkBoxWater.setSelected(true);
         radioButtonDefaultMode.setSelected(true);
+        radioButtonCar.setSelected(true);
     }
 
     public void dispose() {
