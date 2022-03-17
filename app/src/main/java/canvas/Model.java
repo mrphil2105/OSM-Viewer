@@ -1,5 +1,6 @@
 package canvas;
 
+import Search.AddressDatabase;
 import com.jogamp.opengl.*;
 import drawing.Polygons;
 import java.io.*;
@@ -10,10 +11,13 @@ public class Model {
     final GLAutoDrawable sharedDrawable;
     final int[] vbo = new int[Model.VBOType.values().length];
     int count;
+    AddressDatabase addresses;
 
     public Model(String filename) throws IOException, XMLStreamException {
-
-        final Polygons polygons = FileParser.readFile(filename);
+        final ReadResult readResult = FileParser.readFile(filename);
+        final Polygons polygons=readResult.polygons();
+        addresses=readResult.addresses();
+        addresses.buildTries();
 
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
         // 8x anti-aliasing
@@ -74,6 +78,8 @@ public class Model {
                 });
 
         sharedDrawable.display();
+        addresses.display();
+
     }
 
     public GLCapabilities getCaps() {
@@ -107,5 +113,9 @@ public class Model {
         VERTEX,
         INDEX,
         COLOR
+    }
+
+    public AddressDatabase getAddresses() {
+        return addresses;
     }
 }
