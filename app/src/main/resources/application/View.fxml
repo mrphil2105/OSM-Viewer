@@ -9,38 +9,36 @@
 <Scene xmlns="http://javafx.com/javafx"
        xmlns:fx="http://javafx.com/fxml"
        fx:controller="canvas.Controller">
-    <BorderPane>
-    
-        <center>
-            <MapCanvas fx:id="canvas"
-                       prefWidth="1280"
-                       prefHeight="720"
-            />
-        </center>
+
+    <BorderPane >    
         <left>
-            <VBox>
+            <VBox stylesheets="@style.css" id="allVBox">
             <padding>
                 <Insets top="10" bottom="10" left="10" right="10" />
             </padding>
                 <GridPane alignment="center" hgap="10" vgap="10">
                     <TextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
                      <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                        <Button fx:id="searchButton" text="Search"/>
+                        <Button fx:id="searchButton" id="allButtons" text="Search">
+                        </Button>
                     </HBox>
                     <TextField fx:id="fromRouteTextField" promptText="From" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                     <TextField fx:id="toRouteTextField" promptText="To" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
                     <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="4">
-                        <Button fx:id="routeButton" text="Find route"/>
+                        <Button fx:id="routeButton" id="allButtons" text="Find route"/>
                     </HBox>
                     <HBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="5">
-                        <RadioButton fx:id="radioButtonCar" text="Car" />
-                        <RadioButton fx:id="radioButtonBikeOrWalk" text="Bike or walk"/>
+                        <fx:define>
+                            <ToggleGroup fx:id="groupRoute" />
+                        </fx:define>
+                        <RadioButton fx:id="radioButtonCar" text="Car" toggleGroup="$groupRoute"/>
+                        <RadioButton fx:id="radioButtonBikeOrWalk" text="Bike or walk" toggleGroup="$groupRoute"/>
                     </HBox>
                 </GridPane>
             </VBox>
         </left>
         <right>
-            <VBox>
+            <VBox stylesheets="@style.css" id="allVBox">
                 <padding>
                     <Insets top="10" bottom="10" left="10" right="10" />
                 </padding>
@@ -50,11 +48,20 @@
                     <CheckBox fx:id="checkBoxHighways" text="Highways" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                     <CheckBox fx:id="checkBoxWater" text="Water" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
                     <Label text="Select mode" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                    <RadioButton fx:id="radioButtonColorBlind" text="Colorblind mode" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-                    <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
-                    <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
+                    <fx:define>
+                        <ToggleGroup fx:id="groupMode" />
+                    </fx:define>
+                    <RadioButton fx:id="radioButtonColorBlind" text="Colorblind mode" GridPane.columnIndex="0" GridPane.rowIndex="6" toggleGroup="$groupMode"/>
+                    <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0" GridPane.rowIndex="7" toggleGroup="$groupMode"/>
+                    <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0" GridPane.rowIndex="8" toggleGroup="$groupMode"/>
                 </GridPane>
             </VBox>
         </right>
+        <center>
+            <MapCanvas fx:id="canvas"
+                       prefWidth="1280"
+                       prefHeight="720"
+            />
+        </center>
     </BorderPane>
 </Scene>
