@@ -25,7 +25,11 @@ public class Dijkstra implements OSMObserver, Serializable {
 
         int maxSpeed =
                 tags.stream()
-                        .filter(t -> t.key() == MAXSPEED)
+                        .filter(
+                                t ->
+                                        t.key() == MAXSPEED
+                                                && !t.value().equals("signals")
+                                                && !t.value().equals("none"))
                         .map(t -> Integer.parseInt(t.value()))
                         .findFirst()
                         .orElse(0);
@@ -36,11 +40,11 @@ public class Dijkstra implements OSMObserver, Serializable {
 
     private static float calculateDistance(OSMWay way) {
         var nodes = way.nodes();
-        var firstNode = nodes.get(0);
+        var firstNode = nodes[0];
         float totalDistance = 0;
 
-        for (int i = 1; i < nodes.size(); i++) {
-            var secondNode = nodes.get(i);
+        for (int i = 1; i < nodes.length; i++) {
+            var secondNode = nodes[i];
 
             var x1 = firstNode.lat();
             var y1 = firstNode.lon();

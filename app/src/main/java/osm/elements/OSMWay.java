@@ -8,10 +8,10 @@ public final class OSMWay extends OSMElement {
     private final List<OSMTag> tags;
 
     public OSMWay(long id) {
-        this(id, new ArrayList<>(), new ArrayList<>());
+        this(id, new SlimOSMNode[0], new ArrayList<>());
     }
 
-    public OSMWay(long id, List<SlimOSMNode> nodes, List<OSMTag> tags) {
+    public OSMWay(long id, SlimOSMNode[] nodes, List<OSMTag> tags) {
         this.slim = new SlimOSMWay(id, nodes);
         this.tags = tags;
     }
@@ -21,8 +21,12 @@ public final class OSMWay extends OSMElement {
         return slim.id();
     }
 
-    public List<SlimOSMNode> nodes() {
+    public SlimOSMNode[] nodes() {
         return slim.nodes();
+    }
+
+    public void setNodes(SlimOSMNode[] nodes) {
+        slim.setNodes(nodes);
     }
 
     @Override

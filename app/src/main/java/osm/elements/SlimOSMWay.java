@@ -2,13 +2,11 @@ package osm.elements;
 
 import collections.Entity;
 
-import java.util.List;
-
 public final class SlimOSMWay extends Entity {
     private final long id;
-    private final List<SlimOSMNode> nodes;
+    private SlimOSMNode[] nodes;
 
-    public SlimOSMWay(long id, List<SlimOSMNode> nodes) {
+    public SlimOSMWay(long id, SlimOSMNode[] nodes) {
         this.id = id;
         this.nodes = nodes;
     }
@@ -18,7 +16,11 @@ public final class SlimOSMWay extends Entity {
         return id;
     }
 
-    public List<SlimOSMNode> nodes() {
+    public SlimOSMNode[] nodes() {
         return nodes;
+    }
+
+    void setNodes(SlimOSMNode[] nodes) {
+        this.nodes = nodes;
     }
 }
