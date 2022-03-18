@@ -125,6 +125,7 @@ public class TwoDTree<E> implements SpacialTree<E> {
             return champ;
         }
 
+        best = champ.distanceSquaredTo(query);
         var dist = node.point.distanceSquaredTo(query);
 
         if (dist < best) {
