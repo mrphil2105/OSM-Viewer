@@ -16,9 +16,7 @@ import osm.elements.OSMMemberWay;
 import osm.elements.OSMRelation;
 import osm.elements.OSMWay;
 
-/**
- * Writes Drawings to a file as they are finished
- */
+/** Writes Drawings to a file as they are finished */
 public class PolygonsWriter extends TempFileWriter {
 
     private int indexCount;

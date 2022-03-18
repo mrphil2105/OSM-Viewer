@@ -12,6 +12,7 @@ import osm.elements.OSMWay;
 
 /**
  * Keeps an object in memory and writes it to the output stream at the end
+ *
  * @param <T> Type of the object to write
  */
 public class ObjectWriter<T extends OSMObserver & Serializable> implements Writer {

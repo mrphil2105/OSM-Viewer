@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 /**
- * Reads a stream written by a PolygonsWriter.
- * The result is an iterable of Drawings, which are read on demand instead of in bulk.
+ * Reads a stream written by a PolygonsWriter. The result is an iterable of Drawings, which are read
+ * on demand instead of in bulk.
  */
 public class PolygonsReader extends StreamingReader<Drawing> {
     private int indexCount = -1;
@@ -17,9 +17,7 @@ public class PolygonsReader extends StreamingReader<Drawing> {
         super(in);
     }
 
-    /**
-     * If not read already, read the count written by the PolygonsWriter
-     */
+    /** If not read already, read the count written by the PolygonsWriter */
     private void readCounts() {
         if (indexCount != -1) return;
 

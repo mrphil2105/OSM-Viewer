@@ -8,9 +8,7 @@ import java.io.*;
 import java.util.List;
 import javafx.scene.paint.Color;
 
-/**
- * A Drawing represents drawn elements in a format that can be easily passed to OpenGL
- */
+/** A Drawing represents drawn elements in a format that can be easily passed to OpenGL */
 public class Drawing implements Serializable {
     private IntList indices;
     private FloatList vertices;
