@@ -3,30 +3,28 @@ package drawing;
 import collections.Vector2D;
 import collections.lists.FloatList;
 import collections.lists.IntList;
-import com.jogamp.common.nio.Buffers;
 import earcut4j.Earcut;
-import java.io.Serializable;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.*;
+import java.io.*;
+import java.util.List;
 import javafx.scene.paint.Color;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.operation.linemerge.LineMerger;
-import osm.OSMObserver;
-import osm.elements.OSMMemberWay;
-import osm.elements.OSMRelation;
-import osm.elements.OSMWay;
 
-public class Polygons implements OSMObserver, Serializable {
-    FloatList vertices = new FloatList();
-    IntList indices = new IntList();
-    FloatList colors = new FloatList();
+/** A Drawing represents drawn elements in a format that can be easily passed to OpenGL */
+public class Drawing implements Serializable {
+    private IntList indices;
+    private FloatList vertices;
+    private FloatList colors;
 
-    public Polygons() {}
+    public Drawing() {
+        this(new IntList(), new FloatList(), new FloatList());
+    }
 
+    public Drawing(IntList indices, FloatList vertices, FloatList colors) {
+        this.indices = indices;
+        this.vertices = vertices;
+        this.colors = colors;
+    }
+
+    // TODO: Refactor to hypothetical Line class?
     // Credit: https://flassari.is/2008/11/line-line-intersection-in-cplusplus/
     private static Vector2D intersection(Vector2D p1, Vector2D p2, Vector2D p3, Vector2D p4) {
         // Store the values for fast access and easy
@@ -53,7 +51,15 @@ public class Polygons implements OSMObserver, Serializable {
         return new Vector2D(x, y);
     }
 
-    public void addPolygon(List<Vector2D> points, Color color, float layer) {
+    public void drawPolygon(List<Vector2D> points, Drawable drawable) {
+        drawPolygon(points, drawable, 0);
+    }
+
+    public void drawPolygon(List<Vector2D> points, Drawable drawable, int offset) {
+        drawPolygon(points, drawable.color, drawable.layer(), offset);
+    }
+
+    public void drawPolygon(List<Vector2D> points, Color color, float layer, int offset) {
         // Copy all coordinates into an array
         var verts = new double[points.size() * 3];
         for (int i = 0; i < points.size(); i++) {
@@ -66,21 +72,27 @@ public class Polygons implements OSMObserver, Serializable {
 
         // Calculate indices for each vertex in triangulated polygon
         Earcut.earcut(verts, null, 3).stream()
-                .map(
-                        i ->
-                                (vertices.size() - verts.length) / 3
-                                        + i) // Offset each index before adding to indices
-                .forEach(indices::add);
+                // Offset each index before adding to indices
+                .map(i -> (vertices().size() - verts.length) / 3 + offset + i)
+                .forEach(indices()::add);
     }
 
-    public void addLine(List<Vector2D> points, double width, Color color, float layer) {
+    public void drawLine(List<Vector2D> points, Drawable drawable) {
+        drawLine(points, drawable, 0);
+    }
+
+    public void drawLine(List<Vector2D> points, Drawable drawable, int offset) {
+        drawLine(points, drawable.size, drawable.color, drawable.layer(), offset);
+    }
+
+    public void drawLine(List<Vector2D> points, double width, Color color, float layer, int offset) {
         // Lines must exist of at least two points
         if (points.size() < 2) {
             return;
         }
 
         // To draw a line with triangles, we must find p0-3 and connect them accordingly.
-        // Diagram showing what each variable corrosponds to:
+        // Diagram showing what each variable corresponds to:
         //  p0 ------------ p1
         //   |               |
         // from --- dir --> to
@@ -113,13 +125,7 @@ public class Polygons implements OSMObserver, Serializable {
             var p1Next = p0Next.add(nextDir);
             var p2Next = p3Next.add(nextDir);
 
-            // Add two triangles: p0, p2, p3 and p0, p3, p1
-            indices.add(vertices.size() / 3 - 2);
-            indices.add(vertices.size() / 3 + 0);
-            indices.add(vertices.size() / 3 + 1);
-            indices.add(vertices.size() / 3 - 2);
-            indices.add(vertices.size() / 3 + 1);
-            indices.add(vertices.size() / 3 - 1);
+            addLineIndices(offset);
 
             // Find intersections between previous two lines and next two lines
             var intersect1 = intersection(p0.add(to), p1.add(to), p0Next.add(nextTo), p1Next.add(nextTo));
@@ -146,92 +152,67 @@ public class Polygons implements OSMObserver, Serializable {
             p2 = p2Next;
         }
 
-        // Add triangles for the last point
-        indices.add(vertices.size() / 3 - 2);
-        indices.add(vertices.size() / 3 + 0);
-        indices.add(vertices.size() / 3 + 1);
-        indices.add(vertices.size() / 3 - 2);
-        indices.add(vertices.size() / 3 + 1);
-        indices.add(vertices.size() / 3 - 1);
+        addLineIndices(offset);
 
         addVertex(p0.add(to), color, layer);
         addVertex(p3.add(to), color, layer);
     }
 
-    /**
-     * Add a vertex with a color and layer into the correct position in `vertices` and `colors`
-     *
-     * @param vertex
-     * @param color
-     * @param layer
-     */
+    private void addLineIndices(int offset) {
+        var size = offset + vertices().size() / 3;
+
+        // Add two triangles
+        indices().add(size - 2);
+        indices().add(size + 0);
+        indices().add(size + 1);
+        indices().add(size - 2);
+        indices().add(size + 1);
+        indices().add(size - 1);
+    }
+
+    /** Add a vertex with a color and layer into the correct position in `vertices` and `colors` */
     private void addVertex(Vector2D vertex, Color color, float layer) {
-        vertices.add((float) vertex.x());
-        vertices.add((float) vertex.y());
-        vertices.add(layer);
+        vertices().add((float) vertex.x());
+        vertices().add((float) vertex.y());
+        vertices().add(layer);
         addColor(color);
     }
 
     private void addColor(Color color) {
-        colors.add((float) color.getRed());
-        colors.add((float) color.getGreen());
-        colors.add((float) color.getBlue());
+        colors().add((float) color.getRed());
+        colors().add((float) color.getGreen());
+        colors().add((float) color.getBlue());
     }
 
-    public FloatBuffer getVertexBuffer() {
-        return Buffers.newDirectFloatBuffer(vertices.toArray());
+    public int byteSize() {
+        return indices.size() * Integer.BYTES
+                + vertices.size() * Float.BYTES
+                + colors.size() * Float.BYTES;
     }
 
-    public IntBuffer getIndexBuffer() {
-        return Buffers.newDirectIntBuffer(indices.toArray());
+    public IntList indices() {
+        return indices;
     }
 
-    public FloatBuffer getColorBuffer() {
-        return Buffers.newDirectFloatBuffer(colors.toArray());
+    public FloatList vertices() {
+        return vertices;
     }
 
-    @Override
-    public void onWay(OSMWay way) {
-        var drawable = Drawable.from(way);
-        if (drawable == Drawable.UNKNOWN) return;
-
-        var points = way.nodes().stream().map(n -> new Vector2D(n.lon(), n.lat())).toList();
-        switch (drawable.shape) {
-            case POLYLINE -> addLine(points, drawable.size, drawable.color, drawable.layer());
-            case FILL -> addPolygon(points, drawable.color, drawable.layer());
-        }
+    public FloatList colors() {
+        return colors;
     }
 
-    @Override
-    public void onRelation(OSMRelation relation) {
-        var drawable = Drawable.from(relation);
-        if (drawable == Drawable.UNKNOWN) return;
+    @Serial
+    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        indices = (IntList) in.readUnshared();
+        vertices = (FloatList) in.readUnshared();
+        colors = (FloatList) in.readUnshared();
+    }
 
-        var lines = new ArrayList<Geometry>();
-        var geometryFactory = new GeometryFactory();
-
-        Iterable<OSMWay> iter =
-                relation.members().stream()
-                                .filter(m -> m.role() == OSMMemberWay.Role.OUTER)
-                                .map(OSMMemberWay::way)
-                        ::iterator;
-        for (var way : iter) {
-            lines.add(
-                    geometryFactory.createLineString(
-                            way.nodes().stream()
-                                    .map(n -> new Coordinate(n.lon(), n.lat()))
-                                    .toArray(Coordinate[]::new)));
-        }
-
-        var merger = new LineMerger();
-        merger.add(lines);
-        Collection<LineString> merged = merger.getMergedLineStrings();
-
-        addPolygon(
-                merged.stream()
-                        .flatMap(l -> Arrays.stream(l.getCoordinates()).map(c -> new Vector2D(c.x, c.y)))
-                        .toList(),
-                drawable.color,
-                drawable.layer());
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeUnshared(indices);
+        out.writeUnshared(vertices);
+        out.writeUnshared(colors);
     }
 }

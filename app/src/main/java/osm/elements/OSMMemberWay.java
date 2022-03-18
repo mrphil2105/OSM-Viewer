@@ -1,6 +1,6 @@
 package osm.elements;
 
-public record OSMMemberWay(OSMWay way, Role role) {
+public record OSMMemberWay(SlimOSMWay way, Role role) {
     public enum Role {
         INNER,
         OUTER;
@@ -14,7 +14,7 @@ public record OSMMemberWay(OSMWay way, Role role) {
         }
     }
 
-    public static OSMMemberWay from(OSMWay way, String role) {
+    public static OSMMemberWay from(SlimOSMWay way, String role) {
         var r = Role.from(role);
         if (r == null || way == null) return null;
 
