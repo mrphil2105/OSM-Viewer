@@ -8,11 +8,12 @@
 
 <Scene xmlns="http://javafx.com/javafx"
        xmlns:fx="http://javafx.com/fxml"
-       fx:controller="canvas.Controller">
+       fx:controller="canvas.Controller"
+       fx:id="scene">
 
     <BorderPane >    
         <left>
-            <VBox stylesheets="@style.css" id="allVBox">
+            <VBox id="allVBox" fx:id="leftVBox">
             <padding>
                 <Insets top="10" bottom="10" left="10" right="10" />
             </padding>
@@ -38,7 +39,7 @@
             </VBox>
         </left>
         <right>
-            <VBox stylesheets="@style.css" id="allVBox">
+            <VBox id="allVBox" fx:id="rightVBox">
                 <padding>
                     <Insets top="10" bottom="10" left="10" right="10" />
                 </padding>
@@ -51,8 +52,8 @@
                     <fx:define>
                         <ToggleGroup fx:id="groupMode" />
                     </fx:define>
-                    <RadioButton fx:id="radioButtonColorBlind" text="Colorblind mode" GridPane.columnIndex="0" GridPane.rowIndex="6" toggleGroup="$groupMode"/>
-                    <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0" GridPane.rowIndex="7" toggleGroup="$groupMode"/>
+                    <RadioButton fx:id="radioButtonColorBlind" text="Colorblind mode" GridPane.columnIndex="0" GridPane.rowIndex="6" toggleGroup="$groupMode" onAction="#handleColorblind"/>
+                    <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0" GridPane.rowIndex="7" toggleGroup="$groupMode" onAction="#handleDefaultMode"/>
                     <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0" GridPane.rowIndex="8" toggleGroup="$groupMode"/>
                 </GridPane>
             </VBox>
