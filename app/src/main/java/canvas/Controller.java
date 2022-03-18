@@ -6,6 +6,7 @@ import com.jogamp.newt.event.MouseListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 
 public class Controller implements MouseListener {
     private Point2D lastMouse;
@@ -55,6 +56,12 @@ public class Controller implements MouseListener {
     @FXML
     private ToggleGroup groupMode;
 
+    @FXML
+    private VBox leftVBox;
+
+    @FXML
+    private VBox rightVBox;
+
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
@@ -63,6 +70,7 @@ public class Controller implements MouseListener {
         checkBoxWater.setSelected(true);
         radioButtonDefaultMode.setSelected(true);
         radioButtonCar.setSelected(true);
+        setStyleSheets("style.css");
     }
 
     public void dispose() {
@@ -78,6 +86,20 @@ public class Controller implements MouseListener {
     public void handleRouteClick(){
        fromRouteTextField.clear();
        toRouteTextField.clear();
+    }
+
+    @FXML
+    public void handleDefaultMode(){
+        if (radioButtonDefaultMode.isSelected()){
+            setStyleSheets("style.css");                 
+        }
+    }
+
+    @FXML
+    public void handleColorblind(){
+        if (radioButtonColorBlind.isSelected()){
+            setStyleSheets("colorblindStyle.css");                 
+        }
     }
 
     @Override
@@ -112,5 +134,20 @@ public class Controller implements MouseListener {
     public void mouseWheelMoved(MouseEvent mouseEvent) {
         canvas.zoom(
                 (float) Math.pow(1.05, mouseEvent.getRotation()[1]), mouseEvent.getX(), mouseEvent.getY());
+    }
+
+    public void setStyleSheets(String stylesheet){
+        leftVBox.getStylesheets().clear();
+        leftVBox.getStylesheets()
+                            .add(getClass()
+                                    .getResource(stylesheet)
+                                        .toExternalForm()
+                                        );   
+        rightVBox.getStylesheets().clear();
+        rightVBox.getStylesheets()
+                            .add(getClass()
+                                    .getResource(stylesheet)
+                                        .toExternalForm()
+                                        );
     }
 }
