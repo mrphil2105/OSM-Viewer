@@ -2,6 +2,7 @@ package osm;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -31,15 +32,13 @@ public class OSMReader {
     private final RelationTable relations = new RelationTable();
 
     private OSMElement current;
+    private final List<SlimOSMNode> wayNdList = new ArrayList<>();
     private OSMBounds bounds;
-    private boolean
-            advanceAfter; // IntelliJ's static analysis says this can be made local. Don't be fooled - it
-    // can't.
+    // IntelliJ's static analysis says this can be made local. Don't be fooled - it can't.
+    private boolean advanceAfter;
 
     public OSMReader() {
-        addObserver(nodes);
-        addObserver(ways);
-        addObserver(relations);
+        addObservers(nodes, ways, relations, new ReaderStats());
     }
 
     public void parse(InputStream stream) throws XMLStreamException {
@@ -52,13 +51,13 @@ public class OSMReader {
         parseAll(Parseable.way, this::parseWay);
         parseAll(Parseable.relation, this::parseRelation);
 
-        System.out.println("Parsed: " + nodes.size() + " nodes");
-        System.out.println("Parsed: " + ways.size() + " ways");
-        System.out.println("Parsed: " + relations.size() + " relations");
+        for (var observer : observers) {
+            observer.onFinish();
+        }
     }
 
-    public void addObserver(OSMObserver observer) {
-        observers.add(observer);
+    public void addObservers(OSMObserver... observers) {
+        this.observers.addAll(Arrays.asList(observers));
     }
 
     private void advance() {
@@ -83,6 +82,10 @@ public class OSMReader {
                 new OSMBounds(
                         getDouble("minlat"), getDouble("minlon"), getDouble("maxlat"), getDouble("maxlon"));
         advance();
+
+        for (var observer : observers) {
+            observer.onBounds(bounds);
+        }
     }
 
     private void parseAll(Parseable parseable, Runnable runnable) {
@@ -132,6 +135,9 @@ public class OSMReader {
         parseAll(Parseable.nd, this::parseNd);
         parseAll(Parseable.tag, this::parseTag);
 
+        way.setNodes(wayNdList.toArray(new SlimOSMNode[0]));
+        wayNdList.clear();
+
         for (var observer : observers) {
             observer.onWay(way);
         }
@@ -159,7 +165,7 @@ public class OSMReader {
     private void parseNd() {
         var node = nodes.get(getLong("ref"));
         if (node == null) return;
-        ((OSMWay) current).nodes().add(node);
+        wayNdList.add(node);
     }
 
     private void parseMember() {

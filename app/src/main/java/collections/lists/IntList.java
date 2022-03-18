@@ -1,13 +1,18 @@
 package collections.lists;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.Arrays;
 
 public class IntList implements Serializable {
-    private int[] array = new int[1];
+    private int[] array = new int[8];
     private int n = 0;
 
     public IntList() {}
+
+    public IntList(int[] array) {
+        this.array = array;
+        n = array.length;
+    }
 
     public int add(int value) {
         if (n == array.length) {
@@ -70,5 +75,16 @@ public class IntList implements Serializable {
         var newSize = size() + other.size();
         if (newSize > array.length) setSize(newSize);
         System.arraycopy(other.getArray(), 0, array, n, other.size());
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        array = (int[]) in.readUnshared();
+        n = array.length;
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeUnshared(toArray());
     }
 }
