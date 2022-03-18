@@ -3,7 +3,7 @@ package collections.spacial;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TwoDTree<E> implements SpacialTree<E> {
+public class TwoDTree<E> extends SpacialTree<E> {
     private Node root;
     private int size;
 
@@ -104,9 +104,8 @@ public class TwoDTree<E> implements SpacialTree<E> {
         }
     }
 
-    // TODO: Return a result type that also contains the value (of the generic type).
     @Override
-    public Point nearest(Point query) {
+    public NearestResult nearest(Point query) {
         if (query == null) {
             throw new IllegalArgumentException("Parameter 'query' cannot be null.");
         }
@@ -116,34 +115,35 @@ public class TwoDTree<E> implements SpacialTree<E> {
         }
 
         var best = root.point.distanceSquaredTo(query);
+        var champ = new NearestResult(root.value, root.point);
 
-        return nearest(query, root, root.point, best, 1);
+        return nearest(query, root, champ, best, 1);
     }
 
-    private Point nearest(Point query, Node node, Point champ, float best, int level) {
+    private NearestResult nearest(Point query, Node node, NearestResult champ, float best, int level) {
         if (node == null || best < node.rect.distanceSquaredTo(query)) {
             return champ;
         }
 
-        best = champ.distanceSquaredTo(query);
+        best = champ.point().distanceSquaredTo(query);
         var dist = node.point.distanceSquaredTo(query);
 
         if (dist < best) {
             best = dist;
-            champ = node.point;
+            champ = new NearestResult(node.value, node.point);
         }
 
         if (level % 2 == 0) {
             if (node.y() < query.y()) {
                 champ = nearest(query, node.right, champ, best, level + 1);
 
-                if (node.left != null && node.left.rect.distanceSquaredTo(query) < champ.distanceSquaredTo(query)) {
+                if (node.left != null && node.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                     champ = nearest(query, node.left, champ, best, level + 1);
                 }
             } else {
                 champ = nearest(query, node.left, champ, best, level + 1);
 
-                if (node.right != null && node.right.rect.distanceSquaredTo(query) < champ.distanceSquaredTo(query)) {
+                if (node.right != null && node.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                     champ = nearest(query, node.right, champ, best, level + 1);
                 }
             }
@@ -151,13 +151,13 @@ public class TwoDTree<E> implements SpacialTree<E> {
             if (node.x() < query.x()) {
                 champ = nearest(query, node.right, champ, best, level + 1);
 
-                if (node.left != null && node.left.rect.distanceSquaredTo(query) < champ.distanceSquaredTo(query)) {
+                if (node.left != null && node.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                     champ = nearest(query, node.left, champ, best, level + 1);
                 }
             } else {
                 champ = nearest(query, node.left, champ, best, level + 1);
 
-                if (node.right != null && node.right.rect.distanceSquaredTo(query) < champ.distanceSquaredTo(query)) {
+                if (node.right != null && node.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                     champ = nearest(query, node.right, champ, best, level + 1);
                 }
             }
