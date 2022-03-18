@@ -2,7 +2,7 @@ package collections.spacial;
 
 public record Rect(float xMin, float yMin, float xMax, float yMax) {
     public float distanceTo(Point point) {
-        return (float)Math.sqrt(this.distanceSquaredTo(point));
+        return (float) Math.sqrt(this.distanceSquaredTo(point));
     }
 
     public float distanceSquaredTo(Point point) {
@@ -18,12 +18,13 @@ public record Rect(float xMin, float yMin, float xMax, float yMax) {
     }
 
     public boolean contains(Point point) {
-        return point.x() >= xMin && point.x() <= xMax &&
-            point.y() >= yMin && point.y() <= yMax;
+        return point.x() >= xMin && point.x() <= xMax && point.y() >= yMin && point.y() <= yMax;
     }
 
     public boolean intersects(Rect other) {
-        return this.xMax >= other.xMin && this.yMax >= other.yMin &&
-            other.xMax >= this.xMin && other.yMax >= this.yMin;
+        return this.xMax >= other.xMin
+                && this.yMax >= other.yMin
+                && other.xMax >= this.xMin
+                && other.yMax >= this.yMin;
     }
 }

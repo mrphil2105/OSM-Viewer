@@ -2,7 +2,7 @@ package collections.spacial;
 
 public record Point(float x, float y) {
     public float distanceTo(Point other) {
-        return (float)Math.sqrt(distanceSquaredTo(other));
+        return (float) Math.sqrt(distanceSquaredTo(other));
     }
 
     public float distanceSquaredTo(Point other) {
