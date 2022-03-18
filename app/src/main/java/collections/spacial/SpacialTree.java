@@ -1,15 +1,33 @@
 package collections.spacial;
 
-public interface SpacialTree<E> {
-    boolean isEmpty();
+public abstract class SpacialTree<E> {
+    public abstract boolean isEmpty();
 
-    int size();
+    public abstract int size();
 
-    void insert(E value, Point point);
+    public abstract void insert(E value, Point point);
 
-    boolean contains(Point point);
+    public abstract boolean contains(Point point);
 
-    Point nearest(Point query);
+    public abstract NearestResult nearest(Point query);
 
-    Iterable<Point> range(Rect rect);
+    public abstract Iterable<Point> range(Rect rect);
+
+    public class NearestResult {
+        private final E value;
+        private final Point point;
+
+        public NearestResult(E value, Point point) {
+            this.value = value;
+            this.point = point;
+        }
+
+        public E value() {
+            return value;
+        }
+
+        public Point point() {
+            return point;
+        }
+    }
 }
