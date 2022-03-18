@@ -1,5 +1,6 @@
 package canvas;
 
+import Search.Address;
 import Search.AddressDatabase;
 import com.jogamp.opengl.*;
 import drawing.Polygons;
@@ -78,7 +79,10 @@ public class Model {
                 });
 
         sharedDrawable.display();
-        addresses.display();
+
+        for(Address a : addresses.searchAddress("Rued Lan")){
+            System.out.println(a.toString());
+        }
 
     }
 
