@@ -46,7 +46,6 @@ public class FileParser {
     }
 
     static void serializeObject(Serializable serializable, String filename) {
-
         try (var zipStream =
                 new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename))); ) {
             zipStream.putNextEntry(new ZipEntry(filename));
@@ -57,17 +56,21 @@ public class FileParser {
                 throw new RuntimeException(
                         "Could not serialize object: " + e.getMessage()); // TODO: mere præcis besked
             }
-
         } catch (IOException e) {
             throw new RuntimeException("Could not serialize object: " + e.getMessage()); // TODO
         }
     }
 
     static Polygons deserializeToPolygons(String filename) {
-        try (InputStream inputStream = getInputStream(filename);
-                ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
+        //TODO cast ikke her, men hvor deserialize kaldes
+        return (Polygons) deserialize(filename);
+    }
 
-            return (Polygons) objectInputStream.readObject();
+    static Object deserialize(String filename){
+        try (InputStream inputStream = getInputStream(filename);
+             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
+
+            return objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Could not read serialized file: " + e.getMessage());
         }
