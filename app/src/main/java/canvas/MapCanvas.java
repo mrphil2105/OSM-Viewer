@@ -1,6 +1,9 @@
 package canvas;
 
+import com.jogamp.nativewindow.javafx.JFXAccessor;
 import com.jogamp.newt.event.MouseListener;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
@@ -24,6 +27,31 @@ public class MapCanvas extends Region {
         window.setSharedAutoDrawable(model.getSharedDrawable());
         final var canvas = new NewtCanvasJFX(window);
         getChildren().add(canvas);
+
+        // Ugly hack to fix focus
+        // https://forum.jogamp.org/NewtCanvasJFX-not-giving-up-focus-td4040705.html
+        window.addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowGainedFocus(WindowEvent e) {
+                        // when heavyweight window gains focus, also tell javafx to give focus to glCanvas
+                        canvas.requestFocus();
+                    }
+                });
+
+        canvas
+                .focusedProperty()
+                .addListener(
+                        (observable, oldValue, newValue) -> {
+                            if (!newValue) {
+                                JFXAccessor.runOnJFXThread(
+                                        false,
+                                        () -> {
+                                            window.setVisible(false);
+                                            window.setVisible(true);
+                                        });
+                            }
+                        });
 
         // Resize window when region resizes
         widthProperty()
