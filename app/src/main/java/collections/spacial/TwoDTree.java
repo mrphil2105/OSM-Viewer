@@ -53,7 +53,8 @@ public class TwoDTree<E> extends SpacialTree<E> {
                 node.right = insert(value, point, node.right, level + 1);
 
                 if (node.right.rect == null) {
-                    node.right.rect = new Rect(node.rect.xMin(), node.y(), node.rect.xMax(), node.rect.yMax());
+                    node.right.rect =
+                            new Rect(node.rect.xMin(), node.y(), node.rect.xMax(), node.rect.yMax());
                 }
             }
         } else {
@@ -67,7 +68,8 @@ public class TwoDTree<E> extends SpacialTree<E> {
                 node.right = insert(value, point, node.right, level + 1);
 
                 if (node.right.rect == null) {
-                    node.right.rect = new Rect(node.x(), node.rect.yMin(), node.rect.xMax(), node.rect.yMax());
+                    node.right.rect =
+                            new Rect(node.x(), node.rect.yMin(), node.rect.xMax(), node.rect.yMax());
                 }
             }
         }
@@ -137,13 +139,15 @@ public class TwoDTree<E> extends SpacialTree<E> {
             if (node.y() < query.y()) {
                 champ = nearest(query, node.right, champ, best, level + 1);
 
-                if (node.left != null && node.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
+                if (node.left != null
+                        && node.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                     champ = nearest(query, node.left, champ, best, level + 1);
                 }
             } else {
                 champ = nearest(query, node.left, champ, best, level + 1);
 
-                if (node.right != null && node.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
+                if (node.right != null
+                        && node.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                     champ = nearest(query, node.right, champ, best, level + 1);
                 }
             }
@@ -151,13 +155,15 @@ public class TwoDTree<E> extends SpacialTree<E> {
             if (node.x() < query.x()) {
                 champ = nearest(query, node.right, champ, best, level + 1);
 
-                if (node.left != null && node.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
+                if (node.left != null
+                        && node.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                     champ = nearest(query, node.left, champ, best, level + 1);
                 }
             } else {
                 champ = nearest(query, node.left, champ, best, level + 1);
 
-                if (node.right != null && node.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
+                if (node.right != null
+                        && node.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                     champ = nearest(query, node.right, champ, best, level + 1);
                 }
             }
