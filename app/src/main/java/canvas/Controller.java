@@ -3,7 +3,6 @@ package canvas;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
@@ -21,7 +20,7 @@ public class Controller implements MouseListener {
     private TextField fromRouteTextField;
 
     @FXML
-    private TextField toRouteTextfield;
+    private TextField toRouteTextField;
 
     @FXML
     private Button routeButton;
@@ -68,6 +67,17 @@ public class Controller implements MouseListener {
 
     public void dispose() {
         canvas.dispose();
+    }
+
+    @FXML
+    public void handleSearchClick(){
+        searchTextField.clear();
+    }
+
+    @FXML
+    public void handleRouteClick(){
+       fromRouteTextField.clear();
+       toRouteTextField.clear();
     }
 
     @Override
