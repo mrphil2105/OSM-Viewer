@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 
 /**
  * A Reader that reads multiple objects from a stream, but not all at once.
+ *
  * @param <T> Type of the objects read
  */
 public class StreamingReader<T> extends Reader<Iterable<T>> {
@@ -33,7 +34,8 @@ public class StreamingReader<T> extends Reader<Iterable<T>> {
                         if (!hasNext()) throw new NoSuchElementException("next called on empty iterator");
 
                         // Return the object and set the private field to null *afterwards*
-                        // It needs to be null to indicate that we must read another one next time next() is called
+                        // It needs to be null to indicate that we must read another one next time next() is
+                        // called
                         try {
                             return obj;
                         } finally {
