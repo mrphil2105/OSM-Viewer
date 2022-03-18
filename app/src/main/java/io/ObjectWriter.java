@@ -10,6 +10,10 @@ import osm.elements.OSMNode;
 import osm.elements.OSMRelation;
 import osm.elements.OSMWay;
 
+/**
+ * Keeps an object in memory and writes it to the output stream at the end
+ * @param <T> Type of the object to write
+ */
 public class ObjectWriter<T extends OSMObserver & Serializable> implements Writer {
     private final T obj;
 

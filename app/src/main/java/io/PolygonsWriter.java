@@ -16,6 +16,9 @@ import osm.elements.OSMMemberWay;
 import osm.elements.OSMRelation;
 import osm.elements.OSMWay;
 
+/**
+ * Writes Drawings to a file as they are finished
+ */
 public class PolygonsWriter extends TempFileWriter {
 
     private int indexCount;
@@ -28,12 +31,14 @@ public class PolygonsWriter extends TempFileWriter {
     @Override
     public void writeTo(OutputStream out) throws IOException {
         var objOut = new ObjectOutputStream(out);
+        // Write counts to beginning of stream, then write all the drawings
         objOut.writeInt(indexCount);
         objOut.writeInt(vertexCount);
         objOut.writeInt(colorCount);
         super.writeTo(objOut);
     }
 
+    // Write a single Drawing to the stream and forget about it afterwards
     private void writeDrawing() {
         indexCount += drawing.indices().size();
         vertexCount += drawing.vertices().size();
@@ -57,8 +62,9 @@ public class PolygonsWriter extends TempFileWriter {
     @Override
     public void onWay(OSMWay way) {
         var drawable = Drawable.from(way);
-        if (drawable == Drawable.UNKNOWN) return;
+        if (drawable == Drawable.IGNORED || drawable == Drawable.UNKNOWN) return;
 
+        // Transform nodes to points
         var points = Arrays.stream(way.nodes()).map(n -> new Vector2D(n.lon(), n.lat())).toList();
 
         switch (drawable.shape) {
@@ -73,11 +79,13 @@ public class PolygonsWriter extends TempFileWriter {
     @SuppressWarnings("unchecked")
     public void onRelation(OSMRelation relation) {
         var drawable = Drawable.from(relation);
-        if (drawable == Drawable.UNKNOWN) return;
+        if (drawable == Drawable.IGNORED || drawable == Drawable.UNKNOWN) return;
 
         var lines = new ArrayList<Geometry>();
         var geometryFactory = new GeometryFactory();
 
+        // TODO: Implement ourselves
+        // Transform members to line segments
         relation.members().stream()
                 .filter(m -> m.role() == OSMMemberWay.Role.OUTER)
                 .map(
@@ -92,6 +100,7 @@ public class PolygonsWriter extends TempFileWriter {
         merger.add(lines);
         Collection<LineString> merged = merger.getMergedLineStrings();
 
+        // Merge line segments into one large line and draw it
         drawing.drawPolygon(
                 merged.stream()
                         .flatMap(l -> Arrays.stream(l.getCoordinates()).map(c -> new Vector2D(c.x, c.y)))

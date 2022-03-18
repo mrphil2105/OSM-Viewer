@@ -4,6 +4,9 @@ import osm.elements.OSMNode;
 import osm.elements.OSMRelation;
 import osm.elements.OSMWay;
 
+/**
+ * Simple observer that just prints out some stats every second
+ */
 public class ReaderStats implements OSMObserver {
     private long prevNodeCount = 0;
     private long prevWayCount = 0;

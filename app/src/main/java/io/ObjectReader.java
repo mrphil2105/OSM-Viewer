@@ -3,6 +3,10 @@ package io;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
+/**
+ * Reads a single object from the input stream
+ * @param <T> Type of the object to read
+ */
 public class ObjectReader<T> extends Reader<T> {
 
     public ObjectReader(ObjectInputStream in) {
