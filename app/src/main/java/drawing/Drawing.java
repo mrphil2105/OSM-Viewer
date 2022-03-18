@@ -8,7 +8,10 @@ import java.io.*;
 import java.util.List;
 import javafx.scene.paint.Color;
 
-public final class Drawing implements Serializable {
+/**
+ * A Drawing represents drawn elements in a format that can be easily passed to OpenGL
+ */
+public class Drawing implements Serializable {
     private IntList indices;
     private FloatList vertices;
     private FloatList colors;
@@ -23,6 +26,7 @@ public final class Drawing implements Serializable {
         this.colors = colors;
     }
 
+    // TODO: Refactor to hypothetical Line class?
     // Credit: https://flassari.is/2008/11/line-line-intersection-in-cplusplus/
     private static Vector2D intersection(Vector2D p1, Vector2D p2, Vector2D p3, Vector2D p4) {
         // Store the values for fast access and easy
