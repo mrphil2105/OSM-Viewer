@@ -105,7 +105,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
     }
 
     @Override
-    public NearestResult nearest(Point query) {
+    public QueryResult nearest(Point query) {
         if (query == null) {
             throw new IllegalArgumentException("Parameter 'query' cannot be null.");
         }
@@ -115,12 +115,12 @@ public class TwoDTree<E> extends SpacialTree<E> {
         }
 
         var best = root.point.distanceSquaredTo(query);
-        var champ = new NearestResult(root.value, root.point);
+        var champ = new QueryResult(root.value, root.point);
 
         return nearest(query, root, champ, best, 1);
     }
 
-    private NearestResult nearest(Point query, Node node, NearestResult champ, float best, int level) {
+    private QueryResult nearest(Point query, Node node, QueryResult champ, float best, int level) {
         if (node == null || best < node.rect.distanceSquaredTo(query)) {
             return champ;
         }
@@ -130,7 +130,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
 
         if (dist < best) {
             best = dist;
-            champ = new NearestResult(node.value, node.point);
+            champ = new QueryResult(node.value, node.point);
         }
 
         if (level % 2 == 0) {
@@ -167,28 +167,29 @@ public class TwoDTree<E> extends SpacialTree<E> {
     }
 
     @Override
-    public Iterable<Point> range(Rect rect) {
-        if (rect == null) {
-            throw new IllegalArgumentException("Parameter 'rect' cannot be null.");
+    public Iterable<QueryResult> range(Rect query) {
+        if (query == null) {
+            throw new IllegalArgumentException("Parameter 'query' cannot be null.");
         }
 
-        var points = new ArrayList<Point>();
-        range(rect, root, points);
+        var results = new ArrayList<QueryResult>();
+        range(query, root, results);
 
-        return points;
+        return results;
     }
 
-    private void range(Rect rect, Node node, List<Point> points) {
-        if (node == null || !node.rect.intersects(rect)) {
+    private void range(Rect query, Node node, List<QueryResult> results) {
+        if (node == null || !node.rect.intersects(query)) {
             return;
         }
 
-        if (rect.contains(node.point)) {
-            points.add(node.point);
+        if (query.contains(node.point)) {
+            var result = new QueryResult(node.value, node.point);
+            results.add(result);
         }
 
-        range(rect, node.left, points);
-        range(rect, node.right, points);
+        range(query, node.left, results);
+        range(query, node.right, results);
     }
 
     private class Node {

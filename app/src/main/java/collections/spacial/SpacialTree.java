@@ -9,15 +9,15 @@ public abstract class SpacialTree<E> {
 
     public abstract boolean contains(Point point);
 
-    public abstract NearestResult nearest(Point query);
+    public abstract QueryResult nearest(Point query);
 
-    public abstract Iterable<Point> range(Rect rect);
+    public abstract Iterable<QueryResult> range(Rect query);
 
-    public class NearestResult {
+    public class QueryResult {
         private final E value;
         private final Point point;
 
-        public NearestResult(E value, Point point) {
+        public QueryResult(E value, Point point) {
             this.value = value;
             this.point = point;
         }
