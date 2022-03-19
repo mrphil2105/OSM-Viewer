@@ -75,36 +75,61 @@ public class AddressDatabase implements OSMObserver {
 
     public List<Address> searchAddress(String input) {
         var matcher = PATTERN.matcher(input);
-        List<Address> results;
+        List<Address> results; //TODO: maybe an array instead
 
-        if (!matcher.matches()) {
-            return null;
-        }
 
-        var street = matcher.group("street");
-        var searchedStreets = streetSearch(street);
-        var parsedAddresses = new TreeSet<String>();
-        results = new LinkedList<>();
+        if(matcher.matches()) {
+            var street = matcher.group("street");
+            var city = matcher.group("city");
+            var postcode = matcher.group("postcode");
+            System.out.println(street);
 
-        int entriesAdded = 0;
-        int maxEntries = 5; //TODO: it shouldnt be hardcoded
-        while(searchedStreets.hasNext() && entriesAdded < maxEntries){
-            entriesAdded++;
-            var entry = searchedStreets.next().getValue();
+            if (street != null) {
+                var searchedStreets = streetSearch(street);
+                var parsedAddresses = new TreeSet<String>();
+                results = new LinkedList<>();
 
-            String city = entry.city() == null ? "" : entry.city();
+                int maxEntries = 5; //TODO: it shouldn't be hardcoded
+                int addedEntries = 0;
 
-            if(parsedAddresses.add(entry.street() + city)){
-                results.add(entry);
+                if (city != null || postcode != null) {
+                    if(postcode != null){
+                        //Either build a trie with the street search results (postcodes as cities)
+                        //Or build a trie of postcodes to start of with and then take intersection of the 2 results
+                    } else{
+
+                    }
+
+                    //TODO: only add those who match the postcode
+                    while (addedEntries < maxEntries && searchedStreets.hasNext()) {
+                        var entry = searchedStreets.next().getValue();
+                        if (parsedAddresses.add(entry.street() + "|" + entry.city())) {
+                            results.add(entry);
+                            //result[i] = entry;
+                            addedEntries++;
+                        }
+                    }
+                }
+
+                while (addedEntries < maxEntries && searchedStreets.hasNext()) {
+                    var entry = searchedStreets.next().getValue();
+                    if (parsedAddresses.add(entry.street() + "|" + entry.city())) {
+                        results.add(entry);
+                        addedEntries++;
+                    }
+                }
+
+
+
+                //TODO: we also need to save these
+                matcher.group("house");
+                matcher.group("floor");
+                matcher.group("side");
+
+                return results;
             }
         }
-
-        //TODO: we also need to save these
-        matcher.group("house");
-        matcher.group("floor");
-        matcher.group("side");
-
-        return results;
+        return null; //if it doesn't match
     }
 
 

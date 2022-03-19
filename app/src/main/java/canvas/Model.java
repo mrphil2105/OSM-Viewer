@@ -79,11 +79,6 @@ public class Model {
                 });
 
         sharedDrawable.display();
-
-        for(Address a : addresses.searchAddress("Rued Lan")){
-            System.out.println(a.toString());
-        }
-
     }
 
     public GLCapabilities getCaps() {
