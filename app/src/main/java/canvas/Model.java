@@ -3,6 +3,7 @@ package canvas;
 import com.jogamp.opengl.*;
 import io.FileParser;
 import io.PolygonsReader;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -50,12 +51,14 @@ public class Model {
                             (long) indexCount * Integer.BYTES,
                             null,
                             GL.GL_DYNAMIC_DRAW);
+
                     gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.VERTEX));
                     gl.glBufferData(
                             GL3.GL_ARRAY_BUFFER, (long) vertexCount * Float.BYTES, null, GL.GL_DYNAMIC_DRAW);
+
                     gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.COLOR));
                     gl.glBufferData(
-                            GL3.GL_ARRAY_BUFFER, (long) colorCount * Float.BYTES, null, GL.GL_DYNAMIC_DRAW);
+                            GL3.GL_ARRAY_BUFFER, (long) colorCount * Byte.BYTES, null, GL.GL_DYNAMIC_DRAW);
 
                     var curIndex = 0;
                     var curVertex = 0;
@@ -82,9 +85,9 @@ public class Model {
                         gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.COLOR));
                         gl.glBufferSubData(
                                 GL3.GL_ARRAY_BUFFER,
-                                (long) curColor * Float.BYTES,
-                                (long) drawing.colors().size() * Float.BYTES,
-                                FloatBuffer.wrap(drawing.colors().getArray()));
+                                (long) curColor * Byte.BYTES,
+                                (long) drawing.colors().size() * Byte.BYTES,
+                                ByteBuffer.wrap(drawing.colors().getArray()));
 
                         curIndex += drawing.indices().size();
                         curVertex += drawing.vertices().size();
