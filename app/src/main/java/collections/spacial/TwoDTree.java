@@ -6,7 +6,7 @@ import java.util.List;
 public class TwoDTree<E> extends SpacialTree<E> {
     private final float left, top, right, bottom;
 
-    private Node root;
+    private Node<E> root;
     private int size;
 
     public TwoDTree() {
@@ -39,12 +39,12 @@ public class TwoDTree<E> extends SpacialTree<E> {
         }
     }
 
-    private Node insert(Point point, E value, Node node, int level) {
+    private Node<E> insert(Point point, E value, Node<E> node, int level) {
         if (node == null) {
             // The base case, insert a new node by returning it to the parent.
             size++;
 
-            return new Node(point, value, null);
+            return new Node<>(point, value, null);
         }
 
         if (node.point.equals(point)) {
@@ -101,7 +101,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
         return contains(point, root, 1);
     }
 
-    private boolean contains(Point point, Node node, int level) {
+    private boolean contains(Point point, Node<E> node, int level) {
         if (node == null) {
             return false;
         }
@@ -147,7 +147,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
         return nearest(query, root, champ, best, 1);
     }
 
-    private QueryResult nearest(Point query, Node node, QueryResult champ, float best, int level) {
+    private QueryResult nearest(Point query, Node<E> node, QueryResult champ, float best, int level) {
         // Check if the distance from the query point to the nearest point of
         // the node rectangle is greater than the current best distance.
         if (node == null || best < node.rect.distanceSquaredTo(query)) {
@@ -226,7 +226,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
         return results;
     }
 
-    private void range(Rect query, Node node, List<QueryResult> results) {
+    private void range(Rect query, Node<E> node, List<QueryResult> results) {
         if (node == null || !node.rect.intersects(query)) {
             return;
         }
@@ -240,12 +240,12 @@ public class TwoDTree<E> extends SpacialTree<E> {
         range(query, node.right, results);
     }
 
-    private class Node {
+    private static class Node<E> {
         private final Point point;
         private final E value;
         private Rect rect;
-        private Node left;
-        private Node right;
+        private Node<E> left;
+        private Node<E> right;
 
         public Node(Point point, E value, Rect rect) {
             this.point = point;
