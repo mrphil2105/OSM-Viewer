@@ -147,7 +147,8 @@ public class TwoDTree<E> implements SpacialTree<E> {
         return nearest(query, root, champ, best, 1);
     }
 
-    private QueryResult<E> nearest(Point query, Node<E> node, QueryResult<E> champ, float best, int level) {
+    private QueryResult<E> nearest(
+            Point query, Node<E> node, QueryResult<E> champ, float best, int level) {
         // Check if the distance from the query point to the nearest point of
         // the node rectangle is greater than the current best distance.
         if (node == null || best < node.rect.distanceSquaredTo(query)) {
