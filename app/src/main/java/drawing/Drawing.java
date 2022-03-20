@@ -1,24 +1,24 @@
 package drawing;
 
 import collections.Vector2D;
+import collections.lists.ByteList;
 import collections.lists.FloatList;
 import collections.lists.IntList;
 import earcut4j.Earcut;
 import java.io.*;
 import java.util.List;
-import javafx.scene.paint.Color;
 
 /** A Drawing represents drawn elements in a format that can be easily passed to OpenGL */
 public class Drawing implements Serializable {
     private IntList indices;
     private FloatList vertices;
-    private FloatList colors;
+    private ByteList colors;
 
     public Drawing() {
-        this(new IntList(), new FloatList(), new FloatList());
+        this(new IntList(), new FloatList(), new ByteList());
     }
 
-    public Drawing(IntList indices, FloatList vertices, FloatList colors) {
+    public Drawing(IntList indices, FloatList vertices, ByteList colors) {
         this.indices = indices;
         this.vertices = vertices;
         this.colors = colors;
@@ -56,10 +56,10 @@ public class Drawing implements Serializable {
     }
 
     public void drawPolygon(List<Vector2D> points, Drawable drawable, int offset) {
-        drawPolygon(points, drawable.color, drawable.layer(), offset);
+        drawPolygon(points, drawable.mapColor, drawable.layer(), offset);
     }
 
-    public void drawPolygon(List<Vector2D> points, Color color, float layer, int offset) {
+    public void drawPolygon(List<Vector2D> points, MapColor mapColor, float layer, int offset) {
         // Copy all coordinates into an array
         var verts = new double[points.size() * 3];
         for (int i = 0; i < points.size(); i++) {
@@ -67,7 +67,7 @@ public class Drawing implements Serializable {
             verts[i * 3] = p.x();
             verts[i * 3 + 1] = p.y();
             verts[i * 3 + 2] = layer;
-            addVertex(p, color, layer);
+            addVertex(p, mapColor, layer);
         }
 
         // Calculate indices for each vertex in triangulated polygon
@@ -82,10 +82,11 @@ public class Drawing implements Serializable {
     }
 
     public void drawLine(List<Vector2D> points, Drawable drawable, int offset) {
-        drawLine(points, drawable.size, drawable.color, drawable.layer(), offset);
+        drawLine(points, drawable.size, drawable.mapColor, drawable.layer(), offset);
     }
 
-    public void drawLine(List<Vector2D> points, double width, Color color, float layer, int offset) {
+    public void drawLine(
+            List<Vector2D> points, double width, MapColor mapColor, float layer, int offset) {
         // Lines must exist of at least two points
         if (points.size() < 2) {
             return;
@@ -110,8 +111,8 @@ public class Drawing implements Serializable {
         var p2 = p3.add(dir);
 
         // These points are final, we can add them now
-        addVertex(p0.add(from), color, layer);
-        addVertex(p3.add(from), color, layer);
+        addVertex(p0.add(from), mapColor, layer);
+        addVertex(p3.add(from), mapColor, layer);
 
         // Loop through remaining points in line, calculating a pair of points in each iteration
         for (int i = 2; i < points.size(); i++) {
@@ -133,15 +134,15 @@ public class Drawing implements Serializable {
 
             // Intersection is null if lines are parallel
             if (intersect1 != null) {
-                addVertex(intersect1, color, layer);
+                addVertex(intersect1, mapColor, layer);
             } else {
-                addVertex(p1.add(to), color, layer);
+                addVertex(p1.add(to), mapColor, layer);
             }
 
             if (intersect2 != null) {
-                addVertex(intersect2, color, layer);
+                addVertex(intersect2, mapColor, layer);
             } else {
-                addVertex(p2.add(to), color, layer);
+                addVertex(p2.add(to), mapColor, layer);
             }
 
             // Move forward one point, setting the "current" points to the "next points"
@@ -154,8 +155,8 @@ public class Drawing implements Serializable {
 
         addLineIndices(offset);
 
-        addVertex(p0.add(to), color, layer);
-        addVertex(p3.add(to), color, layer);
+        addVertex(p0.add(to), mapColor, layer);
+        addVertex(p3.add(to), mapColor, layer);
     }
 
     private void addLineIndices(int offset) {
@@ -171,17 +172,11 @@ public class Drawing implements Serializable {
     }
 
     /** Add a vertex with a color and layer into the correct position in `vertices` and `colors` */
-    private void addVertex(Vector2D vertex, Color color, float layer) {
+    private void addVertex(Vector2D vertex, MapColor mapColor, float layer) {
         vertices().add((float) vertex.x());
         vertices().add((float) vertex.y());
         vertices().add(layer);
-        addColor(color);
-    }
-
-    private void addColor(Color color) {
-        colors().add((float) color.getRed());
-        colors().add((float) color.getGreen());
-        colors().add((float) color.getBlue());
+        colors().add(mapColor.colorIdx());
     }
 
     public int byteSize() {
@@ -198,7 +193,7 @@ public class Drawing implements Serializable {
         return vertices;
     }
 
-    public FloatList colors() {
+    public ByteList colors() {
         return colors;
     }
 
@@ -206,7 +201,7 @@ public class Drawing implements Serializable {
     private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
         indices = (IntList) in.readUnshared();
         vertices = (FloatList) in.readUnshared();
-        colors = (FloatList) in.readUnshared();
+        colors = (ByteList) in.readUnshared();
     }
 
     @Serial
