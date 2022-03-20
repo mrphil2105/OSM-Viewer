@@ -26,25 +26,25 @@ public class TwoDTree<E> extends SpacialTree<E> {
     }
 
     @Override
-    public void insert(E value, Point point) {
+    public void insert(Point point, E value) {
         if (point == null) {
             throw new IllegalArgumentException("Parameter 'point' cannot be null.");
         }
 
         if (isEmpty()) {
-            root = insert(value, point, root, 0);
+            root = insert(point, value, root, 0);
             root.rect = new Rect(left, top, right, bottom);
         } else {
-            root = insert(value, point, root, 1);
+            root = insert(point, value, root, 1);
         }
     }
 
-    private Node insert(E value, Point point, Node node, int level) {
+    private Node insert(Point point, E value, Node node, int level) {
         if (node == null) {
             // The base case, insert a new node by returning it to the parent.
             size++;
 
-            return new Node(value, point, null);
+            return new Node(point, value, null);
         }
 
         if (node.point.equals(point)) {
@@ -58,14 +58,14 @@ public class TwoDTree<E> extends SpacialTree<E> {
             // We want to call insert on the left side if the new point is smaller at the y-axis.
             if (point.y() < node.y()) {
                 // Traverse down the tree. If this is a null child an insert will be performed.
-                node.left = insert(value, point, node.left, level + 1);
+                node.left = insert(point, value, node.left, level + 1);
 
                 // If the child node has an uninitialized rect we initialize it.
                 if (node.left.rect == null) {
                     node.left.rect = new Rect(node.rect.left(), node.rect.top(), node.rect.right(), node.y());
                 }
             } else {
-                node.right = insert(value, point, node.right, level + 1);
+                node.right = insert(point, value, node.right, level + 1);
 
                 if (node.right.rect == null) {
                     node.right.rect =
@@ -77,14 +77,14 @@ public class TwoDTree<E> extends SpacialTree<E> {
 
             // We want to call insert on the left side if the new point is smaller at the x-axis.
             if (point.x() < node.x()) {
-                node.left = insert(value, point, node.left, level + 1);
+                node.left = insert(point, value, node.left, level + 1);
 
                 if (node.left.rect == null) {
                     node.left.rect =
                             new Rect(node.rect.left(), node.rect.top(), node.x(), node.rect.bottom());
                 }
             } else {
-                node.right = insert(value, point, node.right, level + 1);
+                node.right = insert(point, value, node.right, level + 1);
 
                 if (node.right.rect == null) {
                     node.right.rect =
@@ -142,7 +142,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
         }
 
         var best = root.point.distanceSquaredTo(query);
-        var champ = new QueryResult(root.value, root.point);
+        var champ = new QueryResult(root.point, root.value);
 
         return nearest(query, root, champ, best, 1);
     }
@@ -162,7 +162,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
         // the distance from the query point to the current champion point.
         if (dist < best) {
             best = dist;
-            champ = new QueryResult(node.value, node.point);
+            champ = new QueryResult(node.point, node.value);
         }
 
         if (level % 2 == 0) {
@@ -232,7 +232,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
         }
 
         if (query.contains(node.point)) {
-            var result = new QueryResult(node.value, node.point);
+            var result = new QueryResult(node.point, node.value);
             results.add(result);
         }
 
@@ -241,15 +241,15 @@ public class TwoDTree<E> extends SpacialTree<E> {
     }
 
     private class Node {
-        private final E value;
         private final Point point;
+        private final E value;
         private Rect rect;
         private Node left;
         private Node right;
 
-        public Node(E value, Point point, Rect rect) {
-            this.value = value;
+        public Node(Point point, E value, Rect rect) {
             this.point = point;
+            this.value = value;
             this.rect = rect;
         }
 

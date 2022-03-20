@@ -3,7 +3,7 @@ package collections.spacial;
 public abstract class SpacialTree<E> {
     public abstract int size();
 
-    public abstract void insert(E value, Point point);
+    public abstract void insert(Point point, E value);
 
     public abstract boolean contains(Point point);
 
@@ -16,20 +16,20 @@ public abstract class SpacialTree<E> {
     }
 
     public class QueryResult {
-        private final E value;
         private final Point point;
+        private final E value;
 
-        public QueryResult(E value, Point point) {
-            this.value = value;
+        public QueryResult(Point point, E value) {
             this.point = point;
-        }
-
-        public E value() {
-            return value;
+            this.value = value;
         }
 
         public Point point() {
             return point;
+        }
+
+        public E value() {
+            return value;
         }
     }
 }
