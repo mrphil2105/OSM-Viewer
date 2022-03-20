@@ -1,6 +1,6 @@
 package collections.spacial;
 
-public record Rect(float xMin, float yMin, float xMax, float yMax) {
+public record Rect(float left, float top, float right, float bottom) {
     public float distanceTo(Point point) {
         return (float) Math.sqrt(this.distanceSquaredTo(point));
     }
@@ -8,23 +8,23 @@ public record Rect(float xMin, float yMin, float xMax, float yMax) {
     public float distanceSquaredTo(Point point) {
         float dx = 0, dy = 0;
 
-        if (point.x() < xMin) dx = point.x() - xMin;
-        else if (point.x() > xMax) dx = point.x() - xMax;
+        if (point.x() < left) dx = point.x() - left;
+        else if (point.x() > right) dx = point.x() - right;
 
-        if (point.y() < yMin) dy = point.y() - yMin;
-        else if (point.y() > yMax) dy = point.y() - yMax;
+        if (point.y() < top) dy = point.y() - top;
+        else if (point.y() > bottom) dy = point.y() - bottom;
 
         return dx * dx + dy * dy;
     }
 
     public boolean contains(Point point) {
-        return point.x() >= xMin && point.x() <= xMax && point.y() >= yMin && point.y() <= yMax;
+        return point.x() >= left && point.x() <= right && point.y() >= top && point.y() <= bottom;
     }
 
     public boolean intersects(Rect other) {
-        return this.xMax >= other.xMin
-                && this.yMax >= other.yMin
-                && other.xMax >= this.xMin
-                && other.yMax >= this.yMin;
+        return this.right >= other.left
+                && this.bottom >= other.top
+                && other.right >= this.left
+                && other.bottom >= this.top;
     }
 }
