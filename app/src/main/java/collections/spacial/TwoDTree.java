@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TwoDTree<E> extends SpacialTree<E> {
-    private final float xMin, yMin, xMax, yMax;
+    private final float left, top, right, bottom;
 
     private Node root;
     private int size;
@@ -13,11 +13,11 @@ public class TwoDTree<E> extends SpacialTree<E> {
         this(0, 0, 1, 1);
     }
 
-    public TwoDTree(float xMin, float yMin, float xMax, float yMax) {
-        this.xMin = xMin;
-        this.yMin = yMin;
-        this.xMax = xMax;
-        this.yMax = yMax;
+    public TwoDTree(float left, float top, float right, float bottom) {
+        this.left = left;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
 
         if (isEmpty()) {
             root = insert(value, point, root, 0);
-            root.rect = new Rect(xMin, yMin, xMax, yMax);
+            root.rect = new Rect(left, top, right, bottom);
         } else {
             root = insert(value, point, root, 1);
         }
@@ -62,14 +62,14 @@ public class TwoDTree<E> extends SpacialTree<E> {
 
                 // If the child node has an uninitialized rect we initialize it.
                 if (node.left.rect == null) {
-                    node.left.rect = new Rect(node.rect.xMin(), node.rect.yMin(), node.rect.xMax(), node.y());
+                    node.left.rect = new Rect(node.rect.left(), node.rect.top(), node.rect.right(), node.y());
                 }
             } else {
                 node.right = insert(value, point, node.right, level + 1);
 
                 if (node.right.rect == null) {
                     node.right.rect =
-                            new Rect(node.rect.xMin(), node.y(), node.rect.xMax(), node.rect.yMax());
+                            new Rect(node.rect.left(), node.y(), node.rect.right(), node.rect.bottom());
                 }
             }
         } else {
@@ -80,14 +80,15 @@ public class TwoDTree<E> extends SpacialTree<E> {
                 node.left = insert(value, point, node.left, level + 1);
 
                 if (node.left.rect == null) {
-                    node.left.rect = new Rect(node.rect.xMin(), node.rect.yMin(), node.x(), node.rect.yMax());
+                    node.left.rect =
+                            new Rect(node.rect.left(), node.rect.top(), node.x(), node.rect.bottom());
                 }
             } else {
                 node.right = insert(value, point, node.right, level + 1);
 
                 if (node.right.rect == null) {
                     node.right.rect =
-                            new Rect(node.x(), node.rect.yMin(), node.rect.xMax(), node.rect.yMax());
+                            new Rect(node.x(), node.rect.top(), node.rect.right(), node.rect.bottom());
                 }
             }
         }
