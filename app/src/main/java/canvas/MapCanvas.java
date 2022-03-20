@@ -47,8 +47,10 @@ public class MapCanvas extends Region {
                                 JFXAccessor.runOnJFXThread(
                                         false,
                                         () -> {
-                                            window.setVisible(false);
-                                            window.setVisible(true);
+                                            if (window.isVisible()) {
+                                                window.setVisible(false);
+                                                window.setVisible(true);
+                                            }
                                         });
                             }
                         });
