@@ -52,7 +52,8 @@ public class TwoDTree<E> implements SpacialTree<E> {
             return node;
         }
 
-        if (level % 2 == 0) {
+        // Check if level is even.
+        if ((level & 1) == 0) {
             // Search by y-coordinate (point with horizontal partition line).
 
             // We want to call insert on the left side if the new point is smaller at the y-axis.
@@ -110,7 +111,8 @@ public class TwoDTree<E> implements SpacialTree<E> {
             return true;
         }
 
-        if (level % 2 == 0) {
+        // Check if level is even.
+        if ((level & 1) == 0) {
             // Search by y-coordinate (point with horizontal partition line).
 
             // We want to check the left side if the point is smaller at the y-axis.
@@ -166,7 +168,8 @@ public class TwoDTree<E> implements SpacialTree<E> {
             champ = new QueryResult<>(node.point, node.value);
         }
 
-        if (level % 2 == 0) {
+        // Check if level is even.
+        if ((level & 1) == 0) {
             // Search by y-coordinate (point with horizontal partition line).
 
             // We want to check the right side if the query point is greater at the y-axis.
