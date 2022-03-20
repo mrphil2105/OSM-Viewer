@@ -1,8 +1,6 @@
 package collections.spacial;
 
 public abstract class SpacialTree<E> {
-    public abstract boolean isEmpty();
-
     public abstract int size();
 
     public abstract void insert(E value, Point point);
@@ -12,6 +10,10 @@ public abstract class SpacialTree<E> {
     public abstract QueryResult nearest(Point query);
 
     public abstract Iterable<QueryResult> range(Rect query);
+
+    public boolean isEmpty() {
+        return size() == 0;
+    }
 
     public class QueryResult {
         private final E value;

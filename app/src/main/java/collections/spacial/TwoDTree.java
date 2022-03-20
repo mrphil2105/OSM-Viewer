@@ -21,11 +21,6 @@ public class TwoDTree<E> extends SpacialTree<E> {
     }
 
     @Override
-    public boolean isEmpty() {
-        return root == null;
-    }
-
-    @Override
     public int size() {
         return size;
     }
