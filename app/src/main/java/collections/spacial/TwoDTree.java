@@ -4,8 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TwoDTree<E> extends SpacialTree<E> {
+    private final float xMin, yMin, xMax, yMax;
+
     private Node root;
     private int size;
+
+    public TwoDTree() {
+        this(0, 0, 1, 1);
+    }
+
+    public TwoDTree(float xMin, float yMin, float xMax, float yMax) {
+        this.xMin = xMin;
+        this.yMin = yMin;
+        this.xMax = xMax;
+        this.yMax = yMax;
+    }
 
     @Override
     public boolean isEmpty() {
@@ -25,7 +38,7 @@ public class TwoDTree<E> extends SpacialTree<E> {
 
         if (isEmpty()) {
             root = insert(value, point, root, 0);
-            root.rect = new Rect(0, 0, 1, 1);
+            root.rect = new Rect(xMin, yMin, xMax, yMax);
         } else {
             root = insert(value, point, root, 1);
         }
