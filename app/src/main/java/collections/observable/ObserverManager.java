@@ -1,7 +1,5 @@
 package collections.observable;
 
-import collections.enumflags.EnumFlagsEvent;
-
 import java.util.ArrayList;
 
 public class ObserverManager<T> extends ArrayList<Observer<T>> {
