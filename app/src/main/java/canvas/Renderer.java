@@ -40,7 +40,7 @@ public class Renderer implements GLEventListener {
         gl.glDepthFunc(GL3.GL_LEQUAL);
         gl.glEnable(GL3.GL_DEPTH_TEST);
 
-        // Enable textures. We need this for the color map.
+        // Enable textures. We need this for the mappings.
         gl.glEnable(GL3.GL_TEXTURE_1D);
 
         File vertexShader = new File("shaders/default.vert");
@@ -95,6 +95,10 @@ public class Renderer implements GLEventListener {
         gl.glActiveTexture(GL3.GL_TEXTURE0);
         gl.glBindTexture(GL3.GL_TEXTURE_1D, model.getTex(Model.TexType.COLOR_MAP));
         gl.glUniform1i(shaderProgram.getLocation(Location.COLOR_MAP), 0);
+
+        gl.glActiveTexture(GL3.GL_TEXTURE1);
+        gl.glBindTexture(GL3.GL_TEXTURE_1D, model.getTex(Model.TexType.CATEGORY_MAP));
+        gl.glUniform1i(shaderProgram.getLocation(Location.CATEGORY_MAP), 0);
 
         // Draw `model.getCount()` many triangles
         // This will use the currently bound index buffer
