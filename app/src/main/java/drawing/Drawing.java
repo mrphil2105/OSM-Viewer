@@ -12,16 +12,16 @@ import java.util.List;
 public class Drawing implements Serializable {
     private IntList indices;
     private FloatList vertices;
-    private ByteList colors;
+    private ByteList drawables;
 
     public Drawing() {
         this(new IntList(), new FloatList(), new ByteList());
     }
 
-    public Drawing(IntList indices, FloatList vertices, ByteList colors) {
+    public Drawing(IntList indices, FloatList vertices, ByteList drawables) {
         this.indices = indices;
         this.vertices = vertices;
-        this.colors = colors;
+        this.drawables = drawables;
     }
 
     // TODO: Refactor to hypothetical Line class?
@@ -167,13 +167,13 @@ public class Drawing implements Serializable {
         vertices().add((float) vertex.x());
         vertices().add((float) vertex.y());
         vertices().add(drawable.layer());
-        colors().add((byte) drawable.ordinal());
+        drawables().add((byte) drawable.ordinal());
     }
 
     public int byteSize() {
         return indices.size() * Integer.BYTES
                 + vertices.size() * Float.BYTES
-                + colors.size() * Byte.BYTES;
+                + drawables.size() * Byte.BYTES;
     }
 
     public IntList indices() {
@@ -184,21 +184,21 @@ public class Drawing implements Serializable {
         return vertices;
     }
 
-    public ByteList colors() {
-        return colors;
+    public ByteList drawables() {
+        return drawables;
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
         indices = (IntList) in.readUnshared();
         vertices = (FloatList) in.readUnshared();
-        colors = (ByteList) in.readUnshared();
+        drawables = (ByteList) in.readUnshared();
     }
 
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeUnshared(indices);
         out.writeUnshared(vertices);
-        out.writeUnshared(colors);
+        out.writeUnshared(drawables);
     }
 }

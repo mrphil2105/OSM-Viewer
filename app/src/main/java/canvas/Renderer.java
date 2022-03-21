@@ -4,7 +4,6 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
-import drawing.Category;
 import drawing.Drawable;
 import java.io.File;
 import java.nio.FloatBuffer;
@@ -62,12 +61,12 @@ public class Renderer implements GLEventListener {
                 shaderProgram.getLocation(Location.POSITION), 3, GL3.GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.POSITION));
 
-        // Set the current buffer to the color vbo. We're done initialising the vertex vbo now.
-        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.COLOR));
-        // Tell OpenGL that the current buffer holds color data. 1 byte per color.
+        // Set the current buffer to the drawable vbo. We're done initialising the vertex vbo now.
+        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.DRAWABLE));
+        // Tell OpenGL that the current buffer holds drawable data. 1 byte per drawable.
         gl.glVertexAttribIPointer(
-                shaderProgram.getLocation(Location.COLOR), 1, GL3.GL_BYTE, 0, 0);
-        gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.COLOR));
+                shaderProgram.getLocation(Location.DRAWABLE), 1, GL3.GL_BYTE, 0, 0);
+        gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.DRAWABLE));
 
         gl.glGenTextures(1, tex);
         gl.glBindTexture(GL3.GL_TEXTURE_1D, tex.get(0));
@@ -106,13 +105,13 @@ public class Renderer implements GLEventListener {
         // Tell OpenGL about our transformation and orthographic matrices.
         // We need these in the vertex shader to position our vertices correctly.
         gl.glUniformMatrix4fv(
-                shaderProgram.getLocation(Location.TRANS), 1, false, canvas.getTransformBuffer().rewind());
+                shaderProgram.getLocation(Location.TRANSFORM), 1, false, canvas.getTransformBuffer().rewind());
         gl.glUniformMatrix4fv(
                 shaderProgram.getLocation(Location.ORTHOGRAPHIC), 1, false, orthographic.rewind());
 
         gl.glActiveTexture(GL3.GL_TEXTURE0);
         gl.glBindTexture(GL3.GL_TEXTURE_1D, tex.get(0));
-        gl.glUniform1i(shaderProgram.getLocation(Location.COLORMAP), 0);
+        gl.glUniform1i(shaderProgram.getLocation(Location.COLOR_MAP), 0);
 
         // Draw `model.getCount()` many triangles
         // This will use the currently bound index buffer

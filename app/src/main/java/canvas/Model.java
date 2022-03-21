@@ -39,7 +39,7 @@ public class Model {
 
                     indexCount = reader.getIndexCount();
                     var vertexCount = reader.getVertexCount();
-                    var colorCount = reader.getColorCount();
+                    var drawableCount = reader.getDrawableCount();
 
                     // Get new id's for the buffers
                     gl.glGenBuffers(vbo.length, vbo, 0);
@@ -56,13 +56,13 @@ public class Model {
                     gl.glBufferData(
                             GL3.GL_ARRAY_BUFFER, (long) vertexCount * Float.BYTES, null, GL.GL_DYNAMIC_DRAW);
 
-                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.COLOR));
+                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.DRAWABLE));
                     gl.glBufferData(
-                            GL3.GL_ARRAY_BUFFER, (long) colorCount * Byte.BYTES, null, GL.GL_DYNAMIC_DRAW);
+                            GL3.GL_ARRAY_BUFFER, (long) drawableCount * Byte.BYTES, null, GL.GL_DYNAMIC_DRAW);
 
                     var curIndex = 0;
                     var curVertex = 0;
-                    var curColor = 0;
+                    var curDrawable = 0;
 
                     for (var drawing : reader.read()) {
                         // Upload chunk to the index buffer
@@ -81,17 +81,17 @@ public class Model {
                                 (long) drawing.vertices().size() * Float.BYTES,
                                 FloatBuffer.wrap(drawing.vertices().getArray()));
 
-                        // Upload chunk to the color buffer
-                        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.COLOR));
+                        // Upload chunk to the drawable buffer
+                        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.DRAWABLE));
                         gl.glBufferSubData(
                                 GL3.GL_ARRAY_BUFFER,
-                                (long) curColor * Byte.BYTES,
-                                (long) drawing.colors().size() * Byte.BYTES,
-                                ByteBuffer.wrap(drawing.colors().getArray()));
+                                (long) curDrawable * Byte.BYTES,
+                                (long) drawing.drawables().size() * Byte.BYTES,
+                                ByteBuffer.wrap(drawing.drawables().getArray()));
 
                         curIndex += drawing.indices().size();
                         curVertex += drawing.vertices().size();
-                        curColor += drawing.colors().size();
+                        curDrawable += drawing.drawables().size();
                     }
 
                     System.gc();
@@ -130,6 +130,6 @@ public class Model {
     enum VBOType {
         VERTEX,
         INDEX,
-        COLOR
+        DRAWABLE
     }
 }
