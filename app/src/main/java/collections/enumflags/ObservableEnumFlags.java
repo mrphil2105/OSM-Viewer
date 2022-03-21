@@ -3,8 +3,6 @@ package collections.enumflags;
 import collections.observable.Observer;
 import collections.observable.ObserverManager;
 
-import java.util.ArrayList;
-
 public class ObservableEnumFlags<T extends Enum<T>> extends EnumFlags<T> {
     private final ObserverManager<EnumFlagsEvent<T>> observers = new ObserverManager<>();
 
