@@ -13,8 +13,8 @@ import java.nio.IntBuffer;
 public class Model {
     private final GLCapabilities caps;
     private final GLAutoDrawable sharedDrawable;
-    private final IntBuffer vbo = IntBuffer.allocate(Model.VBOType.values().length);
-    private final IntBuffer tex = IntBuffer.allocate(1);
+    private final IntBuffer vbo = IntBuffer.allocate(VBOType.values().length);
+    private final IntBuffer tex = IntBuffer.allocate(TexType.values().length);
     private int indexCount;
 
     public Model(String filename) throws Exception {
@@ -81,6 +81,20 @@ public class Model {
                             GL3.GL_RGBA,
                             GL3.GL_FLOAT,
                             Drawable.COLOR_MAP.rewind());
+
+                    gl.glActiveTexture(GL3.GL_TEXTURE1);
+                    gl.glBindTexture(GL3.GL_TEXTURE_1D, getTex(TexType.CATEGORY_MAP));
+                    gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST);
+                    gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST);
+                    gl.glTexImage1D(
+                            GL3.GL_TEXTURE_1D,
+                            0,
+                            GL3.GL_R8UI,
+                            Drawable.values().length,
+                            0,
+                            GL3.GL_RED_INTEGER,
+                            GL3.GL_UNSIGNED_INT,
+                            Drawable.CATEGORY_MAP.rewind());
 
                     var curIndex = 0;
                     var curVertex = 0;
@@ -158,6 +172,6 @@ public class Model {
     }
 
     enum TexType {
-        COLOR_MAP,
+        COLOR_MAP, CATEGORY_MAP,
     }
 }
