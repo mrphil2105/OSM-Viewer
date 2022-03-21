@@ -56,18 +56,14 @@ public class Drawing implements Serializable {
     }
 
     public void drawPolygon(List<Vector2D> points, Drawable drawable, int offset) {
-        drawPolygon(points, drawable.mapColor, drawable.layer(), offset);
-    }
-
-    public void drawPolygon(List<Vector2D> points, MapColor mapColor, float layer, int offset) {
         // Copy all coordinates into an array
         var verts = new double[points.size() * 3];
         for (int i = 0; i < points.size(); i++) {
             var p = points.get(i);
             verts[i * 3] = p.x();
             verts[i * 3 + 1] = p.y();
-            verts[i * 3 + 2] = layer;
-            addVertex(p, mapColor, layer);
+            verts[i * 3 + 2] = drawable.layer();
+            addVertex(p, drawable);
         }
 
         // Calculate indices for each vertex in triangulated polygon
@@ -82,11 +78,6 @@ public class Drawing implements Serializable {
     }
 
     public void drawLine(List<Vector2D> points, Drawable drawable, int offset) {
-        drawLine(points, drawable.size, drawable.mapColor, drawable.layer(), offset);
-    }
-
-    public void drawLine(
-            List<Vector2D> points, double width, MapColor mapColor, float layer, int offset) {
         // Lines must exist of at least two points
         if (points.size() < 2) {
             return;
@@ -105,14 +96,14 @@ public class Drawing implements Serializable {
         var dir = to.sub(from);
 
         // find p0-3 by manipulating vectors
-        var p3 = dir.hat().normalize().scale(width);
+        var p3 = dir.hat().normalize().scale(drawable.size);
         var p0 = p3.scale(-1.0f);
         var p1 = p0.add(dir);
         var p2 = p3.add(dir);
 
         // These points are final, we can add them now
-        addVertex(p0.add(from), mapColor, layer);
-        addVertex(p3.add(from), mapColor, layer);
+        addVertex(p0.add(from), drawable);
+        addVertex(p3.add(from), drawable);
 
         // Loop through remaining points in line, calculating a pair of points in each iteration
         for (int i = 2; i < points.size(); i++) {
@@ -121,7 +112,7 @@ public class Drawing implements Serializable {
             var nextDir = nextTo.sub(to);
 
             // Corners drawn from the next point
-            var p3Next = nextDir.hat().normalize().scale(width);
+            var p3Next = nextDir.hat().normalize().scale(drawable.size);
             var p0Next = p3Next.scale(-1.0f);
             var p1Next = p0Next.add(nextDir);
             var p2Next = p3Next.add(nextDir);
@@ -134,15 +125,15 @@ public class Drawing implements Serializable {
 
             // Intersection is null if lines are parallel
             if (intersect1 != null) {
-                addVertex(intersect1, mapColor, layer);
+                addVertex(intersect1, drawable);
             } else {
-                addVertex(p1.add(to), mapColor, layer);
+                addVertex(p1.add(to), drawable);
             }
 
             if (intersect2 != null) {
-                addVertex(intersect2, mapColor, layer);
+                addVertex(intersect2, drawable);
             } else {
-                addVertex(p2.add(to), mapColor, layer);
+                addVertex(p2.add(to), drawable);
             }
 
             // Move forward one point, setting the "current" points to the "next points"
@@ -155,8 +146,8 @@ public class Drawing implements Serializable {
 
         addLineIndices(offset);
 
-        addVertex(p0.add(to), mapColor, layer);
-        addVertex(p3.add(to), mapColor, layer);
+        addVertex(p0.add(to), drawable);
+        addVertex(p3.add(to), drawable);
     }
 
     private void addLineIndices(int offset) {
@@ -172,17 +163,17 @@ public class Drawing implements Serializable {
     }
 
     /** Add a vertex with a color and layer into the correct position in `vertices` and `colors` */
-    private void addVertex(Vector2D vertex, MapColor mapColor, float layer) {
+    private void addVertex(Vector2D vertex, Drawable drawable) {
         vertices().add((float) vertex.x());
         vertices().add((float) vertex.y());
-        vertices().add(layer);
-        colors().add(mapColor.colorIdx());
+        vertices().add(drawable.layer());
+        colors().add((byte) drawable.ordinal());
     }
 
     public int byteSize() {
         return indices.size() * Integer.BYTES
                 + vertices.size() * Float.BYTES
-                + colors.size() * Float.BYTES;
+                + colors.size() * Byte.BYTES;
     }
 
     public IntList indices() {

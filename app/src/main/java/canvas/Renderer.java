@@ -4,8 +4,8 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import drawing.Category;
 import drawing.Drawable;
-import drawing.MapColor;
 import java.io.File;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -14,7 +14,7 @@ import shaders.Location;
 import shaders.ShaderProgram;
 
 public class Renderer implements GLEventListener {
-    private final Color clear = Drawable.WATER.mapColor.color;
+    private final Color clear = Drawable.WATER.color;
     private final Model model;
     private final MapCanvas canvas;
     private ShaderProgram shaderProgram;
@@ -78,11 +78,11 @@ public class Renderer implements GLEventListener {
                 GL3.GL_TEXTURE_1D,
                 0,
                 GL3.GL_RGBA,
-                MapColor.values().length,
+                Drawable.values().length,
                 0,
                 GL3.GL_RGBA,
                 GL3.GL_FLOAT,
-                MapColor.COLOR_MAP.rewind());
+                Drawable.COLOR_MAP.rewind());
     }
 
     @Override
