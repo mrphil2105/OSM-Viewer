@@ -1,8 +1,11 @@
 package canvas;
 
 import com.jogamp.opengl.*;
+import drawing.Drawable;
 import io.FileParser;
 import io.PolygonsReader;
+
+import java.awt.*;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -10,7 +13,8 @@ import java.nio.IntBuffer;
 public class Model {
     private final GLCapabilities caps;
     private final GLAutoDrawable sharedDrawable;
-    private final int[] vbo = new int[Model.VBOType.values().length];
+    private final IntBuffer vbo = IntBuffer.allocate(Model.VBOType.values().length);
+    private final IntBuffer tex = IntBuffer.allocate(1);
     private int indexCount;
 
     public Model(String filename) throws Exception {
@@ -42,7 +46,7 @@ public class Model {
                     var drawableCount = reader.getDrawableCount();
 
                     // Get new id's for the buffers
-                    gl.glGenBuffers(vbo.length, vbo, 0);
+                    gl.glGenBuffers(vbo.capacity(), vbo);
 
                     // Pre-allocate buffers with correct size
                     gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, getVBO(VBOType.INDEX));
@@ -59,6 +63,24 @@ public class Model {
                     gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.DRAWABLE));
                     gl.glBufferData(
                             GL3.GL_ARRAY_BUFFER, (long) drawableCount * Byte.BYTES, null, GL.GL_DYNAMIC_DRAW);
+
+                    // Get new id's for textures
+                    gl.glGenTextures(tex.capacity(), tex);
+
+                    // Upload COLOR_MAP as 1D RGBA texture
+                    gl.glActiveTexture(GL3.GL_TEXTURE0);
+                    gl.glBindTexture(GL3.GL_TEXTURE_1D, getTex(TexType.COLOR_MAP));
+                    gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST);
+                    gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST);
+                    gl.glTexImage1D(
+                            GL3.GL_TEXTURE_1D,
+                            0,
+                            GL3.GL_RGBA,
+                            Drawable.values().length,
+                            0,
+                            GL3.GL_RGBA,
+                            GL3.GL_FLOAT,
+                            Drawable.COLOR_MAP.rewind());
 
                     var curIndex = 0;
                     var curVertex = 0;
@@ -115,7 +137,11 @@ public class Model {
      * @return Buffer id as seen from OpenGL
      */
     public int getVBO(Model.VBOType type) {
-        return vbo[type.ordinal()];
+        return vbo.get(type.ordinal());
+    }
+
+    public int getTex(Model.TexType type) {
+        return tex.get(type.ordinal());
     }
 
     /**
@@ -128,8 +154,10 @@ public class Model {
     }
 
     enum VBOType {
-        VERTEX,
-        INDEX,
-        DRAWABLE
+        VERTEX, INDEX, DRAWABLE,
+    }
+
+    enum TexType {
+        COLOR_MAP,
     }
 }

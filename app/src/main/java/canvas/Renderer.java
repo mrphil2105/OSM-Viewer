@@ -19,8 +19,6 @@ public class Renderer implements GLEventListener {
     private ShaderProgram shaderProgram;
     private FloatBuffer orthographic;
 
-    private final IntBuffer tex = IntBuffer.allocate(1);
-
     public Renderer(Model model, MapCanvas canvas) {
         this.model = model;
         this.canvas = canvas;
@@ -67,21 +65,6 @@ public class Renderer implements GLEventListener {
         gl.glVertexAttribIPointer(
                 shaderProgram.getLocation(Location.DRAWABLE), 1, GL3.GL_BYTE, 0, 0);
         gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.DRAWABLE));
-
-        gl.glGenTextures(1, tex);
-        gl.glBindTexture(GL3.GL_TEXTURE_1D, tex.get(0));
-
-        gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST);
-        gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST);
-        gl.glTexImage1D(
-                GL3.GL_TEXTURE_1D,
-                0,
-                GL3.GL_RGBA,
-                Drawable.values().length,
-                0,
-                GL3.GL_RGBA,
-                GL3.GL_FLOAT,
-                Drawable.COLOR_MAP.rewind());
     }
 
     @Override
@@ -110,7 +93,7 @@ public class Renderer implements GLEventListener {
                 shaderProgram.getLocation(Location.ORTHOGRAPHIC), 1, false, orthographic.rewind());
 
         gl.glActiveTexture(GL3.GL_TEXTURE0);
-        gl.glBindTexture(GL3.GL_TEXTURE_1D, tex.get(0));
+        gl.glBindTexture(GL3.GL_TEXTURE_1D, model.getTex(Model.TexType.COLOR_MAP));
         gl.glUniform1i(shaderProgram.getLocation(Location.COLOR_MAP), 0);
 
         // Draw `model.getCount()` many triangles
