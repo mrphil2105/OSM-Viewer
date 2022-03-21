@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
+import Search.AddressDatabase;
 import javafx.util.Pair;
 import javax.xml.stream.XMLStreamException;
 import navigation.Dijkstra;
@@ -14,6 +16,7 @@ public class FileParser implements IOConstants {
     private static final String EXT = ".zip";
     private static final String POLYGONS = "polygons";
     private static final String DIJKSTRA = "dijkstra";
+    private static final String ADDRESSES = "addresses";
 
     public static ReadResult readFile(String filename) throws IOException, XMLStreamException {
         if (filename.matches(".*(\\.osm|\\.xml)(\\.zip)?$")) {
@@ -33,13 +36,14 @@ public class FileParser implements IOConstants {
         var reader = new OSMReader();
         var polygonsWriter = new PolygonsWriter();
         var dijkstraWriter = new ObjectWriter<>(new Dijkstra());
-        reader.addObservers(polygonsWriter, dijkstraWriter);
+        var addressWriter = new ObjectWriter<AddressDatabase>(new AddressDatabase());
+        reader.addObservers(polygonsWriter, dijkstraWriter,addressWriter);
 
         reader.parse(getInputStream(infile));
 
         var outfile = infile.split("\\.")[0] + EXT;
         createMapFromWriters(
-                outfile, new Pair<>(POLYGONS, polygonsWriter), new Pair<>(DIJKSTRA, dijkstraWriter));
+                outfile, new Pair<>(POLYGONS, polygonsWriter), new Pair<>(DIJKSTRA, dijkstraWriter), new Pair<>(ADDRESSES,addressWriter));
 
         return outfile;
     }
@@ -61,7 +65,9 @@ public class FileParser implements IOConstants {
         var zipFile = new ZipFile(filename);
         return new ReadResult(
                 new PolygonsReader(getEntryStream(POLYGONS, zipFile)),
-                new ObjectReader<>(getEntryStream(DIJKSTRA, zipFile)));
+                new ObjectReader<>(getEntryStream(DIJKSTRA, zipFile)),
+                new ObjectReader<>(getEntryStream(ADDRESSES, zipFile)));
+
     }
 
     private static ObjectInputStream getEntryStream(String name, ZipFile zipFile) throws IOException {

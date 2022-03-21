@@ -1,6 +1,8 @@
 package osm.elements;
 
-public record OSMTag(Key key, String value) {
+import java.io.Serializable;
+
+public record OSMTag(Key key, String value) implements Serializable {
     public enum Key {
         BUILDING,
         HIGHWAY,
