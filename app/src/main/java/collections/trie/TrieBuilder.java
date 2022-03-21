@@ -23,6 +23,8 @@ public class TrieBuilder<Value> {
      */
     @SuppressWarnings("unchecked")
     public FinalTrie<Value> build() {
+        //TODO: perhaps compress all keys that has 1 child to a string
+
         var trie = new FinalTrie<Value>(key, value, new FinalTrie[children.size()]);
 
         for (int i = 0; i < children.size(); i++) {

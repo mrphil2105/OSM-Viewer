@@ -14,7 +14,11 @@ public record OSMTag(Key key, String value) {
         PLACE,
         TYPE,
         NAME,
-        MAXSPEED;
+        MAXSPEED,
+        STREET,
+        HOUSENUMBER,
+        CITY,
+        POSTCODE;
 
         public static Key from(String key) {
             return switch (key) {
@@ -31,6 +35,10 @@ public record OSMTag(Key key, String value) {
                 case "type" -> TYPE;
                 case "name" -> NAME;
                 case "maxspeed" -> MAXSPEED;
+                case "addr:street" -> STREET;
+                case "addr:housenumber" -> HOUSENUMBER;
+                case "addr:city" -> CITY;
+                case "addr:postcode" -> POSTCODE;
                 default -> null;
             };
         }

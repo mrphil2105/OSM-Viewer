@@ -1,5 +1,7 @@
 package canvas;
 
+import Search.Address;
+import Search.AddressDatabase;
 import com.jogamp.opengl.*;
 import io.FileParser;
 import io.PolygonsReader;
@@ -8,10 +10,13 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 public class Model {
+
     private final GLCapabilities caps;
     private final GLAutoDrawable sharedDrawable;
     private final int[] vbo = new int[Model.VBOType.values().length];
     private int indexCount;
+    AddressDatabase addresses;
+
 
     public Model(String filename) throws Exception {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
@@ -27,7 +32,11 @@ public class Model {
 
         try (var result = FileParser.readFile(filename)) {
             loadPolygons(result.polygons());
+            addresses=result.addresses().read();
+            addresses.buildTries();
         }
+
+        addresses.display();
     }
 
     private void loadPolygons(PolygonsReader reader) {
@@ -131,5 +140,9 @@ public class Model {
         VERTEX,
         INDEX,
         COLOR
+    }
+
+    public AddressDatabase getAddresses() {
+        return addresses;
     }
 }
