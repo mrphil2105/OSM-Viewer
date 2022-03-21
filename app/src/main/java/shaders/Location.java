@@ -8,11 +8,11 @@ package shaders;
  * @author serhiy
  */
 public enum Location {
-    POSITION("inPosition", LocationType.ATTRIB),
-    COLOR("inColor", LocationType.ATTRIB),
-    ORTHOGRAPHIC("inOrthographic", LocationType.UNIFORM),
-    TRANS("inTrans", LocationType.UNIFORM),
-    COLORMAP("colorMap", LocationType.UNIFORM);
+    POSITION("position", LocationType.ATTRIB),
+    DRAWABLE("drawable", LocationType.ATTRIB),
+    ORTHOGRAPHIC("orthographic", LocationType.UNIFORM),
+    TRANSFORM("transform", LocationType.UNIFORM),
+    COLOR_MAP("color_map", LocationType.UNIFORM);
 
     private final String name;
     private final LocationType type;

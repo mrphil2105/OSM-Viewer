@@ -21,7 +21,7 @@ public class PolygonsWriter extends TempFileWriter {
 
     private int indexCount;
     private int vertexCount;
-    private int colorCount;
+    private int drawableCount;
     private Drawing drawing = new Drawing();
 
     public PolygonsWriter() throws IOException {}
@@ -32,7 +32,7 @@ public class PolygonsWriter extends TempFileWriter {
         // Write counts to beginning of stream, then write all the drawings
         objOut.writeInt(indexCount);
         objOut.writeInt(vertexCount);
-        objOut.writeInt(colorCount);
+        objOut.writeInt(drawableCount);
         super.writeTo(objOut);
     }
 
@@ -40,7 +40,7 @@ public class PolygonsWriter extends TempFileWriter {
     private void writeDrawing() {
         indexCount += drawing.indices().size();
         vertexCount += drawing.vertices().size();
-        colorCount += drawing.colors().size();
+        drawableCount += drawing.drawables().size();
 
         try {
             stream.writeUnshared(drawing);
