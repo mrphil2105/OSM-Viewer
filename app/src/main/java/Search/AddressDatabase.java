@@ -9,12 +9,13 @@ import osm.elements.OSMNode;
 import osm.elements.OSMTag;
 
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 
-public class AddressDatabase implements OSMObserver {
+public class AddressDatabase implements OSMObserver, Serializable {
     private Trie<Address> streetToAddress;
     private TrieBuilder<Address> trieBuilder;
     private List<Address> history;
