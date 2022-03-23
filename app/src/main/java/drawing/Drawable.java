@@ -74,7 +74,7 @@ public enum Drawable {
 
         CATEGORY_MAP = IntBuffer.allocate((int) length);
         for (var drawable : values()) {
-            CATEGORY_MAP.put(drawable.category.ordinal() + 1);
+            CATEGORY_MAP.put(1 << drawable.category.ordinal());
         }
     }
 

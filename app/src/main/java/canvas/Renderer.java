@@ -98,7 +98,9 @@ public class Renderer implements GLEventListener {
 
         gl.glActiveTexture(GL3.GL_TEXTURE1);
         gl.glBindTexture(GL3.GL_TEXTURE_1D, model.getTex(Model.TexType.CATEGORY_MAP));
-        gl.glUniform1i(shaderProgram.getLocation(Location.CATEGORY_MAP), 0);
+        gl.glUniform1i(shaderProgram.getLocation(Location.CATEGORY_MAP), 1);
+
+        gl.glUniform1ui(shaderProgram.getLocation(Location.CATEGORY_BITSET), canvas.categories.getFlags());
 
         // Draw `model.getCount()` many triangles
         // This will use the currently bound index buffer

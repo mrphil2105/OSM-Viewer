@@ -6,10 +6,17 @@ import collections.lists.FloatList;
 import collections.lists.IntList;
 import earcut4j.Earcut;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /** A Drawing represents drawn elements in a format that can be easily passed to OpenGL */
-public class Drawing implements Serializable {
+public class Drawing implements Comparable<Drawing>, Serializable {
+    private transient List<Drawing> drawings = new ArrayList<>();
+    private transient int byteSize;
+    private transient float layer;
+
     private IntList indices;
     private FloatList vertices;
     private ByteList drawables;
@@ -51,11 +58,40 @@ public class Drawing implements Serializable {
         return new Vector2D(x, y);
     }
 
+    public void draw(Drawing drawing) {
+        draw(drawing, true);
+    }
+
+    public void draw(Drawing drawing, boolean wait) {
+        if (wait) {
+            byteSize += drawing.byteSize();
+            drawings.add(drawing);
+            return;
+        }
+
+        indices.extend(new IntList(Arrays.stream(drawing.indices().toArray()).map(i -> i + vertices.size() / 3).toArray()));
+        vertices.extend(drawing.vertices());
+        drawables.extend(drawing.drawables());
+    }
+
     public void drawPolygon(List<Vector2D> points, Drawable drawable) {
         drawPolygon(points, drawable, 0);
     }
 
     public void drawPolygon(List<Vector2D> points, Drawable drawable, int offset) {
+        drawPolygon(points, drawable, offset, true);
+    }
+
+    public void drawPolygon(List<Vector2D> points, Drawable drawable, int offset, boolean wait) {
+        if (wait) {
+            var drawing = new Drawing();
+            drawing.layer = drawable.layer();
+            drawing.drawPolygon(points, drawable, offset, false);
+            byteSize += drawing.byteSize();
+            drawings.add(drawing);
+            return;
+        }
+
         // Copy all coordinates into an array
         var verts = new double[points.size() * 3];
         for (int i = 0; i < points.size(); i++) {
@@ -69,7 +105,7 @@ public class Drawing implements Serializable {
         // Calculate indices for each vertex in triangulated polygon
         Earcut.earcut(verts, null, 3).stream()
                 // Offset each index before adding to indices
-                .map(i -> (vertices().size() - verts.length) / 3 + offset + i)
+                .map(i -> offset + i)
                 .forEach(indices()::add);
     }
 
@@ -78,6 +114,19 @@ public class Drawing implements Serializable {
     }
 
     public void drawLine(List<Vector2D> points, Drawable drawable, int offset) {
+        drawLine(points, drawable, offset, true);
+    }
+
+    public void drawLine(List<Vector2D> points, Drawable drawable, int offset, boolean wait) {
+        if (wait) {
+            var drawing = new Drawing();
+            drawing.layer = drawable.layer();
+            drawing.drawLine(points, drawable, offset, false);
+            byteSize += drawing.byteSize();
+            drawings.add(drawing);
+            return;
+        }
+
         // Lines must exist of at least two points
         if (points.size() < 2) {
             return;
@@ -171,25 +220,40 @@ public class Drawing implements Serializable {
     }
 
     public int byteSize() {
-        return indices.size() * Integer.BYTES
+        return byteSize
+                + indices.size() * Integer.BYTES
                 + vertices.size() * Float.BYTES
                 + drawables.size() * Byte.BYTES;
     }
 
+    private void flushDrawings() {
+        if (drawings.isEmpty()) return;
+
+        Collections.sort(drawings);
+        for (var drawing : drawings) {
+            draw(drawing, false);
+        }
+        drawings.clear();
+    }
+
     public IntList indices() {
+        flushDrawings();
         return indices;
     }
 
     public FloatList vertices() {
+        flushDrawings();
         return vertices;
     }
 
     public ByteList drawables() {
+        flushDrawings();
         return drawables;
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        drawings = new ArrayList<>();
         indices = (IntList) in.readUnshared();
         vertices = (FloatList) in.readUnshared();
         drawables = (ByteList) in.readUnshared();
@@ -197,8 +261,13 @@ public class Drawing implements Serializable {
 
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeUnshared(indices);
-        out.writeUnshared(vertices);
-        out.writeUnshared(drawables);
+        out.writeUnshared(indices());
+        out.writeUnshared(vertices());
+        out.writeUnshared(drawables());
+    }
+
+    @Override
+    public int compareTo(Drawing o) {
+        return Float.compare(layer, o.layer);
     }
 }

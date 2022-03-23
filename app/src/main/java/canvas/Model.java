@@ -89,7 +89,7 @@ public class Model {
                     gl.glTexImage1D(
                             GL3.GL_TEXTURE_1D,
                             0,
-                            GL3.GL_R8UI,
+                            GL3.GL_R32UI,
                             Drawable.values().length,
                             0,
                             GL3.GL_RED_INTEGER,
