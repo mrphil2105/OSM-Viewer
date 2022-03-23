@@ -7,7 +7,6 @@ import com.jogamp.opengl.GLEventListener;
 import drawing.Drawable;
 import java.io.File;
 import java.nio.FloatBuffer;
-
 import javafx.scene.paint.Color;
 import shaders.Location;
 import shaders.ShaderProgram;
@@ -88,7 +87,10 @@ public class Renderer implements GLEventListener {
         // Tell OpenGL about our transformation and orthographic matrices.
         // We need these in the vertex shader to position our vertices correctly.
         gl.glUniformMatrix4fv(
-                shaderProgram.getLocation(Location.TRANSFORM), 1, false, canvas.getTransformBuffer().rewind());
+                shaderProgram.getLocation(Location.TRANSFORM),
+                1,
+                false,
+                canvas.getTransformBuffer().rewind());
         gl.glUniformMatrix4fv(
                 shaderProgram.getLocation(Location.ORTHOGRAPHIC), 1, false, orthographic.rewind());
 
@@ -100,7 +102,8 @@ public class Renderer implements GLEventListener {
         gl.glBindTexture(GL3.GL_TEXTURE_1D, model.getTex(Model.TexType.MAP));
         gl.glUniform1i(shaderProgram.getLocation(Location.MAP), 1);
 
-        gl.glUniform1ui(shaderProgram.getLocation(Location.CATEGORY_BITSET), canvas.categories.getFlags());
+        gl.glUniform1ui(
+                shaderProgram.getLocation(Location.CATEGORY_BITSET), canvas.categories.getFlags());
 
         // Draw `model.getCount()` many triangles
         // This will use the currently bound index buffer
