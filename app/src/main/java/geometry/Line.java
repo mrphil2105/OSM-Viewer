@@ -16,7 +16,7 @@ public record Line(double ax, double ay, double bx, double by) {
     public Vector2D intersection(Line other) {
         return intersection(this, other);
     }
-    
+
     public static Vector2D intersection(Line a, Line b) {
         return intersection(a.a(), a.b(), b.a(), b.b());
     }
