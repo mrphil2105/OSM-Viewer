@@ -61,7 +61,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
             }
         }
 
-        if (isAddress) addAddress(new Address(street,houseNumber,city,postcode,node));
+        if (isAddress) addAddress(new Address(street,houseNumber,city,postcode,node.slim()));
 
     }
 
