@@ -69,7 +69,11 @@ public class Drawing implements Comparable<Drawing>, Serializable {
             return;
         }
 
-        indices.extend(new IntList(Arrays.stream(drawing.indices().toArray()).map(i -> i + vertices.size() / 2).toArray()));
+        indices.extend(
+                new IntList(
+                        Arrays.stream(drawing.indices().toArray())
+                                .map(i -> i + vertices.size() / 2)
+                                .toArray()));
         vertices.extend(drawing.vertices());
         drawables.extend(drawing.drawables());
     }

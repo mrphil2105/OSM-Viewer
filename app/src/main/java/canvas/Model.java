@@ -4,11 +4,9 @@ import com.jogamp.opengl.*;
 import drawing.Drawable;
 import io.FileParser;
 import io.PolygonsReader;
-
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.List;
 
 public class Model {
     private final GLCapabilities caps;
@@ -168,10 +166,13 @@ public class Model {
     }
 
     enum VBOType {
-        VERTEX, INDEX, DRAWABLE,
+        VERTEX,
+        INDEX,
+        DRAWABLE,
     }
 
     enum TexType {
-        COLOR_MAP, MAP,
+        COLOR_MAP,
+        MAP,
     }
 }
