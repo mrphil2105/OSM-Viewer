@@ -5,7 +5,6 @@ import drawing.Drawable;
 import io.FileParser;
 import io.PolygonsReader;
 
-import java.awt.*;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -83,18 +82,18 @@ public class Model {
                             Drawable.COLOR_MAP.rewind());
 
                     gl.glActiveTexture(GL3.GL_TEXTURE1);
-                    gl.glBindTexture(GL3.GL_TEXTURE_1D, getTex(TexType.CATEGORY_MAP));
+                    gl.glBindTexture(GL3.GL_TEXTURE_1D, getTex(TexType.MAP));
                     gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST);
                     gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST);
                     gl.glTexImage1D(
                             GL3.GL_TEXTURE_1D,
                             0,
-                            GL3.GL_R32UI,
+                            GL3.GL_RG32UI,
                             Drawable.values().length,
                             0,
-                            GL3.GL_RED_INTEGER,
+                            GL3.GL_RG_INTEGER,
                             GL3.GL_UNSIGNED_INT,
-                            Drawable.CATEGORY_MAP.rewind());
+                            Drawable.MAP.rewind());
 
                     var curIndex = 0;
                     var curVertex = 0;
@@ -172,6 +171,6 @@ public class Model {
     }
 
     enum TexType {
-        COLOR_MAP, CATEGORY_MAP,
+        COLOR_MAP, MAP,
     }
 }
