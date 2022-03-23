@@ -54,9 +54,9 @@ public class Renderer implements GLEventListener {
 
         // Set the current buffer to the vertex vbo
         gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.VERTEX));
-        // Tell OpenGL that the current buffer holds position data. 3 floats per position.
+        // Tell OpenGL that the current buffer holds position data. 2 floats per position.
         gl.glVertexAttribPointer(
-                shaderProgram.getLocation(Location.POSITION), 3, GL3.GL_FLOAT, false, 0, 0);
+                shaderProgram.getLocation(Location.POSITION), 2, GL3.GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.POSITION));
 
         // Set the current buffer to the drawable vbo. We're done initialising the vertex vbo now.

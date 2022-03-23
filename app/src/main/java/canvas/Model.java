@@ -8,6 +8,7 @@ import io.PolygonsReader;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.List;
 
 public class Model {
     private final GLCapabilities caps;

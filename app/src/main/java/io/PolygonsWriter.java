@@ -66,8 +66,8 @@ public class PolygonsWriter extends TempFileWriter {
         var points = Arrays.stream(way.nodes()).map(n -> new Vector2D(n.lon(), n.lat())).toList();
 
         switch (drawable.shape) {
-            case POLYLINE -> drawing.drawLine(points, drawable, vertexCount / 3);
-            case FILL -> drawing.drawPolygon(points, drawable, vertexCount / 3);
+            case POLYLINE -> drawing.drawLine(points, drawable, vertexCount / 2, true);
+            case FILL -> drawing.drawPolygon(points, drawable, vertexCount / 2, true);
         }
 
         if (drawing.byteSize() >= BUFFER_SIZE) writeDrawing();
@@ -104,7 +104,8 @@ public class PolygonsWriter extends TempFileWriter {
                         .flatMap(l -> Arrays.stream(l.getCoordinates()).map(c -> new Vector2D(c.x, c.y)))
                         .toList(),
                 drawable,
-                vertexCount / 3);
+                vertexCount / 2,
+                true);
 
         if (drawing.byteSize() >= BUFFER_SIZE) writeDrawing();
     }

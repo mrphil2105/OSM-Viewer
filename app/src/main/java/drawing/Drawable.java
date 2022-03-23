@@ -58,7 +58,6 @@ public enum Drawable {
     UNKNOWN(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG),
     IGNORED(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG);
 
-    public static final float length = values().length;
     public static final FloatBuffer COLOR_MAP;
     public static final IntBuffer MAP;
 
@@ -89,10 +88,6 @@ public enum Drawable {
         this.color = color;
         this.size = size;
         this.category = category;
-    }
-
-    public float layer() {
-        return ordinal() / length;
     }
 
     private static Drawable _default(OSMTag tag) {
