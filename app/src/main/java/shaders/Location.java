@@ -13,7 +13,8 @@ public enum Location {
     ORTHOGRAPHIC("orthographic", LocationType.UNIFORM),
     TRANSFORM("transform", LocationType.UNIFORM),
     COLOR_MAP("color_map", LocationType.UNIFORM),
-    CATEGORY_MAP("category_map", LocationType.UNIFORM);
+    CATEGORY_MAP("category_map", LocationType.UNIFORM),
+    CATEGORY_BITSET("category_bitset", LocationType.UNIFORM);
 
     private final String name;
     private final LocationType type;
