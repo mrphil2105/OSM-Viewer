@@ -1,6 +1,7 @@
 package drawing;
 
-import collections.Vector2D;
+import geometry.Line;
+import geometry.Vector2D;
 import collections.lists.ByteList;
 import collections.lists.FloatList;
 import collections.lists.IntList;
@@ -22,33 +23,6 @@ public class Drawing implements Serializable {
         this.indices = indices;
         this.vertices = vertices;
         this.colors = colors;
-    }
-
-    // TODO: Refactor to hypothetical Line class?
-    // Credit: https://flassari.is/2008/11/line-line-intersection-in-cplusplus/
-    private static Vector2D intersection(Vector2D p1, Vector2D p2, Vector2D p3, Vector2D p4) {
-        // Store the values for fast access and easy
-        // equations-to-code conversion
-        double x1 = p1.x(), x2 = p2.x(), x3 = p3.x(), x4 = p4.x();
-        double y1 = p1.y(), y2 = p2.y(), y3 = p3.y(), y4 = p4.y();
-
-        double d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-        // If d is zero, there is no intersection
-        if (Math.abs(d) < 0.01) return null;
-
-        // Get the x and y
-        double pre = (x1 * y2 - y1 * x2), post = (x3 * y4 - y3 * x4);
-        double x = (pre * (x3 - x4) - (x1 - x2) * post) / d;
-        double y = (pre * (y3 - y4) - (y1 - y2) * post) / d;
-
-        // Check if the x and y coordinates are within both lines (I don't need this)
-        // if (x < min(x1, x2) || x > max(x1, x2) ||
-        // x < min(x3, x4) || x > max(x3, x4)) return null;
-        // if (y < min(y1, y2) || y > max(y1, y2) ||
-        // y < min(y3, y4) || y > max(y3, y4)) return null;
-
-        // Return the point of intersection
-        return new Vector2D(x, y);
     }
 
     public void drawPolygon(List<Vector2D> points, Drawable drawable) {
@@ -129,8 +103,8 @@ public class Drawing implements Serializable {
             addLineIndices(offset);
 
             // Find intersections between previous two lines and next two lines
-            var intersect1 = intersection(p0.add(to), p1.add(to), p0Next.add(nextTo), p1Next.add(nextTo));
-            var intersect2 = intersection(p3.add(to), p2.add(to), p3Next.add(nextTo), p2Next.add(nextTo));
+            var intersect1 = Line.intersection(p0.add(to), p1.add(to), p0Next.add(nextTo), p1Next.add(nextTo));
+            var intersect2 = Line.intersection(p3.add(to), p2.add(to), p3Next.add(nextTo), p2Next.add(nextTo));
 
             // Intersection is null if lines are parallel
             if (intersect1 != null) {

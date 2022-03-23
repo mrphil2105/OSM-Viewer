@@ -1,5 +1,8 @@
 package collections.spacial;
 
+import geometry.Point;
+import geometry.Rect;
+
 import java.util.ArrayList;
 import java.util.List;
 

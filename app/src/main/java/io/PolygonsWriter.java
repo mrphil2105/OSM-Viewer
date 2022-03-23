@@ -1,6 +1,6 @@
 package io;
 
-import collections.Vector2D;
+import geometry.Vector2D;
 import drawing.Drawable;
 import drawing.Drawing;
 import java.io.*;
