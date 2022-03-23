@@ -1,6 +1,26 @@
-package collections.spacial;
+package geometry;
 
 public record Rect(float left, float top, float right, float bottom) {
+    public Rect(Point topLeft, Point bottomRight) {
+        this(topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
+    }
+
+    public Point getTopLeft() {
+        return new Point(left(), top());
+    }
+
+    public Point getTopRight() {
+        return new Point(right(), top());
+    }
+
+    public Point getBottomLeft() {
+        return new Point(left(), bottom());
+    }
+
+    public Point getBottomRight() {
+        return new Point(right(), bottom());
+    }
+
     public float distanceTo(Point point) {
         return (float) Math.sqrt(this.distanceSquaredTo(point));
     }

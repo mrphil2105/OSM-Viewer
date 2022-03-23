@@ -1,6 +1,10 @@
-package collections.spacial;
+package geometry;
 
 public record Point(float x, float y) {
+    public Point(Vector2D vec) {
+        this((float) vec.x(), (float) vec.y());
+    }
+
     public float distanceTo(Point other) {
         return (float) Math.sqrt(distanceSquaredTo(other));
     }
