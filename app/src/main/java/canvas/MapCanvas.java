@@ -9,8 +9,10 @@ import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
 import java.nio.FloatBuffer;
 import javafx.application.Platform;
+import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 
 public class MapCanvas extends Region {
     private final Affine transform = new Affine();
@@ -116,5 +118,13 @@ public class MapCanvas extends Region {
                         .put((float) transform.getTy())
                         .put(0)
                         .put(1);
+    }
+
+    public Point2D mouseToModel(Point2D point) {
+        try {
+            return transform.inverseTransform(point);
+        } catch (NonInvertibleTransformException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

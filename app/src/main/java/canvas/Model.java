@@ -1,8 +1,14 @@
 package canvas;
 
+import collections.spacial.Point;
 import com.jogamp.opengl.*;
 import io.FileParser;
 import io.PolygonsReader;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.geometry.Point2D;
+import navigation.NearestNeighbor;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -12,6 +18,10 @@ public class Model {
     private final GLAutoDrawable sharedDrawable;
     private final int[] vbo = new int[Model.VBOType.values().length];
     private int indexCount;
+
+    private final NearestNeighbor nearestNeighbor;
+
+    private final StringProperty nearestRoad = new SimpleStringProperty();
 
     public Model(String filename) throws Exception {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
@@ -27,6 +37,7 @@ public class Model {
 
         try (var result = FileParser.readFile(filename)) {
             loadPolygons(result.polygons());
+            nearestNeighbor = result.nearestNeighbor().read();
         }
     }
 
@@ -125,6 +136,21 @@ public class Model {
      */
     public int getCount() {
         return indexCount;
+    }
+
+    public StringProperty nearestRoadProperty() {
+        return nearestRoad;
+    }
+
+    public String getNearestRoad() {
+        return nearestRoad.get();
+    }
+
+    public void setQueryPoint(Point2D query) {
+        var point = new Point((float)query.getX(), (float)query.getY());
+        var road = nearestNeighbor.nearestTo(point);
+        nearestRoadProperty().set(road);
+        System.out.println("Nearest Road: " + road);
     }
 
     enum VBOType {

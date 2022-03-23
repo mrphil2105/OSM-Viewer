@@ -7,12 +7,14 @@ import java.util.zip.ZipOutputStream;
 import javafx.util.Pair;
 import javax.xml.stream.XMLStreamException;
 import navigation.Dijkstra;
+import navigation.NearestNeighbor;
 import osm.OSMReader;
 
 // TODO: Use a custom exception type instead of RuntimeException for when parsing fails.
 public class FileParser implements IOConstants {
     private static final String EXT = ".zip";
     private static final String POLYGONS = "polygons";
+    private static final String NEAREST_NEIGHBOR = "nearest-neighbor";
     private static final String DIJKSTRA = "dijkstra";
 
     public static ReadResult readFile(String filename) throws IOException, XMLStreamException {
@@ -32,14 +34,15 @@ public class FileParser implements IOConstants {
     private static String createMapFromOsm(String infile) throws IOException, XMLStreamException {
         var reader = new OSMReader();
         var polygonsWriter = new PolygonsWriter();
+        var nearestNeighborWriter = new ObjectWriter<>(new NearestNeighbor());
         var dijkstraWriter = new ObjectWriter<>(new Dijkstra());
-        reader.addObservers(polygonsWriter, dijkstraWriter);
+        reader.addObservers(polygonsWriter, nearestNeighborWriter, dijkstraWriter);
 
         reader.parse(getInputStream(infile));
 
         var outfile = infile.split("\\.")[0] + EXT;
         createMapFromWriters(
-                outfile, new Pair<>(POLYGONS, polygonsWriter), new Pair<>(DIJKSTRA, dijkstraWriter));
+                outfile, new Pair<>(POLYGONS, polygonsWriter), new Pair<>(NEAREST_NEIGHBOR, nearestNeighborWriter), new Pair<>(DIJKSTRA, dijkstraWriter));
 
         return outfile;
     }
@@ -61,6 +64,7 @@ public class FileParser implements IOConstants {
         var zipFile = new ZipFile(filename);
         return new ReadResult(
                 new PolygonsReader(getEntryStream(POLYGONS, zipFile)),
+                new ObjectReader<>(getEntryStream(NEAREST_NEIGHBOR, zipFile)),
                 new ObjectReader<>(getEntryStream(DIJKSTRA, zipFile)));
     }
 
