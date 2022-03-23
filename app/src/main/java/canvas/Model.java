@@ -36,7 +36,22 @@ public class Model {
             addresses.buildTries();
         }
 
-        addresses.display();
+
+        System.out.println("1");
+        for (Address a : addresses.searchAddress("Ibskervej")){
+            System.out.println(a.toString());
+        }
+        System.out.println("2");
+        for (Address a : addresses.searchAddress("Ibskervej 41")){
+
+            System.out.println(a.toString());
+        }
+        System.out.println("3");
+        for (Address a : addresses.searchAddress("Ibskervej 2 Nex")){
+
+            System.out.println(a.toString());
+        }
+
     }
 
     private void loadPolygons(PolygonsReader reader) {
