@@ -60,7 +60,7 @@ public enum Drawable {
 
     public static final float length = values().length;
     public static final FloatBuffer COLOR_MAP;
-    public static final IntBuffer CATEGORY_MAP;
+    public static final IntBuffer MAP;
 
     static {
         var array = new float[values().length * 4];
@@ -72,9 +72,10 @@ public enum Drawable {
         }
         COLOR_MAP = FloatBuffer.wrap(array);
 
-        CATEGORY_MAP = IntBuffer.allocate((int) length);
+        MAP = IntBuffer.allocate(values().length * 2);
         for (var drawable : values()) {
-            CATEGORY_MAP.put(1 << drawable.category.ordinal());
+            MAP.put(1 << drawable.category.ordinal());
+            MAP.put(drawable.ordinal());
         }
     }
 

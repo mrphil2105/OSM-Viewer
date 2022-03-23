@@ -7,7 +7,7 @@ import com.jogamp.opengl.GLEventListener;
 import drawing.Drawable;
 import java.io.File;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
+
 import javafx.scene.paint.Color;
 import shaders.Location;
 import shaders.ShaderProgram;
@@ -63,8 +63,8 @@ public class Renderer implements GLEventListener {
         gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.DRAWABLE));
         // Tell OpenGL that the current buffer holds drawable data. 1 byte per drawable.
         gl.glVertexAttribIPointer(
-                shaderProgram.getLocation(Location.DRAWABLE), 1, GL3.GL_BYTE, 0, 0);
-        gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.DRAWABLE));
+                shaderProgram.getLocation(Location.DRAWABLE_ID), 1, GL3.GL_BYTE, 0, 0);
+        gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.DRAWABLE_ID));
     }
 
     @Override
@@ -97,8 +97,8 @@ public class Renderer implements GLEventListener {
         gl.glUniform1i(shaderProgram.getLocation(Location.COLOR_MAP), 0);
 
         gl.glActiveTexture(GL3.GL_TEXTURE1);
-        gl.glBindTexture(GL3.GL_TEXTURE_1D, model.getTex(Model.TexType.CATEGORY_MAP));
-        gl.glUniform1i(shaderProgram.getLocation(Location.CATEGORY_MAP), 1);
+        gl.glBindTexture(GL3.GL_TEXTURE_1D, model.getTex(Model.TexType.MAP));
+        gl.glUniform1i(shaderProgram.getLocation(Location.MAP), 1);
 
         gl.glUniform1ui(shaderProgram.getLocation(Location.CATEGORY_BITSET), canvas.categories.getFlags());
 
