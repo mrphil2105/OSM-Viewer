@@ -16,12 +16,15 @@ import java.util.regex.Pattern;
 
 
 public class AddressDatabase implements OSMObserver, Serializable {
-    private Trie<Address> streetToAddress;
-    private TrieBuilder<Address> trieBuilder;
+    private Trie<Address> addressTrie;
+    private TrieBuilder<Address> addressTrieBuilder;
+
+
     private List<Address> history;
 
+
     public AddressDatabase() {
-        trieBuilder = new TrieBuilder<>('\0');
+        addressTrieBuilder = new TrieBuilder<>('\0');
         history = getHistory();
     }
 
@@ -30,7 +33,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
     }
 
     public void addAddress(Address a){
-        trieBuilder.put(a.street(), a);
+        addressTrieBuilder.put(a.toString(), a);
     }
 
     @Override
@@ -62,13 +65,13 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
     }
 
-    //TODO: call from model when done parsing
+
     public void buildTries(){
-        streetToAddress = trieBuilder.build();
+       addressTrie = addressTrieBuilder.build();
     }
 
     public Iterator<Entry<String,Address>> streetSearch(String search){
-        return streetToAddress.withPrefix(search);
+        return addressTrie.withPrefix(search);
     }
 
     private final static String REGEX = "^[ .,]*(?<street>[A-Za-zæøåÆØÅ.é ]+?)(([ .,]+)(?<house>[0-9]+[A-Za-z]?(-[0-9]+)?)([ ,.]+(?<floor>[0-9]{1,3})([ ,.]+(?<side>tv|th|mf|[0-9]{1,3})?))?([ ,.]*(?<postcode>[0-9]{4})??[ ,.]*(?<city>[A-Za-zæøåÆØÅ ]+?)?)?)?[ ,.]*$";
@@ -80,55 +83,47 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
 
         if(matcher.matches()) {
-            var street = matcher.group("street");
-            var city = matcher.group("city");
-            var postcode = matcher.group("postcode");
-            System.out.println(street);
+            var street= (matcher.group("street")!=null) ? matcher.group("street") : "";
+            var house= (matcher.group("house")!=null) ? matcher.group("house") : "";
+            var city= (matcher.group("city")!=null) ? matcher.group("city") : "";
+            var postcode= (matcher.group("postcode")!=null) ? matcher.group("postcode") : "";
 
-            if (street != null) {
-                var searchedStreets = streetSearch(street);
-                var parsedAddresses = new TreeSet<String>();
-                results = new LinkedList<>();
+            results = new LinkedList<Address>();
 
-                int maxEntries = 5; //TODO: it shouldn't be hardcoded
-                int addedEntries = 0;
+            int maxEntries = 5; //TODO: it shouldn't be hardcoded
+            int addedEntries = 0;
 
-                if (city != null || postcode != null) {
-                    if(postcode != null){
-                        //Either build a trie with the street search results (postcodes as cities)
-                        //Or build a trie of postcodes to start of with and then take intersection of the 2 results
-                    } else{
 
-                    }
 
-                    //TODO: only add those who match the postcode
-                    while (addedEntries < maxEntries && searchedStreets.hasNext()) {
-                        var entry = searchedStreets.next().getValue();
-                        if (parsedAddresses.add(entry.street() + "|" + entry.city())) {
-                            results.add(entry);
-                            //result[i] = entry;
-                            addedEntries++;
-                        }
-                    }
+
+            if (house.length()>0) {
+
+                var possibleAddresses = streetSearch(street + " " + house + " "  + city + " " + postcode);
+
+                for (Iterator<Entry<String, Address>> it = possibleAddresses; it.hasNext() && (addedEntries<maxEntries); ) {
+                    results.add(it.next().getValue());
+                    addedEntries++;
                 }
-
-                while (addedEntries < maxEntries && searchedStreets.hasNext()) {
-                    var entry = searchedStreets.next().getValue();
-                    if (parsedAddresses.add(entry.street() + "|" + entry.city())) {
-                        results.add(entry);
-                        addedEntries++;
-                    }
-                }
-
-
-
-                //TODO: we also need to save these
-                matcher.group("house");
-                matcher.group("floor");
-                matcher.group("side");
 
                 return results;
             }
+            else {
+               var possibleAddresses = streetSearch(street);
+               Set<String> parsedStreets = new HashSet<>();
+
+                while (addedEntries < maxEntries && possibleAddresses.hasNext()) {
+
+                    var entry = possibleAddresses.next().getValue();
+                    if (entry.city().startsWith(city) && parsedStreets.add(entry.street() + "|" + entry.city())){
+                        results.add(entry);
+                        addedEntries++;
+                    }
+
+                }
+                return results;
+            }
+
+
         }
         return null; //if it doesn't match
     }
@@ -136,10 +131,14 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
     //test method
     public void display(){
-        for (Iterator<Entry<String, Address>> it = streetToAddress.withPrefix(""); it.hasNext(); ) {
-           System.out.println(it.next().getValue().street());
+
+        for (Iterator<Entry<String, Address>> it = addressTrie.withPrefix(""); it.hasNext(); ) {
+            System.out.println(it.next().getValue().toString());
 
         }
+
+
+
     }
 
 
