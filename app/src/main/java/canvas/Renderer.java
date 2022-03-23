@@ -65,8 +65,7 @@ public class Renderer implements GLEventListener {
         // Set the current buffer to the color vbo. We're done initialising the vertex vbo now.
         gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.COLOR));
         // Tell OpenGL that the current buffer holds color data. 1 byte per color.
-        gl.glVertexAttribIPointer(
-                shaderProgram.getLocation(Location.COLOR), 1, GL3.GL_BYTE, 0, 0);
+        gl.glVertexAttribIPointer(shaderProgram.getLocation(Location.COLOR), 1, GL3.GL_BYTE, 0, 0);
         gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.COLOR));
 
         gl.glGenTextures(1, tex);

@@ -1,11 +1,11 @@
 package drawing;
 
-import geometry.Line;
-import geometry.Vector2D;
 import collections.lists.ByteList;
 import collections.lists.FloatList;
 import collections.lists.IntList;
 import earcut4j.Earcut;
+import geometry.Line;
+import geometry.Vector2D;
 import java.io.*;
 import java.util.List;
 
@@ -103,8 +103,10 @@ public class Drawing implements Serializable {
             addLineIndices(offset);
 
             // Find intersections between previous two lines and next two lines
-            var intersect1 = Line.intersection(p0.add(to), p1.add(to), p0Next.add(nextTo), p1Next.add(nextTo));
-            var intersect2 = Line.intersection(p3.add(to), p2.add(to), p3Next.add(nextTo), p2Next.add(nextTo));
+            var intersect1 =
+                    Line.intersection(p0.add(to), p1.add(to), p0Next.add(nextTo), p1Next.add(nextTo));
+            var intersect2 =
+                    Line.intersection(p3.add(to), p2.add(to), p3Next.add(nextTo), p2Next.add(nextTo));
 
             // Intersection is null if lines are parallel
             if (intersect1 != null) {
