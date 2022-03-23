@@ -1,6 +1,6 @@
 #version 130
 
-in vec3 position;
+in vec2 position;
 in int drawable_id;
 uniform mat4 transform;
 uniform mat4 orthographic;
@@ -22,7 +22,7 @@ void main()
     uint category = texture(map, idx).r;
     uint layer = texture(map, idx).g;
 
-    gl_Position = orthographic * transform * vec4(position.xy, float(layer) / size, 1.0);
+    gl_Position = orthographic * transform * vec4(position, float(layer) / size, 1.0);
 
     vert_color = vec4(color.rgb, color.a * int((category_bitset & category) != 0u));
 }

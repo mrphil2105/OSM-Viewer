@@ -59,7 +59,7 @@ public class Drawing implements Comparable<Drawing>, Serializable {
     }
 
     public void draw(Drawing drawing) {
-        draw(drawing, true);
+        draw(drawing, false);
     }
 
     public void draw(Drawing drawing, boolean wait) {
@@ -69,7 +69,7 @@ public class Drawing implements Comparable<Drawing>, Serializable {
             return;
         }
 
-        indices.extend(new IntList(Arrays.stream(drawing.indices().toArray()).map(i -> i + vertices.size() / 3).toArray()));
+        indices.extend(new IntList(Arrays.stream(drawing.indices().toArray()).map(i -> i + vertices.size() / 2).toArray()));
         vertices.extend(drawing.vertices());
         drawables.extend(drawing.drawables());
     }
@@ -79,13 +79,13 @@ public class Drawing implements Comparable<Drawing>, Serializable {
     }
 
     public void drawPolygon(List<Vector2D> points, Drawable drawable, int offset) {
-        drawPolygon(points, drawable, offset, true);
+        drawPolygon(points, drawable, offset, false);
     }
 
     public void drawPolygon(List<Vector2D> points, Drawable drawable, int offset, boolean wait) {
         if (wait) {
             var drawing = new Drawing();
-            drawing.layer = drawable.layer();
+            drawing.layer = drawable.ordinal();
             drawing.drawPolygon(points, drawable, offset, false);
             byteSize += drawing.byteSize();
             drawings.add(drawing);
@@ -93,17 +93,16 @@ public class Drawing implements Comparable<Drawing>, Serializable {
         }
 
         // Copy all coordinates into an array
-        var verts = new double[points.size() * 3];
+        var verts = new double[points.size() * 2];
         for (int i = 0; i < points.size(); i++) {
             var p = points.get(i);
-            verts[i * 3] = p.x();
-            verts[i * 3 + 1] = p.y();
-            verts[i * 3 + 2] = drawable.layer();
+            verts[i * 2] = p.x();
+            verts[i * 2 + 1] = p.y();
             addVertex(p, drawable);
         }
 
         // Calculate indices for each vertex in triangulated polygon
-        Earcut.earcut(verts, null, 3).stream()
+        Earcut.earcut(verts).stream()
                 // Offset each index before adding to indices
                 .map(i -> offset + i)
                 .forEach(indices()::add);
@@ -120,7 +119,7 @@ public class Drawing implements Comparable<Drawing>, Serializable {
     public void drawLine(List<Vector2D> points, Drawable drawable, int offset, boolean wait) {
         if (wait) {
             var drawing = new Drawing();
-            drawing.layer = drawable.layer();
+            drawing.layer = drawable.ordinal();
             drawing.drawLine(points, drawable, offset, false);
             byteSize += drawing.byteSize();
             drawings.add(drawing);
@@ -200,7 +199,7 @@ public class Drawing implements Comparable<Drawing>, Serializable {
     }
 
     private void addLineIndices(int offset) {
-        var size = offset + vertices().size() / 3;
+        var size = offset + vertices().size() / 2;
 
         // Add two triangles
         indices().add(size - 2);
@@ -215,7 +214,6 @@ public class Drawing implements Comparable<Drawing>, Serializable {
     private void addVertex(Vector2D vertex, Drawable drawable) {
         vertices().add((float) vertex.x());
         vertices().add((float) vertex.y());
-        vertices().add(drawable.layer());
         drawables().add((byte) drawable.ordinal());
     }
 
