@@ -6,11 +6,14 @@ import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 
 public class Controller implements MouseListener {
+    private Model model;
     private Point2D lastMouse;
 
     @FXML private MapCanvas canvas;
 
     public void init(Model model) {
+        this.model = model;
+
         canvas.init(model);
         canvas.addMouseListener(this);
     }
@@ -37,7 +40,11 @@ public class Controller implements MouseListener {
     public void mouseReleased(MouseEvent mouseEvent) {}
 
     @Override
-    public void mouseMoved(MouseEvent mouseEvent) {}
+    public void mouseMoved(MouseEvent mouseEvent) {
+        var mousePoint = new Point2D(mouseEvent.getX(), mouseEvent.getY());
+        var queryPoint = canvas.mouseToModel(mousePoint);
+        model.setQueryPoint(queryPoint);
+    }
 
     @Override
     public void mouseDragged(MouseEvent mouseEvent) {
