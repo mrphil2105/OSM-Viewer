@@ -33,9 +33,6 @@ dependencies {
     // Polygon Triangulation
     implementation 'io.github.earcut4j:earcut4j:2.2.2'
 
-    // Very relevant general purpose things
-    implementation 'org.locationtech.jts:jts-core:1.18.2'
-
     // JavaFX
     implementation 'org.openjfx:javafx-base:0.0.11:win'
     implementation 'org.openjfx:javafx-base:0.0.11:mac'
