@@ -14,7 +14,8 @@ public enum Location {
     TRANSFORM("transform", LocationType.UNIFORM),
     COLOR_MAP("color_map", LocationType.UNIFORM),
     MAP("map", LocationType.UNIFORM),
-    CATEGORY_BITSET("category_bitset", LocationType.UNIFORM);
+    CATEGORY_BITSET("category_bitset", LocationType.UNIFORM),
+    TIME("time", LocationType.UNIFORM);
 
     private final String name;
     private final LocationType type;
