@@ -8,7 +8,7 @@ import osm.elements.OSMTag;
 
 // TODO: Missing Area
 public enum Drawable {
-    ISLAND(Shape.FILL, Color.web("#f2efe9"), 0, Category.LAND),
+    BASE(Shape.FILL, Color.web("#f2efe9"), 0, Category.COAST),
     BEACH(Shape.FILL, Color.web("#f0e1ae"), 0, Category.LAND),
     SAND(Shape.FILL, Color.web("#f5e9c6"), 0, Category.LAND),
     FARMLAND(Shape.FILL, Color.web("#eef0d5"), 0, Category.LAND),
@@ -50,11 +50,12 @@ public enum Drawable {
     SERVICE(Shape.POLYLINE, Color.web("#ffffff"), 0.2, Category.ROAD),
     ROAD(Shape.POLYLINE, Color.web("#ffffff"), 0.4, Category.ROAD),
     TREE_ROW(Shape.POLYLINE, Color.web("#aacea3"), 0.2, Category.LAND),
-    NATURE_RESERVE(Shape.POLYLINE, Color.web("#b5d3ae"), 0.2, Category.LAND),
     TERTIARY(Shape.POLYLINE, Color.web("#ffffff"), 0.7, Category.ROAD),
     SECONDARY(Shape.POLYLINE, Color.web("#f7fabf"), 0.8, Category.ROAD),
     PRIMARY(Shape.POLYLINE, Color.web("#fcd6a4"), 0.9, Category.ROAD),
     MOTORWAY(Shape.POLYLINE, Color.web("#e892a2"), 1.0, Category.ROAD),
+    NATURE_RESERVE(Shape.POLYLINE, Color.rgb(0, 180, 30, 0.2), 0.6, Category.LAND),
+    MILITARY(Shape.FILL, Color.rgb(255, 0, 0, 0.2), 0, Category.LAND),
     UNKNOWN(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG),
     IGNORED(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG);
 
@@ -120,7 +121,8 @@ public enum Drawable {
                 case "farmyard" -> FARMYARD;
                 case "orchard" -> ORCHARD;
                 case "quarry" -> QUARRY;
-                case "military", "greenfield" -> IGNORED;
+                case "military" -> MILITARY;
+                case "greenfield" -> IGNORED;
                 case "retail" -> RETAIL;
                 case "isolated_dwelling" -> DWELLING;
                 case "grass", "meadow" -> GRASS;
@@ -128,6 +130,7 @@ public enum Drawable {
                 default -> _default(tag);
             };
             case NATURAL -> switch (tag.value()) {
+                case "peninsula" -> BASE;
                 case "wood" -> FOREST;
                 case "water" -> WATER;
                 case "cliff" -> CLIFF;
@@ -184,7 +187,7 @@ public enum Drawable {
                 default -> _default(tag);
             };
             case PLACE -> switch (tag.value()) {
-                case "island" -> ISLAND;
+                case "island" -> BASE;
                 case "square", "archipelago" -> IGNORED;
                 default -> _default(tag);
             };
