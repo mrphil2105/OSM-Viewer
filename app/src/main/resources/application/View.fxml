@@ -60,6 +60,12 @@
                 </GridPane>
             </VBox>
         </right>
+         <center>
+            <MapCanvas fx:id="canvas"
+                       prefWidth="1280"
+                       prefHeight="720"
+            />
+        </center>
         <top>
             <MenuBar>
                 <Menu text="Appearance">
