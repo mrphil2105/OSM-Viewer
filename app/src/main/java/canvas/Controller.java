@@ -1,5 +1,6 @@
 package canvas;
 
+import Search.AutofillTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
@@ -15,7 +16,7 @@ public class Controller implements MouseListener {
 
     @FXML private MapCanvas canvas;
 
-    @FXML private TextField searchTextField;
+    @FXML private AutofillTextField searchTextField;
 
     @FXML private TextField fromRouteTextField;
 
@@ -50,6 +51,7 @@ public class Controller implements MouseListener {
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
+        searchTextField.init(model.getAddresses());
         checkBoxBuildings.setSelected(true);
         checkBoxHighways.setSelected(true);
         checkBoxWater.setSelected(true);
@@ -95,7 +97,12 @@ public class Controller implements MouseListener {
     }
 
     @FXML
-    public void handleSearchClick() {
+    public void handleKeyTyped(){
+        searchTextField.handleSearchChange(searchTextField.getText());
+    }
+
+    @FXML
+    public void handleSearchClick(){
         searchTextField.clear();
     }
 
