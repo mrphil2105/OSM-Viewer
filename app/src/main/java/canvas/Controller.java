@@ -68,6 +68,7 @@ public class Controller implements MouseListener {
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
+        searchTextField.init(model.getAddresses());
         checkBoxBuildings.setSelected(true);
         checkBoxHighways.setSelected(true);
         checkBoxWater.setSelected(true);

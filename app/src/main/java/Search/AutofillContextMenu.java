@@ -21,6 +21,7 @@ public class AutofillContextMenu extends ContextMenu {
 
         AddressBuilder addressBuilder = AddressDatabase.parse(inputText); //TODO: or keep the typed address as a field in the MenuItem
 
+        assert addressBuilder != null;
         String replace = addressBuilder.getStringToReplace(menuAddress);
         text.setText(""); //TODO ugly way to move cursor to the end by appending... how to move the cursor?????
         text.appendText(replace);

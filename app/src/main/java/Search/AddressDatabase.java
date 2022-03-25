@@ -170,16 +170,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
             }
         });
 
-
-
-
-        System.out.println("Returning:");
-        for(Address a : results){
-            System.out.println(a.toString());
-        }
-
         return results;
-
 
 
 
@@ -193,9 +184,6 @@ public class AddressDatabase implements OSMObserver, Serializable {
         }
 
          */
-
-
-
     }
 
 
