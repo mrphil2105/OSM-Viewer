@@ -1,9 +1,10 @@
 package collections.spacial;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TwoDTree<E> implements SpacialTree<E> {
+public class TwoDTree<E> implements SpacialTree<E>, Serializable {
     private final float left, top, right, bottom;
 
     private Node<E> root;
@@ -244,7 +245,7 @@ public class TwoDTree<E> implements SpacialTree<E> {
         range(query, node.right, results);
     }
 
-    private static class Node<E> {
+    private static class Node<E> implements Serializable {
         private final Point point;
         private final E value;
         private Rect rect;

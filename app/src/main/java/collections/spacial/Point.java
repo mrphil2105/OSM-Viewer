@@ -1,6 +1,8 @@
 package collections.spacial;
 
-public record Point(float x, float y) {
+import java.io.Serializable;
+
+public record Point(float x, float y) implements Serializable {
     public float distanceTo(Point other) {
         return (float) Math.sqrt(distanceSquaredTo(other));
     }
