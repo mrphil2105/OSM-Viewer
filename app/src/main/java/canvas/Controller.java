@@ -1,5 +1,6 @@
 package canvas;
 
+import Search.AutofillTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 
@@ -17,7 +18,7 @@ public class Controller implements MouseListener {
     @FXML private MapCanvas canvas;
 
     @FXML
-    private TextField searchTextField;
+    private AutofillTextField searchTextField;
 
     @FXML
     private TextField fromRouteTextField;
@@ -112,6 +113,10 @@ public class Controller implements MouseListener {
         canvas.dispose();
     }
 
+    @FXML
+    public void handleKeyTyped(){
+        searchTextField.handleSearchChange(searchTextField.getText());
+    }
     @FXML
     public void handleSearchClick(){
         searchTextField.clear();
