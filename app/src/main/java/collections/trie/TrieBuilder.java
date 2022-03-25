@@ -71,4 +71,23 @@ public class TrieBuilder<Value> implements Serializable {
 
         return null;
     }
+
+    public Value get(String key) {
+        var subtrie = find(key, 0);
+        if (subtrie != null) {
+            return subtrie.value;
+        } else {
+            return null;
+        }
+    }
+
+    private TrieBuilder<Value> find(String prefix, int idx) {
+        if (idx == prefix.length()) return this;
+
+        var child = getChild(prefix.charAt(idx));
+        if (child == null) return null;
+
+        return child.find(prefix, idx + 1);
+    }
+
 }
