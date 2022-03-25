@@ -134,9 +134,6 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
             filteringSet.stream().filter(e -> e.getHouse().startsWith(inputAddress.houseNumber())).forEach(set::add);
             filteringSet = set;
-            for(AddressBuilder a: set){
-                System.out.println(a.build().toString());
-            }
         }
 
 
