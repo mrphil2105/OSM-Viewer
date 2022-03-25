@@ -9,6 +9,7 @@ import osm.elements.OSMTag;
 import osm.elements.OSMWay;
 import osm.elements.SlimOSMNode;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 import static osm.elements.OSMTag.Key.HIGHWAY;
 import static osm.elements.OSMTag.Key.NAME;
 
-public class NearestNeighbor implements OSMObserver {
+public class NearestNeighbor implements OSMObserver, Serializable {
     private transient List<Pair<SlimOSMNode, String>> nodeCache = new ArrayList<>();
     private TwoDTree<Node> twoDTree;
 
@@ -118,7 +119,7 @@ public class NearestNeighbor implements OSMObserver {
         addToTree(secondHalf, level + 1);
     }
 
-    private interface Node {
+    private interface Node extends Serializable {
     }
 
     private record AncestorNode(String name) implements Node {
