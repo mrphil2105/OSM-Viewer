@@ -1,13 +1,18 @@
 package collections.lists;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.Arrays;
 
 public class FloatList implements Serializable {
-    private float[] array = new float[1];
+    private float[] array = new float[8];
     private int n = 0;
 
     public FloatList() {}
+
+    public FloatList(float[] array) {
+        this.array = array;
+        n = array.length;
+    }
 
     public int add(float value) {
         if (n == array.length) {
@@ -68,7 +73,19 @@ public class FloatList implements Serializable {
 
     public void extend(FloatList other) {
         var newSize = size() + other.size();
-        if (newSize > array.length) setSize(newSize);
+        if (newSize > array.length) setSize(newSize * 2);
         System.arraycopy(other.getArray(), 0, array, n, other.size());
+        n = newSize;
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        array = (float[]) in.readUnshared();
+        n = array.length;
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeUnshared(toArray());
     }
 }

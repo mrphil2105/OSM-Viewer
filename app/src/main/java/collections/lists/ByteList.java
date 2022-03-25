@@ -1,15 +1,20 @@
 package collections.lists;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.Arrays;
 
-public class DoubleList implements Serializable {
-    private double[] array = new double[1];
+public class ByteList implements Serializable {
+    private byte[] array = new byte[8];
     private int n = 0;
 
-    public DoubleList() {}
+    public ByteList() {}
 
-    public int add(double value) {
+    public ByteList(byte[] array) {
+        this.array = array;
+        n = array.length;
+    }
+
+    public int add(byte value) {
         if (n == array.length) {
             grow();
         }
@@ -18,19 +23,19 @@ public class DoubleList implements Serializable {
         return n++;
     }
 
-    public double get(int index) {
+    public byte get(int index) {
         return array[index];
     }
 
-    public double set(int index, double value) {
+    public byte set(int index, byte value) {
         return array[index] = value;
     }
 
-    public double[] toArray() {
+    public byte[] toArray() {
         return copyToSize(n);
     }
 
-    public double[] getArray() {
+    public byte[] getArray() {
         return array;
     }
 
@@ -50,8 +55,8 @@ public class DoubleList implements Serializable {
         array = copyToSize(sz);
     }
 
-    double[] copyToSize(int sz) {
-        var tmp = new double[sz];
+    byte[] copyToSize(int sz) {
+        var tmp = new byte[sz];
         System.arraycopy(array, 0, tmp, 0, n);
         return tmp;
     }
@@ -62,13 +67,25 @@ public class DoubleList implements Serializable {
         array[j] = tmp;
     }
 
-    public int search(double value) {
+    public int search(byte value) {
         return Arrays.binarySearch(array, 0, n, value);
     }
 
-    public void extend(DoubleList other) {
+    public void extend(ByteList other) {
         var newSize = size() + other.size();
-        if (newSize > array.length) setSize(newSize);
+        if (newSize > array.length) setSize(newSize * 2);
         System.arraycopy(other.getArray(), 0, array, n, other.size());
+        n = newSize;
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        array = (byte[]) in.readUnshared();
+        n = array.length;
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeUnshared(toArray());
     }
 }

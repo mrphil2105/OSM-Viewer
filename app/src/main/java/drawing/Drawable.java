@@ -1,79 +1,97 @@
 package drawing;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import javafx.scene.paint.Color;
 import osm.elements.OSMElement;
 import osm.elements.OSMTag;
 
 // TODO: Missing Area
 public enum Drawable {
-    ISLAND(Shape.FILL, Color.web("#f2efe9"), 0),
-    BEACH(Shape.FILL, Color.web("#f0e1ae"), 0),
-    SAND(Shape.FILL, Color.web("#f5e9c6"), 0),
-    FARMLAND(Shape.FILL, Color.web("#eef0d5"), 0),
-    FARMYARD(Shape.FILL, Color.web("#f5dcba"), 0),
-    FOREST(Shape.FILL, Color.web("#add19e"), 0),
-    RESIDENTIAL(Shape.FILL, Color.web("#e0dfdf"), 0),
-    PARK(Shape.FILL, Color.web("#c8facc"), 0),
-    CONSTRUCTION(Shape.FILL, Color.web("#c7c7b4"), 0),
-    CAMP_SITE(Shape.FILL, Color.web("#def6c0"), 0),
-    BREAK_WATER(Shape.FILL, Color.web("#aaaaaa"), 0),
-    PARKING(Shape.FILL, Color.web("#eeeeee"), 0),
-    ALLOTMENTS(Shape.FILL, Color.web("#c9e1bf"), 0),
-    LEISURE_PARK(Shape.FILL, Color.web("#dffce2"), 0),
-    GRASS(Shape.FILL, Color.web("#cdebb0"), 0),
-    GOLF(Shape.FILL, Color.web("#def6c0"), 0),
-    SPORTS_CENTRE(Shape.FILL, Color.web("#dffce2"), 0),
-    AMENITY_AREA(Shape.FILL, Color.web("#ffffe5"), 0),
-    HEATH(Shape.FILL, Color.web("#d6d99f"), 0),
-    BARE_ROCK(Shape.FILL, Color.web("#dfd9d3"), 0),
-    QUARRY(Shape.FILL, Color.web("#c9c7c7"), 0),
-    SCRUB(Shape.FILL, Color.web("#c8d7ab"), 0),
-    ORCHARD(Shape.FILL, Color.web("#aedfa3"), 0),
-    INDUSTRIAL(Shape.FILL, Color.web("#ebdbe8"), 0),
-    PLANT_NURSERY(Shape.FILL, Color.web("#aedfa3"), 0),
-    WATER(Shape.FILL, Color.web("#aad3df"), 0),
-    MUSEUM(Shape.FILL, Color.web("#f2efe9"), 0),
-    BUILDING(Shape.FILL, Color.web("#d9d0c9"), 0),
-    REST_AREA(Shape.FILL, Color.web("#efc8c8"), 0),
-    DWELLING(Shape.FILL, Color.web("#f2efe9"), 0),
-    PITCH(Shape.FILL, Color.web("#aae0cb"), 0),
-    RETAIL(Shape.FILL, Color.web("#ffd0c6"), 0),
-    PRISON(Shape.FILL, Color.web("#bdbdbd"), 0),
-    CLIFF(Shape.POLYLINE, Color.web("#9a9b99"), 0.1),
-    HEDGE(Shape.POLYLINE, Color.web("#add19e"), 0.05),
-    WALL(Shape.POLYLINE, Color.web("#bfbcb8"), 0.05),
-    PIER(Shape.POLYLINE, Color.web("#ffffff"), 0.05),
-    PATH(Shape.POLYLINE, Color.web("#edb39f"), 0.1),
-    TRACK(Shape.POLYLINE, Color.web("#95dcc0"), 0.2),
-    SERVICE(Shape.POLYLINE, Color.web("#ffffff"), 0.2),
-    ROAD(Shape.POLYLINE, Color.web("#ffffff"), 0.4),
-    TREE_ROW(Shape.POLYLINE, Color.web("#aacea3"), 0.2),
-    NATURE_RESERVE(Shape.POLYLINE, Color.web("#b5d3ae"), 0.2), // TODO: Translucent?
-    TERTIARY(Shape.POLYLINE, Color.web("#ffffff"), 0.7),
-    SECONDARY(Shape.POLYLINE, Color.web("#f7fabf"), 0.8),
-    PRIMARY(Shape.POLYLINE, Color.web("#fcd6a4"), 0.9),
-    MOTORWAY(Shape.POLYLINE, Color.web("#e892a2"), 1.0),
-    UNKNOWN(Shape.FILL, Color.BLACK, 0),
-    IGNORED(Shape.FILL, Color.BLACK, 0);
+    ISLAND(Shape.FILL, Color.web("#f2efe9"), 0, Category.LAND),
+    BEACH(Shape.FILL, Color.web("#f0e1ae"), 0, Category.LAND),
+    SAND(Shape.FILL, Color.web("#f5e9c6"), 0, Category.LAND),
+    FARMLAND(Shape.FILL, Color.web("#eef0d5"), 0, Category.LAND),
+    FARMYARD(Shape.FILL, Color.web("#f5dcba"), 0, Category.LAND),
+    FOREST(Shape.FILL, Color.web("#add19e"), 0, Category.LAND),
+    RESIDENTIAL(Shape.FILL, Color.web("#e0dfdf"), 0, Category.CITY),
+    PARK(Shape.FILL, Color.web("#c8facc"), 0, Category.LAND),
+    CONSTRUCTION(Shape.FILL, Color.web("#c7c7b4"), 0, Category.CITY),
+    CAMP_SITE(Shape.FILL, Color.web("#def6c0"), 0, Category.CITY),
+    BREAK_WATER(Shape.FILL, Color.web("#aaaaaa"), 0, Category.LAND),
+    PARKING(Shape.FILL, Color.web("#eeeeee"), 0, Category.CITY),
+    ALLOTMENTS(Shape.FILL, Color.web("#c9e1bf"), 0, Category.CITY),
+    LEISURE_PARK(Shape.FILL, Color.web("#dffce2"), 0, Category.LAND),
+    GRASS(Shape.FILL, Color.web("#cdebb0"), 0, Category.LAND),
+    GOLF(Shape.FILL, Color.web("#def6c0"), 0, Category.LAND),
+    SPORTS_CENTRE(Shape.FILL, Color.web("#dffce2"), 0, Category.CITY),
+    AMENITY_AREA(Shape.FILL, Color.web("#ffffe5"), 0, Category.CITY),
+    HEATH(Shape.FILL, Color.web("#d6d99f"), 0, Category.LAND),
+    BARE_ROCK(Shape.FILL, Color.web("#dfd9d3"), 0, Category.LAND),
+    QUARRY(Shape.FILL, Color.web("#c9c7c7"), 0, Category.LAND),
+    SCRUB(Shape.FILL, Color.web("#c8d7ab"), 0, Category.LAND),
+    ORCHARD(Shape.FILL, Color.web("#aedfa3"), 0, Category.LAND),
+    INDUSTRIAL(Shape.FILL, Color.web("#ebdbe8"), 0, Category.CITY),
+    PLANT_NURSERY(Shape.FILL, Color.web("#aedfa3"), 0, Category.CITY),
+    WATER(Shape.FILL, Color.web("#aad3df"), 0, Category.LAND),
+    MUSEUM(Shape.FILL, Color.web("#f2efe9"), 0, Category.CITY),
+    BUILDING(Shape.FILL, Color.web("#d9d0c9"), 0, Category.CITY),
+    REST_AREA(Shape.FILL, Color.web("#efc8c8"), 0, Category.CITY),
+    DWELLING(Shape.FILL, Color.web("#f2efe9"), 0, Category.CITY),
+    PITCH(Shape.FILL, Color.web("#aae0cb"), 0, Category.CITY),
+    RETAIL(Shape.FILL, Color.web("#ffd0c6"), 0, Category.CITY),
+    PRISON(Shape.FILL, Color.web("#bdbdbd"), 0, Category.CITY),
+    CLIFF(Shape.POLYLINE, Color.web("#9a9b99"), 0.1, Category.LAND),
+    HEDGE(Shape.POLYLINE, Color.web("#add19e"), 0.05, Category.LAND),
+    WALL(Shape.POLYLINE, Color.web("#bfbcb8"), 0.05, Category.CITY),
+    PIER(Shape.POLYLINE, Color.web("#ffffff"), 0.05, Category.CITY),
+    PATH(Shape.POLYLINE, Color.web("#edb39f"), 0.1, Category.ROAD),
+    TRACK(Shape.POLYLINE, Color.web("#95dcc0"), 0.2, Category.ROAD),
+    SERVICE(Shape.POLYLINE, Color.web("#ffffff"), 0.2, Category.ROAD),
+    ROAD(Shape.POLYLINE, Color.web("#ffffff"), 0.4, Category.ROAD),
+    TREE_ROW(Shape.POLYLINE, Color.web("#aacea3"), 0.2, Category.LAND),
+    NATURE_RESERVE(Shape.POLYLINE, Color.web("#b5d3ae"), 0.2, Category.LAND),
+    TERTIARY(Shape.POLYLINE, Color.web("#ffffff"), 0.7, Category.ROAD),
+    SECONDARY(Shape.POLYLINE, Color.web("#f7fabf"), 0.8, Category.ROAD),
+    PRIMARY(Shape.POLYLINE, Color.web("#fcd6a4"), 0.9, Category.ROAD),
+    MOTORWAY(Shape.POLYLINE, Color.web("#e892a2"), 1.0, Category.ROAD),
+    UNKNOWN(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG),
+    IGNORED(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG);
 
-    public static final float length = values().length;
+    public static final FloatBuffer COLOR_MAP;
+    public static final IntBuffer MAP;
+
+    static {
+        var array = new float[values().length * 4];
+        for (var value : values()) {
+            array[value.ordinal() * 4 + 0] = (float) value.color.getRed();
+            array[value.ordinal() * 4 + 1] = (float) value.color.getGreen();
+            array[value.ordinal() * 4 + 2] = (float) value.color.getBlue();
+            array[value.ordinal() * 4 + 3] = (float) value.color.getOpacity();
+        }
+        COLOR_MAP = FloatBuffer.wrap(array);
+
+        MAP = IntBuffer.allocate(values().length * 2);
+        for (var drawable : values()) {
+            MAP.put(1 << drawable.category.ordinal());
+            MAP.put(drawable.ordinal());
+        }
+    }
 
     public final Shape shape;
     public final Color color;
     public final double size;
+    public final Category category;
 
-    Drawable(Shape shape, Color color, double size) {
+    Drawable(Shape shape, Color color, double size, Category category) {
         this.shape = shape;
         this.color = color;
         this.size = size;
-    }
-
-    public float layer() {
-        return ordinal() / length;
+        this.category = category;
     }
 
     private static Drawable _default(OSMTag tag) {
-        System.out.println("Unknown tag " + tag.toString());
+        // System.out.println("Unknown tag " + tag.toString());
         return UNKNOWN;
     }
 
