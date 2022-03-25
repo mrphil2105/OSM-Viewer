@@ -8,7 +8,7 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        var model = new Model("data/bornholm.xml.zip");
+        var model = new Model("data/denmark-latest.osm/denmark-latest.osm");
 
         new View(model, primaryStage);
     }
