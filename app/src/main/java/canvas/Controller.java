@@ -3,6 +3,7 @@ package canvas;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
@@ -126,14 +127,24 @@ public class Controller implements MouseListener {
     @FXML
     public void handleDefaultMode(){
         if (radioButtonDefaultMode.isSelected()){
-            setStyleSheets("style.css");                 
+            setStyleSheets("style.css");
+            canvas.setShader(Renderer.Shader.DEFAULT);
         }
     }
 
     @FXML
     public void handleColorblind(){
         if (radioButtonColorBlind.isSelected()){
-            setStyleSheets("colorblindStyle.css");                 
+            setStyleSheets("colorblindStyle.css");
+            canvas.setShader(Renderer.Shader.MONOTONE);
+        }
+    }
+
+    @FXML
+    public void handlePartyMode() {
+        if (radioButtonPartyMode.isSelected()){
+            setStyleSheets("style.css");
+            canvas.setShader(Renderer.Shader.PARTY);
         }
     }
 
