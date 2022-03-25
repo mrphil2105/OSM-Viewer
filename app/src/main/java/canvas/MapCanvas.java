@@ -1,12 +1,14 @@
 package canvas;
 
+import collections.enumflags.ObservableEnumFlags;
 import com.jogamp.nativewindow.javafx.JFXAccessor;
 import com.jogamp.newt.event.MouseListener;
-import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
+import drawing.Category;
 import java.nio.FloatBuffer;
 import javafx.application.Platform;
 import javafx.scene.layout.Region;
@@ -17,6 +19,8 @@ public class MapCanvas extends Region {
     private Animator animator;
     private FloatBuffer transformBuffer;
     private GLWindow window;
+
+    public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
 
     public void init(Model model) {
         recalculateTransform();
@@ -47,8 +51,10 @@ public class MapCanvas extends Region {
                                 JFXAccessor.runOnJFXThread(
                                         false,
                                         () -> {
-                                            window.setVisible(false);
-                                            window.setVisible(true);
+                                            if (window.isVisible()) {
+                                                window.setVisible(false);
+                                                window.setVisible(true);
+                                            }
                                         });
                             }
                         });
@@ -99,22 +105,23 @@ public class MapCanvas extends Region {
 
     private void recalculateTransform() {
         // Extract column major 4x4 matrix from Affine to buffer
-        transformBuffer = FloatBuffer.allocate(16);
-        transformBuffer.put((float) transform.getMxx());
-        transformBuffer.put((float) transform.getMyx());
-        transformBuffer.put(0);
-        transformBuffer.put(0);
-        transformBuffer.put((float) transform.getMxy());
-        transformBuffer.put((float) transform.getMyy());
-        transformBuffer.put(0);
-        transformBuffer.put(0);
-        transformBuffer.put(0);
-        transformBuffer.put(0);
-        transformBuffer.put(1);
-        transformBuffer.put(0);
-        transformBuffer.put((float) transform.getTx());
-        transformBuffer.put((float) transform.getTy());
-        transformBuffer.put(0);
-        transformBuffer.put(1);
+        transformBuffer =
+                FloatBuffer.allocate(16)
+                        .put((float) transform.getMxx())
+                        .put((float) transform.getMyx())
+                        .put(0)
+                        .put(0)
+                        .put((float) transform.getMxy())
+                        .put((float) transform.getMyy())
+                        .put(0)
+                        .put(0)
+                        .put(0)
+                        .put(0)
+                        .put(1)
+                        .put(0)
+                        .put((float) transform.getTx())
+                        .put((float) transform.getTy())
+                        .put(0)
+                        .put(1);
     }
 }

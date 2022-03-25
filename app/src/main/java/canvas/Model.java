@@ -1,20 +1,21 @@
 package canvas;
 
 import com.jogamp.opengl.*;
-import drawing.Polygons;
-import java.io.*;
-import javax.xml.stream.XMLStreamException;
+import drawing.Drawable;
+import io.FileParser;
+import io.PolygonsReader;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class Model {
     private final GLCapabilities caps;
     private final GLAutoDrawable sharedDrawable;
-    private final int[] vbo = new int[Model.VBOType.values().length];
-    private int count;
+    private final IntBuffer vbo = IntBuffer.allocate(VBOType.values().length);
+    private final IntBuffer tex = IntBuffer.allocate(TexType.values().length);
+    private int indexCount;
 
-    public Model(String filename) throws IOException, XMLStreamException {
-
-        final Polygons polygons = FileParser.readFile(filename);
-
+    public Model(String filename) throws Exception {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
         // 8x anti-aliasing
         caps.setSampleBuffers(true);
@@ -26,54 +27,111 @@ public class Model {
                         .createDummyAutoDrawable(null, true, caps, null);
         sharedDrawable.display();
 
+        try (var result = FileParser.readFile(filename)) {
+            loadPolygons(result.polygons());
+        }
+    }
+
+    private void loadPolygons(PolygonsReader reader) {
         // Run once. We upload our various buffers to the GPU, registering them with OpenGL
         sharedDrawable.invoke(
                 true,
                 glAutoDrawable -> {
                     var gl = glAutoDrawable.getGL().getGL3();
 
-                    var vertexBuffer = polygons.getVertexBuffer();
-                    var indexBuffer = polygons.getIndexBuffer();
-                    var colorBuffer = polygons.getColorBuffer();
-                    count = indexBuffer.capacity();
+                    indexCount = reader.getIndexCount();
+                    var vertexCount = reader.getVertexCount();
+                    var drawableCount = reader.getDrawableCount();
 
                     // Get new id's for the buffers
-                    gl.glGenBuffers(vbo.length, vbo, 0);
+                    gl.glGenBuffers(vbo.capacity(), vbo);
 
-                    // Set the vertex buffer as the current buffer
-                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(Model.VBOType.VERTEX));
-                    // Set the data for the current buffer to the data of the vertex buffer
-                    gl.glBufferData(
-                            GL3.GL_ARRAY_BUFFER,
-                            (long) vertexBuffer.capacity()
-                                    * Float.BYTES, // Allocate this many bytes for the buffer
-                            vertexBuffer.rewind(),
-                            GL.GL_STATIC_DRAW);
-
-                    // Set the index buffer as the current index buffer
-                    gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, getVBO(Model.VBOType.INDEX));
-                    // Set the data for the current index buffer to the data of the index buffer
+                    // Pre-allocate buffers with correct size
+                    gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, getVBO(VBOType.INDEX));
                     gl.glBufferData(
                             GL3.GL_ELEMENT_ARRAY_BUFFER,
-                            (long) indexBuffer.capacity() * Integer.BYTES,
-                            indexBuffer.rewind(),
-                            GL.GL_STATIC_DRAW);
+                            (long) indexCount * Integer.BYTES,
+                            null,
+                            GL.GL_DYNAMIC_DRAW);
 
-                    // Set the color buffer as the current buffer. This unsets the vertex buffer as the
-                    // current one and, since we have already set all the data for the vertex buffer, this is
-                    // fine.
-                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(Model.VBOType.COLOR));
-                    // Set the data for the current buffer to the data of the color buffer
+                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.VERTEX));
                     gl.glBufferData(
-                            GL3.GL_ARRAY_BUFFER,
-                            (long) colorBuffer.capacity() * Float.BYTES,
-                            colorBuffer.rewind(),
-                            GL.GL_STATIC_DRAW);
+                            GL3.GL_ARRAY_BUFFER, (long) vertexCount * Float.BYTES, null, GL.GL_DYNAMIC_DRAW);
+
+                    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.DRAWABLE));
+                    gl.glBufferData(
+                            GL3.GL_ARRAY_BUFFER, (long) drawableCount * Byte.BYTES, null, GL.GL_DYNAMIC_DRAW);
+
+                    // Get new id's for textures
+                    gl.glGenTextures(tex.capacity(), tex);
+
+                    // Upload COLOR_MAP as 1D RGBA texture
+                    gl.glActiveTexture(GL3.GL_TEXTURE0);
+                    gl.glBindTexture(GL3.GL_TEXTURE_1D, getTex(TexType.COLOR_MAP));
+                    gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST);
+                    gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST);
+                    gl.glTexImage1D(
+                            GL3.GL_TEXTURE_1D,
+                            0,
+                            GL3.GL_RGBA,
+                            Drawable.values().length,
+                            0,
+                            GL3.GL_RGBA,
+                            GL3.GL_FLOAT,
+                            Drawable.COLOR_MAP.rewind());
+
+                    gl.glActiveTexture(GL3.GL_TEXTURE1);
+                    gl.glBindTexture(GL3.GL_TEXTURE_1D, getTex(TexType.MAP));
+                    gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST);
+                    gl.glTexParameteri(GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST);
+                    gl.glTexImage1D(
+                            GL3.GL_TEXTURE_1D,
+                            0,
+                            GL3.GL_RG32UI,
+                            Drawable.values().length,
+                            0,
+                            GL3.GL_RG_INTEGER,
+                            GL3.GL_UNSIGNED_INT,
+                            Drawable.MAP.rewind());
+
+                    var curIndex = 0;
+                    var curVertex = 0;
+                    var curDrawable = 0;
+
+                    for (var drawing : reader.read()) {
+                        // Upload chunk to the index buffer
+                        gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, getVBO(VBOType.INDEX));
+                        gl.glBufferSubData(
+                                GL3.GL_ELEMENT_ARRAY_BUFFER,
+                                (long) curIndex * Integer.BYTES,
+                                (long) drawing.indices().size() * Integer.BYTES,
+                                IntBuffer.wrap(drawing.indices().getArray()));
+
+                        // Upload chunk to the vertex buffer
+                        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.VERTEX));
+                        gl.glBufferSubData(
+                                GL3.GL_ARRAY_BUFFER,
+                                (long) curVertex * Float.BYTES,
+                                (long) drawing.vertices().size() * Float.BYTES,
+                                FloatBuffer.wrap(drawing.vertices().getArray()));
+
+                        // Upload chunk to the drawable buffer
+                        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, getVBO(VBOType.DRAWABLE));
+                        gl.glBufferSubData(
+                                GL3.GL_ARRAY_BUFFER,
+                                (long) curDrawable * Byte.BYTES,
+                                (long) drawing.drawables().size() * Byte.BYTES,
+                                ByteBuffer.wrap(drawing.drawables().getArray()));
+
+                        curIndex += drawing.indices().size();
+                        curVertex += drawing.vertices().size();
+                        curDrawable += drawing.drawables().size();
+                    }
+
+                    System.gc();
 
                     return true;
                 });
-
-        sharedDrawable.display();
     }
 
     public GLCapabilities getCaps() {
@@ -91,7 +149,11 @@ public class Model {
      * @return Buffer id as seen from OpenGL
      */
     public int getVBO(Model.VBOType type) {
-        return vbo[type.ordinal()];
+        return vbo.get(type.ordinal());
+    }
+
+    public int getTex(Model.TexType type) {
+        return tex.get(type.ordinal());
     }
 
     /**
@@ -100,12 +162,17 @@ public class Model {
      * @return How many vertices are stored in the model
      */
     public int getCount() {
-        return count;
+        return indexCount;
     }
 
     enum VBOType {
         VERTEX,
         INDEX,
-        COLOR
+        DRAWABLE,
+    }
+
+    enum TexType {
+        COLOR_MAP,
+        MAP,
     }
 }

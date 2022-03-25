@@ -5,6 +5,8 @@
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.Menu?>
 
 <Scene xmlns="http://javafx.com/javafx"
        xmlns:fx="http://javafx.com/fxml"
@@ -58,11 +60,12 @@
                 </GridPane>
             </VBox>
         </right>
-        <center>
-            <MapCanvas fx:id="canvas"
-                       prefWidth="1280"
-                       prefHeight="720"
-            />
-        </center>
+        <top>
+            <MenuBar>
+                <Menu text="Appearance">
+                    <Menu fx:id="categories" text="Toggle categories"/>
+                </Menu>
+            </MenuBar>
+        </top>
     </BorderPane>
 </Scene>

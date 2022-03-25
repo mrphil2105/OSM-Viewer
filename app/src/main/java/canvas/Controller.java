@@ -7,12 +7,14 @@ import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import drawing.Category;
+import java.util.Arrays;
 
 public class Controller implements MouseListener {
+    public Menu categories;
     private Point2D lastMouse;
 
-    @FXML
-    private MapCanvas canvas;
+    @FXML private MapCanvas canvas;
 
     @FXML
     private TextField searchTextField;
@@ -71,6 +73,39 @@ public class Controller implements MouseListener {
         radioButtonDefaultMode.setSelected(true);
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
+
+        // FIXME: yuck
+        categories
+                .getItems()
+                .addAll(
+                        Arrays.stream(Category.values())
+                                .map(
+                                        c -> {
+                                            var cb = new CheckBox(c.toString());
+                                            cb.setStyle("-fx-text-fill: #222222");
+                                            cb.selectedProperty().set(canvas.categories.isSet(c));
+
+                                            canvas.categories.addObserver(
+                                                    e -> {
+                                                        if (e.variant() == c) {
+                                                            cb.setSelected(e.enabled());
+                                                        }
+                                                    });
+
+                                            cb.selectedProperty()
+                                                    .addListener(
+                                                            ((observable, oldValue, newValue) -> {
+                                                                if (newValue) canvas.categories.set(c);
+                                                                else canvas.categories.unset(c);
+                                                            }));
+
+                                            var m = new CustomMenuItem(cb);
+                                            m.setHideOnClick(false);
+
+                                            return m;
+                                        })
+                                .toList());
+
     }
 
     public void dispose() {
