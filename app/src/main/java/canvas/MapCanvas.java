@@ -60,7 +60,6 @@ public class MapCanvas extends Region {
                             }
                         });
 
-
         // Resize window when region resizes
         widthProperty()
                 .addListener(
