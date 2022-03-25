@@ -145,7 +145,8 @@ public class Renderer implements GLEventListener {
         gl.glUniform1ui(
                 shaderProgram.getLocation(Location.CATEGORY_BITSET), canvas.categories.getFlags());
         gl.glUniform1f(
-                shaderProgram.getLocation(Location.TIME), (float) (System.currentTimeMillis() % (2000 * Math.PI) / 1000.0));
+                shaderProgram.getLocation(Location.TIME),
+                (float) (System.currentTimeMillis() % (2000 * Math.PI) / 1000.0));
 
         // Draw `model.getCount()` many triangles
         // This will use the currently bound index buffer
