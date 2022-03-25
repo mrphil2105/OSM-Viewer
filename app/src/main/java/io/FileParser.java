@@ -1,9 +1,8 @@
 package io;
 
+import Search.AddressDatabase;
 import java.io.*;
 import java.util.zip.ZipFile;
-
-import Search.AddressDatabase;
 import javafx.util.Pair;
 import javax.xml.stream.XMLStreamException;
 import navigation.Dijkstra;
@@ -39,14 +38,17 @@ public class FileParser implements IOConstants {
         var reader = new OSMReader();
         var polygonsWriter = new PolygonsWriter();
         var dijkstraWriter = new ObjectWriter<>(new Dijkstra());
-        var addressWriter = new ObjectWriter<AddressDatabase>(new AddressDatabase());
-        reader.addObservers(polygonsWriter, dijkstraWriter,addressWriter);
+        var addressWriter = new ObjectWriter<>(new AddressDatabase());
+        reader.addObservers(polygonsWriter, dijkstraWriter, addressWriter);
 
         reader.parse(getInputStream(infile));
 
         var outfile = infile.split("\\.")[0] + EXT;
         createMapFromWriters(
-                outfile, new Pair<>(POLYGONS, polygonsWriter), new Pair<>(DIJKSTRA, dijkstraWriter), new Pair<>(ADDRESSES,addressWriter));
+                outfile,
+                new Pair<>(POLYGONS, polygonsWriter),
+                new Pair<>(DIJKSTRA, dijkstraWriter),
+                new Pair<>(ADDRESSES, addressWriter));
 
         return outfile;
     }
@@ -81,7 +83,7 @@ public class FileParser implements IOConstants {
         var tarFile = new TarFile(new File(filename));
         return new ReadResult(
                 new PolygonsReader(getEntryStream(POLYGONS, tarFile)),
-                new ObjectReader<>(getEntryStream(DIJKSTRA, tarFile)));
+                new ObjectReader<>(getEntryStream(DIJKSTRA, tarFile)),
                 new ObjectReader<>(getEntryStream(ADDRESSES, tarFile)));
     }
 
