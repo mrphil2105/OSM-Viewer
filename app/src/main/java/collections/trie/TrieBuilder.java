@@ -1,5 +1,6 @@
 package collections.trie;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -7,7 +8,7 @@ import java.util.ArrayList;
  *
  * @param <Value> The type that can be looked up using String keys.
  */
-public class TrieBuilder<Value> {
+public class TrieBuilder<Value> implements Serializable {
     private final char key;
     private Value value;
     private final ArrayList<TrieBuilder<Value>> children = new ArrayList<>();
@@ -23,6 +24,8 @@ public class TrieBuilder<Value> {
      */
     @SuppressWarnings("unchecked")
     public FinalTrie<Value> build() {
+        //TODO: perhaps compress all keys that has 1 child to a string
+
         var trie = new FinalTrie<Value>(key, value, new FinalTrie[children.size()]);
 
         for (int i = 0; i < children.size(); i++) {
