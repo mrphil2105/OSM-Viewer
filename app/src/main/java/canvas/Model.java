@@ -1,5 +1,7 @@
 package canvas;
 
+import Search.Address;
+import Search.AddressDatabase;
 import com.jogamp.opengl.*;
 import drawing.Drawable;
 import io.FileParser;
@@ -10,6 +12,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 public class Model {
+
     private final GLCapabilities caps;
     private final GLAutoDrawable sharedDrawable;
     private final IntBuffer vbo = IntBuffer.allocate(VBOType.values().length);
@@ -35,6 +38,7 @@ public class Model {
             addresses=result.addresses().read();
             addresses.buildTries();
         }
+
     }
 
     private void loadPolygons(PolygonsReader reader) {
@@ -179,5 +183,9 @@ public class Model {
     enum TexType {
         COLOR_MAP,
         MAP,
+    }
+
+    public AddressDatabase getAddresses() {
+        return addresses;
     }
 }

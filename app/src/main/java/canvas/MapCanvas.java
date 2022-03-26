@@ -19,6 +19,7 @@ public class MapCanvas extends Region {
     private Animator animator;
     private FloatBuffer transformBuffer;
     private GLWindow window;
+    private Renderer renderer;
 
     public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
 
@@ -59,7 +60,6 @@ public class MapCanvas extends Region {
                             }
                         });
 
-
         // Resize window when region resizes
         widthProperty()
                 .addListener(
@@ -74,9 +74,14 @@ public class MapCanvas extends Region {
         canvas.setHeight(getPrefHeight());
 
         // Start rendering the model
-        window.addGLEventListener(new Renderer(model, this));
+        renderer = new Renderer(model, this);
+        window.addGLEventListener(renderer);
         animator = new Animator(window);
         animator.start();
+    }
+
+    public void setShader(Renderer.Shader shader) {
+        renderer.setShader(shader);
     }
 
     public void dispose() {
