@@ -131,9 +131,10 @@ public class Controller implements MouseListener {
     }
 
     @FXML
-    public void handleColorblind(){
-        if (radioButtonColorBlind.isSelected()){
-            setStyleSheets("colorblindStyle.css");                 
+    public void handlePartyMode() {
+        if (radioButtonPartyMode.isSelected()) {
+            setStyleSheets("partyStyle.css");
+            canvas.setShader(Renderer.Shader.PARTY);
         }
     }
 
