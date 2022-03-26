@@ -1,14 +1,14 @@
 package canvas;
 
+import Search.AutofillTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
-
+import drawing.Category;
+import java.util.Arrays;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import drawing.Category;
-import java.util.Arrays;
 
 public class Controller implements MouseListener {
     public Menu categories;
@@ -16,57 +16,42 @@ public class Controller implements MouseListener {
 
     @FXML private MapCanvas canvas;
 
-    @FXML
-    private TextField searchTextField;
+    @FXML private AutofillTextField searchTextField;
 
-    @FXML
-    private TextField fromRouteTextField;
+    @FXML private TextField fromRouteTextField;
 
-    @FXML
-    private TextField toRouteTextField;
+    @FXML private TextField toRouteTextField;
 
-    @FXML
-    private Button routeButton;
+    @FXML private Button routeButton;
 
-    @FXML
-    private RadioButton radioButtonCar;
+    @FXML private RadioButton radioButtonCar;
 
-    @FXML
-    private RadioButton radioButtonBikeOrWalk;
+    @FXML private RadioButton radioButtonBikeOrWalk;
 
-    @FXML
-    private CheckBox checkBoxBuildings;
+    @FXML private CheckBox checkBoxBuildings;
 
-    @FXML
-    private CheckBox checkBoxHighways;
+    @FXML private CheckBox checkBoxHighways;
 
-    @FXML
-    private CheckBox checkBoxWater;
+    @FXML private CheckBox checkBoxWater;
 
-    @FXML
-    private RadioButton radioButtonColorBlind;
+    @FXML private RadioButton radioButtonColorBlind;
 
-    @FXML
-    private RadioButton radioButtonDefaultMode;
+    @FXML private RadioButton radioButtonDefaultMode;
 
-    @FXML
-    private RadioButton radioButtonPartyMode;
+    @FXML private RadioButton radioButtonPartyMode;
 
-    @FXML
-    private ToggleGroup groupRoute;
+    @FXML private ToggleGroup groupRoute;
 
-    @FXML
-    private ToggleGroup groupMode;
+    @FXML private ToggleGroup groupMode;
 
-    @FXML
-    private VBox leftVBox;
+    @FXML private VBox leftVBox;
 
-    @FXML
-    private VBox rightVBox;
+    @FXML private VBox rightVBox;
 
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
+        searchTextField.init(model.getAddresses());
         checkBoxBuildings.setSelected(true);
         checkBoxHighways.setSelected(true);
         checkBoxWater.setSelected(true);
@@ -105,11 +90,15 @@ public class Controller implements MouseListener {
                                             return m;
                                         })
                                 .toList());
-
     }
 
     public void dispose() {
         canvas.dispose();
+    }
+
+    @FXML
+    public void handleKeyTyped(){
+        searchTextField.handleSearchChange(searchTextField.getText());
     }
 
     @FXML
@@ -118,15 +107,24 @@ public class Controller implements MouseListener {
     }
 
     @FXML
-    public void handleRouteClick(){
-       fromRouteTextField.clear();
-       toRouteTextField.clear();
+    public void handleRouteClick() {
+        fromRouteTextField.clear();
+        toRouteTextField.clear();
     }
 
     @FXML
-    public void handleDefaultMode(){
-        if (radioButtonDefaultMode.isSelected()){
-            setStyleSheets("style.css");                 
+    public void handleDefaultMode() {
+        if (radioButtonDefaultMode.isSelected()) {
+            setStyleSheets("style.css");
+            canvas.setShader(Renderer.Shader.DEFAULT);
+        }
+    }
+
+    @FXML
+    public void handleColorblind() {
+        if (radioButtonColorBlind.isSelected()) {
+            setStyleSheets("colorblindStyle.css");
+            canvas.setShader(Renderer.Shader.MONOTONE);
         }
     }
 
@@ -172,18 +170,10 @@ public class Controller implements MouseListener {
                 (float) Math.pow(1.05, mouseEvent.getRotation()[1]), mouseEvent.getX(), mouseEvent.getY());
     }
 
-    public void setStyleSheets(String stylesheet){
+    public void setStyleSheets(String stylesheet) {
         leftVBox.getStylesheets().clear();
-        leftVBox.getStylesheets()
-                            .add(getClass()
-                                    .getResource(stylesheet)
-                                        .toExternalForm()
-                                        );   
+        leftVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
         rightVBox.getStylesheets().clear();
-        rightVBox.getStylesheets()
-                            .add(getClass()
-                                    .getResource(stylesheet)
-                                        .toExternalForm()
-                                        );
+        rightVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
     }
 }

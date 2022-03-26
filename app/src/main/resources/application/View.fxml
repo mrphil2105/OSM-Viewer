@@ -7,6 +7,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.Menu?>
+<?import Search.AutofillTextField?>
+
 
 <Scene xmlns="http://javafx.com/javafx"
        xmlns:fx="http://javafx.com/fxml"
@@ -20,7 +22,7 @@
                 <Insets top="10" bottom="10" left="10" right="10" />
             </padding>
                 <GridPane alignment="center" hgap="10" vgap="10">
-                    <TextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <AutofillTextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0" GridPane.rowIndex="0" onKeyTyped="#handleKeyTyped"/>
                      <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="1">
                         <Button fx:id="searchButton" id="allButtons" text="Search" onAction="#handleSearchClick">
                         </Button>
@@ -56,10 +58,16 @@
                     </fx:define>
                     <RadioButton fx:id="radioButtonColorBlind" text="Colorblind mode" GridPane.columnIndex="0" GridPane.rowIndex="6" toggleGroup="$groupMode" onAction="#handleColorblind"/>
                     <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0" GridPane.rowIndex="7" toggleGroup="$groupMode" onAction="#handleDefaultMode"/>
-                    <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0" GridPane.rowIndex="8" toggleGroup="$groupMode"/>
+                    <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0" GridPane.rowIndex="8" toggleGroup="$groupMode" onAction="#handlePartyMode"/>
                 </GridPane>
             </VBox>
         </right>
+         <center>
+            <MapCanvas fx:id="canvas"
+                       prefWidth="1280"
+                       prefHeight="720"
+            />
+        </center>
         <top>
             <MenuBar>
                 <Menu text="Appearance">
