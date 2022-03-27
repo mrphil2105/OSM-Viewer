@@ -15,4 +15,20 @@ public record Point(float x, float y) {
 
         return dx * dx + dy * dy;
     }
+
+    // TODO: Find equations that can translate sphere to a flat earth
+    public static Point geoToMap(Point point, Rect bounds) {
+        return new Point(
+                (float) geoToMapX(point.x(), bounds),
+                (float) geoToMapY(point.y(), bounds)
+        );
+    }
+
+    public static double geoToMapX(double x, Rect bounds) {
+        return (x - (bounds.left() + bounds.right()) / 2) * 5600;
+    }
+
+    public static double geoToMapY(double y, Rect bounds) {
+        return (y - (bounds.left() + bounds.right()) / 2) * 10000;
+    }
 }
