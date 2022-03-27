@@ -2,19 +2,12 @@ package io;
 
 import drawing.Drawable;
 import drawing.Drawing;
+import drawing.Segment;
+import drawing.SegmentJoiner;
 import geometry.Vector2D;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.operation.linemerge.LineMerger;
-import osm.elements.OSMMemberWay;
-import osm.elements.OSMRelation;
-import osm.elements.OSMWay;
+import osm.elements.*;
 
 /** Writes Drawings to a file as they are finished */
 public class PolygonsWriter extends TempFileWriter {
@@ -74,38 +67,30 @@ public class PolygonsWriter extends TempFileWriter {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void onRelation(OSMRelation relation) {
         var drawable = Drawable.from(relation);
         if (drawable == Drawable.IGNORED || drawable == Drawable.UNKNOWN) return;
 
-        var lines = new ArrayList<Geometry>();
-        var geometryFactory = new GeometryFactory();
+        // Create line segments from all members and join them
+        var joiner =
+                new SegmentJoiner<>(
+                        relation.members().stream()
+                                .filter(m -> m.role() == OSMMemberWay.Role.OUTER)
+                                .map(OSMMemberWay::way)
+                                .map(SlimOSMWay::nodes)
+                                .map(Arrays::asList)
+                                .map(Segment<SlimOSMNode>::new)
+                                .toList());
+        joiner.join();
 
-        // TODO: Implement ourselves
-        // Transform members to line segments
-        relation.members().stream()
-                .filter(m -> m.role() == OSMMemberWay.Role.OUTER)
-                .map(
-                        m ->
-                                Arrays.stream(m.way().nodes())
-                                        .map(n -> new Coordinate(n.lon(), n.lat()))
-                                        .toArray(Coordinate[]::new))
-                .map(geometryFactory::createLineString)
-                .forEach(lines::add);
-
-        var merger = new LineMerger();
-        merger.add(lines);
-        Collection<LineString> merged = merger.getMergedLineStrings();
-
-        // Merge line segments into one large line and draw it
-        drawing.drawPolygon(
-                merged.stream()
-                        .flatMap(l -> Arrays.stream(l.getCoordinates()).map(c -> new Vector2D(c.x, c.y)))
-                        .toList(),
-                drawable,
-                vertexCount / 2,
-                true);
+        // Draw all the segments
+        for (var segment : joiner) {
+            drawing.drawPolygon(
+                    segment.stream().map(n -> new Vector2D(n.lon(), n.lat())).toList(),
+                    drawable,
+                    vertexCount / 2,
+                    true);
+        }
 
         if (drawing.byteSize() >= BUFFER_SIZE) writeDrawing();
     }

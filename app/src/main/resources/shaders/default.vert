@@ -7,8 +7,11 @@ uniform mat4 orthographic;
 uniform sampler1D color_map;
 uniform usampler1D map;
 uniform uint category_bitset;
+uniform float time;
 
 out vec4 vert_color;
+flat out float out_time;
+flat out int vert_drawable_id;
 
 void main()
 {
@@ -24,5 +27,7 @@ void main()
 
     gl_Position = orthographic * transform * vec4(position, float(layer) / size, 1.0);
 
+    vert_drawable_id = drawable_id;
+    out_time = time;
     vert_color = vec4(color.rgb, color.a * int((category_bitset & category) != 0u));
 }
