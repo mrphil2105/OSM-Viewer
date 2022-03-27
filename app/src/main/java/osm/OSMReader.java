@@ -8,6 +8,9 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
+import geometry.Point;
+import geometry.Rect;
 import osm.elements.*;
 import osm.tables.NodeTable;
 import osm.tables.RelationTable;
@@ -33,7 +36,7 @@ public class OSMReader {
 
     private OSMElement current;
     private final List<SlimOSMNode> wayNdList = new ArrayList<>();
-    private OSMBounds bounds;
+    private Rect bounds;
     // IntelliJ's static analysis says this can be made local. Don't be fooled - it can't.
     private boolean advanceAfter;
 
@@ -79,7 +82,7 @@ public class OSMReader {
         }
 
         bounds =
-                new OSMBounds(
+                new Rect(
                         getDouble("minlat"), getDouble("minlon"), getDouble("maxlat"), getDouble("maxlon"));
         advance();
 
@@ -111,12 +114,10 @@ public class OSMReader {
     }
 
     private void parseNode() {
-        var node =
-                new OSMNode(
+        var node = new OSMNode(
                         getLong("id"),
-                        // TODO: Find equations that can translate sphere to a flat earth
-                        (getDouble("lon") - (bounds.minlon() + bounds.maxlon()) / 2) * 5600,
-                        (getDouble("lat") - (bounds.minlat() + bounds.maxlat()) / 2) * 10000);
+                        Point.geoToMapX(getDouble("lon"), bounds),
+                        Point.geoToMapY(getDouble("lat"), bounds));
         current = node;
 
         advance();
