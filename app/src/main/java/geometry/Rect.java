@@ -1,6 +1,6 @@
 package geometry;
 
-public record Rect(float left, float top, float right, float bottom) {
+public record Rect(float top, float left, float bottom, float right) {
     public Rect(Point topLeft, Point bottomRight) {
         this(topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
     }
