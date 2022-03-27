@@ -97,12 +97,12 @@ public class Controller implements MouseListener {
     }
 
     @FXML
-    public void handleKeyTyped(){
+    public void handleKeyTyped() {
         searchTextField.handleSearchChange(searchTextField.getText());
     }
 
     @FXML
-    public void handleSearchClick(){
+    public void handleSearchClick() {
         searchTextField.clear();
     }
 
@@ -166,8 +166,17 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseWheelMoved(MouseEvent mouseEvent) {
-        canvas.zoom(
-                (float) Math.pow(1.05, mouseEvent.getRotation()[1]), mouseEvent.getX(), mouseEvent.getY());
+        if (mouseEvent.getRotation()[0] == 0.0) {
+            canvas.zoom(
+                    (float) Math.pow(1.05, mouseEvent.getRotation()[1]),
+                    mouseEvent.getX(),
+                    mouseEvent.getY());
+        } else {
+            canvas.zoom(
+                    (float) Math.pow(1.15, mouseEvent.getRotation()[0]),
+                    mouseEvent.getX(),
+                    mouseEvent.getY());
+        }
     }
 
     public void setStyleSheets(String stylesheet) {
