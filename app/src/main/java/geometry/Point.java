@@ -18,10 +18,7 @@ public record Point(float x, float y) {
 
     // TODO: Find equations that can translate sphere to a flat earth
     public static Point geoToMap(Point point, Rect bounds) {
-        return new Point(
-                (float) geoToMapX(point.x(), bounds),
-                (float) geoToMapY(point.y(), bounds)
-        );
+        return new Point((float) geoToMapX(point.x(), bounds), (float) geoToMapY(point.y(), bounds));
     }
 
     public static double geoToMapX(double x, Rect bounds) {
