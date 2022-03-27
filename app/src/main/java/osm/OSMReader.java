@@ -1,5 +1,7 @@
 package osm;
 
+import geometry.Point;
+import geometry.Rect;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,9 +10,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
-import geometry.Point;
-import geometry.Rect;
 import osm.elements.*;
 import osm.tables.NodeTable;
 import osm.tables.RelationTable;
@@ -114,7 +113,8 @@ public class OSMReader {
     }
 
     private void parseNode() {
-        var node = new OSMNode(
+        var node =
+                new OSMNode(
                         getLong("id"),
                         Point.geoToMapX(getDouble("lon"), bounds),
                         Point.geoToMapY(getDouble("lat"), bounds));
