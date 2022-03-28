@@ -105,6 +105,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
     public List<Address> search(AddressBuilder input){
         return null;
+        //TODO
     }
 
     public List<Address> autofillSearch(AddressBuilder input, int maxEntries) {
@@ -127,9 +128,6 @@ public class AddressDatabase implements OSMObserver, Serializable {
         if(inputAddress.houseNumber() !=null){
             //we know that we must have a full street name, and since there probably isn't that many streets with the
             // same address it shouldn't take long to go through them linearly, to check if they have the specified house number
-
-
-
             var set = new HashSet<AddressBuilder>();
 
             filteringSet.stream().filter(e -> e.getHouse().startsWith(inputAddress.houseNumber())).forEach(set::add);
@@ -161,11 +159,15 @@ public class AddressDatabase implements OSMObserver, Serializable {
         }
 
 
-        filteringSet.stream().limit(maxEntries).forEach(e -> {
-            if(parsedStreetsAndCities.add(e.getStreet() + "|" + e.getPostcode())){
-                results.add(e.build());
-            }
-        });
+        if(inputAddress.houseNumber() != null){
+            filteringSet.stream().limit(maxEntries).forEach(e -> results.add(e.build()));
+        } else{
+            filteringSet.stream().limit(maxEntries).forEach(e -> {
+                if(parsedStreetsAndCities.add(e.getStreet() + "|" + e.getPostcode())){
+                    results.add(e.build());
+                }
+            });
+        }
 
         return results;
 
