@@ -95,11 +95,11 @@ public class NearestNeighbor implements OSMObserver, Serializable {
 
         var halfSize = nodes.length / 2;
         var median = nodes[halfSize];
-        var point = new Point((float)median.getKey().lat(), (float)median.getKey().lon());
+        var point = new Point((float)median.getKey().lon(), (float)median.getKey().lat());
 
         if (nodes.length <= 1000) {
             var points = Arrays.stream(nodes)
-                .map(p -> new Point((float)p.getKey().lat(), (float)p.getKey().lon()))
+                .map(p -> new Point((float)p.getKey().lon(), (float)p.getKey().lat()))
                 .toList();
             var names = Arrays.stream(nodes)
                 .map(Pair::getValue)
