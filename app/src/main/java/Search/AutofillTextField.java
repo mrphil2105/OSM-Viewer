@@ -4,6 +4,7 @@ import javafx.geometry.Side;
 import javafx.scene.control.TextField;
 
 import java.util.List;
+import java.util.Locale;
 
 public class AutofillTextField extends TextField {
     AutofillContextMenu popupEntries;
@@ -32,6 +33,8 @@ public class AutofillTextField extends TextField {
                 return;
             };
 
+            searchedAddressBuilder.street(capitalize(searchedAddressBuilder.getStreet()));
+            searchedAddressBuilder.city(capitalize(searchedAddressBuilder.getCity()));
 
             var searchedAddress = searchedAddressBuilder.build();
 
@@ -40,6 +43,8 @@ public class AutofillTextField extends TextField {
             boolean showCity = (searchedAddress.city() != null);
             boolean showPostcode = (searchedAddress.postcode() != null);
             if(searchedAddress.street() != null) showCity = true;
+
+            //TODO evt. lav alle bogstaver store i starten af ord
 
 
             results = addressDatabase.autofillSearch(searchedAddressBuilder,5);
@@ -55,6 +60,20 @@ public class AutofillTextField extends TextField {
                 popupEntries.show(this, Side.BOTTOM, 0, 0);
             }
         }
+    }
+    private String capitalize(String string){
+        if(string == null) return null;
+
+        var stringBuilder = new StringBuilder();
+        var split = string.split(" ");
+        for(String s : split){
+            char[] charArray = s.toCharArray();
+            charArray[0] = Character.toUpperCase(charArray[0]);
+            var result = new String(charArray);
+            stringBuilder.append(result);
+        }
+
+        return stringBuilder.toString();
     }
 
     public void showHistory(List<Address> history){
