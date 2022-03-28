@@ -2,8 +2,7 @@
 
 in vec2 position;
 in int drawable_id;
-uniform mat4 transform;
-uniform mat4 orthographic;
+uniform mat4 projection;
 uniform sampler1D color_map;
 uniform usampler1D map;
 uniform uint category_bitset;
@@ -30,5 +29,5 @@ void main()
 
     draw = category_bitset & category;
 
-    gl_Position = orthographic * transform * vec4(position, float(layer) / size, 1.0);
+    gl_Position = projection * vec4(position, float(layer) / size, 1.0);
 }

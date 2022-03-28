@@ -1,6 +1,8 @@
 package geometry;
 
-public record Rect(double top, double left, double bottom, double right) {
+import java.io.Serializable;
+
+public record Rect(double top, double left, double bottom, double right) implements Serializable {
     public Rect(Point topLeft, Point bottomRight) {
         this(topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
     }
@@ -19,6 +21,10 @@ public record Rect(double top, double left, double bottom, double right) {
 
     public Point getBottomRight() {
         return new Point((float) right(), (float) bottom());
+    }
+
+    public Point center() {
+        return new Point((float) (left + right) / 2, (float) (top + bottom) / 2);
     }
 
     public float distanceTo(Point point) {

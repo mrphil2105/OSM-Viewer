@@ -4,6 +4,7 @@ import Search.AutofillTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
+import geometry.Point;
 import java.util.Arrays;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -124,7 +125,7 @@ public class Controller implements MouseListener {
     public void handleColorblind() {
         if (radioButtonColorBlind.isSelected()) {
             setStyleSheets("colorblindStyle.css");
-            canvas.setShader(Renderer.Shader.MONOTONE);
+            canvas.setShader(Renderer.Shader.MONOCHROME);
         }
     }
 
@@ -184,5 +185,9 @@ public class Controller implements MouseListener {
         leftVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
         rightVBox.getStylesheets().clear();
         rightVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
+    }
+
+    public void centerOn(Point point) {
+        canvas.center(point);
     }
 }

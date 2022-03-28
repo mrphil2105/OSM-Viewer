@@ -1,6 +1,5 @@
 package osm;
 
-import geometry.Point;
 import geometry.Rect;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ public class OSMReader {
 
     private OSMElement current;
     private final List<SlimOSMNode> wayNdList = new ArrayList<>();
-    private Rect bounds;
     // IntelliJ's static analysis says this can be made local. Don't be fooled - it can't.
     private boolean advanceAfter;
 
@@ -80,7 +78,7 @@ public class OSMReader {
             advance();
         }
 
-        bounds =
+        var bounds =
                 new Rect(
                         getDouble("minlat"), getDouble("minlon"), getDouble("maxlat"), getDouble("maxlon"));
         advance();
@@ -113,11 +111,7 @@ public class OSMReader {
     }
 
     private void parseNode() {
-        var node =
-                new OSMNode(
-                        getLong("id"),
-                        Point.geoToMapX(getDouble("lon"), bounds),
-                        Point.geoToMapY(getDouble("lat"), bounds));
+        var node = new OSMNode(getLong("id"), getDouble("lon"), getDouble("lat"));
         current = node;
 
         advance();
