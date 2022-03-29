@@ -187,7 +187,7 @@ public class Controller implements MouseListener {
         rightVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
     }
 
-    public void centerOn(Point point) {
+    public void center(Point point) {
         canvas.center(point);
     }
 }
