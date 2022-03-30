@@ -191,9 +191,8 @@ public class Model {
         return nearestRoad.get();
     }
 
-    public void setQueryPoint(Point2D query) {
-        var point = new Point((float) query.getX(), (float) query.getY());
-        var road = nearestNeighbor.nearestTo(point);
+    public void setQueryPoint(Point query) {
+        var road = nearestNeighbor.nearestTo(query);
         nearestRoadProperty().set(road);
         System.out.println("Nearest Road: " + road);
     }

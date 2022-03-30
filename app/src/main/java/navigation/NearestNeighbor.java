@@ -28,12 +28,10 @@ public class NearestNeighbor implements OSMObserver, Serializable {
 
     @Override
     public void onBounds(Rect bounds) {
-        twoDTree =
-                new TwoDTree<>(
-                        (float) (bounds.left() - (bounds.left() + bounds.right()) / 2) * 5600,
-                        (float) (bounds.top() - (bounds.top() + bounds.bottom()) / 2) * 10000,
-                        (float) (bounds.right() - (bounds.left() + bounds.right()) / 2) * 5600,
-                        (float) (bounds.bottom() - (bounds.top() + bounds.bottom()) / 2) * 10000);
+        twoDTree = new TwoDTree<>((float)bounds.left(),
+            (float)bounds.top(),
+            (float)bounds.right(),
+            (float)bounds.bottom());
     }
 
     @Override

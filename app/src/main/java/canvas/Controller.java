@@ -159,8 +159,8 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
-        var mousePoint = new Point2D(mouseEvent.getX(), mouseEvent.getY());
-        var queryPoint = canvas.mouseToModel(mousePoint);
+        var mousePoint = new Point(mouseEvent.getX(), mouseEvent.getY());
+        var queryPoint = Point.mapToGeo(canvas.canvasToMap(mousePoint));
         model.setQueryPoint(queryPoint);
     }
 

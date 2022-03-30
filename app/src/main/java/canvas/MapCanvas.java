@@ -113,12 +113,4 @@ public class MapCanvas extends Region {
         transform.setTx(-center.x() * transform.getMxx() + getWidth() / 2);
         transform.setTy(-center.y() * transform.getMyy() + getHeight() / 2);
     }
-
-    public Point2D mouseToModel(Point2D point) {
-        try {
-            return transform.inverseTransform(point);
-        } catch (NonInvertibleTransformException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
