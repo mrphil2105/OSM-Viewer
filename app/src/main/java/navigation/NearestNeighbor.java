@@ -67,7 +67,6 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     }
 
     public String nearestTo(Point point) {
-        if (true) return "";
         var nearestResult = twoDTree.nearest(point);
 
         if (nearestResult.value() instanceof AncestorNode node) {
