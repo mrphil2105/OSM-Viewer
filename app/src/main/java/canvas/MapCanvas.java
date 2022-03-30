@@ -111,5 +111,12 @@ public class MapCanvas extends Region {
     public void center(Point center) {
         transform.setTx(-center.x() * transform.getMxx() + getWidth() / 2);
         transform.setTy(-center.y() * transform.getMyy() + getHeight() / 2);
+
+    }
+
+    public void setZoom(float zoom){
+        transform.setMxx(zoom);
+        transform.setMyy(zoom);
+
     }
 }
