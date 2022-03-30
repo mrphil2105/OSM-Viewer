@@ -55,5 +55,7 @@ public class AutofillContextMenu extends ContextMenu {
         }else{
             text.end();
         }
+
+        ((AutofillTextField)text).setCurrentAddress(menuAddress);
     }
 }
