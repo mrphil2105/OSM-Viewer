@@ -2,7 +2,7 @@ package navigation;
 
 import java.util.Comparator;
 
-class EdgeComparer implements Comparator<Edge> {
+class EdgeComparator implements Comparator<Edge> {
     private EdgeRole mode = EdgeRole.CAR;
 
     public void setMode(EdgeRole mode) {
