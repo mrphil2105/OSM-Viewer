@@ -75,6 +75,8 @@ public class AutofillTextField extends TextField {
     private String capitalize(String string){
         if(string == null) return null;
 
+        string = string.toLowerCase();
+
         var stringBuilder = new StringBuilder();
         var split = string.split(" ");
         for(String s : split){
@@ -93,6 +95,7 @@ public class AutofillTextField extends TextField {
         if(searchedAddressBuilder == null){
             return null;
         };
+
 
         searchedAddressBuilder.street(capitalize(searchedAddressBuilder.getStreet()));
         searchedAddressBuilder.city(capitalize(searchedAddressBuilder.getCity()));
