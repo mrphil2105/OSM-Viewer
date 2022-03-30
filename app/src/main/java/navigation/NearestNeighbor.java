@@ -1,21 +1,20 @@
 package navigation;
 
-import collections.spacial.Point;
-import collections.spacial.TwoDTree;
-import javafx.util.Pair;
-import osm.OSMObserver;
-import osm.elements.OSMBounds;
-import osm.elements.OSMTag;
-import osm.elements.OSMWay;
-import osm.elements.SlimOSMNode;
+import static osm.elements.OSMTag.Key.HIGHWAY;
+import static osm.elements.OSMTag.Key.NAME;
 
+import collections.spacial.TwoDTree;
+import geometry.Point;
+import geometry.Rect;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static osm.elements.OSMTag.Key.HIGHWAY;
-import static osm.elements.OSMTag.Key.NAME;
+import javafx.util.Pair;
+import osm.OSMObserver;
+import osm.elements.OSMTag;
+import osm.elements.OSMWay;
+import osm.elements.SlimOSMNode;
 
 public class NearestNeighbor implements OSMObserver, Serializable {
     private transient List<Pair<SlimOSMNode, String>> nodeCache = new ArrayList<>();
@@ -28,11 +27,13 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     }
 
     @Override
-    public void onBounds(OSMBounds bounds) {
-        twoDTree = new TwoDTree<>((float)(bounds.minlon() - (bounds.minlon() + bounds.maxlon()) / 2) * 5600,
-            (float)(bounds.minlat() - (bounds.minlat() + bounds.maxlat()) / 2) * 10000,
-            (float)(bounds.maxlon() - (bounds.minlon() + bounds.maxlon()) / 2) * 5600,
-            (float)(bounds.maxlat() - (bounds.minlat() + bounds.maxlat()) / 2) * 10000);
+    public void onBounds(Rect bounds) {
+        twoDTree =
+                new TwoDTree<>(
+                        (float) (bounds.left() - (bounds.left() + bounds.right()) / 2) * 5600,
+                        (float) (bounds.top() - (bounds.top() + bounds.bottom()) / 2) * 10000,
+                        (float) (bounds.right() - (bounds.left() + bounds.right()) / 2) * 5600,
+                        (float) (bounds.bottom() - (bounds.top() + bounds.bottom()) / 2) * 10000);
     }
 
     @Override
@@ -62,19 +63,20 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         var nodes = nodeCache;
         nodeCache = null;
         //noinspection unchecked
-        addToTree(nodes.toArray(((Pair<SlimOSMNode, String>[])new Pair[0])), 0);
+        addToTree(nodes.toArray(((Pair<SlimOSMNode, String>[]) new Pair[0])), 0);
 
         var road = nearestTo(new Point(0, 0));
     }
 
     public String nearestTo(Point point) {
+        if (true) return "";
         var nearestResult = twoDTree.nearest(point);
 
         if (nearestResult.value() instanceof AncestorNode node) {
             return node.name();
         }
 
-        var node = (LeafNode)nearestResult.value();
+        var node = (LeafNode) nearestResult.value();
         var points = node.points();
         float shortest = Float.MAX_VALUE;
         var bestIndex = 0;
@@ -92,21 +94,23 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     }
 
     private void addToTree(Pair<SlimOSMNode, String>[] nodes, int level) {
-        Arrays.sort(nodes, (first, second) -> (level & 1) == 0 ?
-            Double.compare(first.getKey().lon(), second.getKey().lon()) :
-            Double.compare(first.getKey().lat(), second.getKey().lat()));
+        Arrays.sort(
+                nodes,
+                (first, second) ->
+                        (level & 1) == 0
+                                ? Double.compare(first.getKey().lon(), second.getKey().lon())
+                                : Double.compare(first.getKey().lat(), second.getKey().lat()));
 
         var halfSize = nodes.length / 2;
         var median = nodes[halfSize];
-        var point = new Point((float)median.getKey().lon(), (float)median.getKey().lat());
+        var point = new Point((float) median.getKey().lon(), (float) median.getKey().lat());
 
         if (nodes.length <= 1000) {
-            var points = Arrays.stream(nodes)
-                .map(p -> new Point((float)p.getKey().lon(), (float)p.getKey().lat()))
-                .toList();
-            var names = Arrays.stream(nodes)
-                .map(Pair::getValue)
-                .toList();
+            var points =
+                    Arrays.stream(nodes)
+                            .map(p -> new Point((float) p.getKey().lon(), (float) p.getKey().lat()))
+                            .toList();
+            var names = Arrays.stream(nodes).map(Pair::getValue).toList();
             var node = new LeafNode(points, names);
             twoDTree.insert(point, node);
 
@@ -122,12 +126,9 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         addToTree(secondHalf, level + 1);
     }
 
-    private interface Node extends Serializable {
-    }
+    private interface Node extends Serializable {}
 
-    private record AncestorNode(String name) implements Node {
-    }
+    private record AncestorNode(String name) implements Node {}
 
-    private record LeafNode(List<Point> points, List<String> names) implements Node {
-    }
+    private record LeafNode(List<Point> points, List<String> names) implements Node {}
 }

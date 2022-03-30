@@ -1,21 +1,28 @@
 package io;
 
+import Search.AddressDatabase;
 import java.io.*;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 import javafx.util.Pair;
 import javax.xml.stream.XMLStreamException;
 import navigation.Dijkstra;
 import navigation.NearestNeighbor;
+import org.anarres.parallelgzip.ParallelGZIPInputStream;
+import org.anarres.parallelgzip.ParallelGZIPOutputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.archivers.tar.TarFile;
+import org.apache.commons.compress.utils.IOUtils;
 import osm.OSMReader;
+import osm.elements.OSMBounds;
 
 // TODO: Use a custom exception type instead of RuntimeException for when parsing fails.
 public class FileParser implements IOConstants {
-    private static final String EXT = ".zip";
+    private static final String EXT = ".gz.tar";
     private static final String POLYGONS = "polygons";
     private static final String NEAREST_NEIGHBOR = "nearest-neighbor";
     private static final String DIJKSTRA = "dijkstra";
+    private static final String ADDRESSES = "addresses";
+    private static final String BOUNDS = "bounds";
 
     public static ReadResult readFile(String filename) throws IOException, XMLStreamException {
         if (filename.matches(".*(\\.osm|\\.xml)(\\.zip)?$")) {
@@ -36,13 +43,20 @@ public class FileParser implements IOConstants {
         var polygonsWriter = new PolygonsWriter();
         var nearestNeighborWriter = new ObjectWriter<>(new NearestNeighbor());
         var dijkstraWriter = new ObjectWriter<>(new Dijkstra());
-        reader.addObservers(polygonsWriter, nearestNeighborWriter, dijkstraWriter);
+        var addressWriter = new ObjectWriter<>(new AddressDatabase());
+        var boundsWriter = new ObjectWriter<>(new OSMBounds());
+        reader.addObservers(polygonsWriter, dijkstraWriter, addressWriter, boundsWriter);
 
         reader.parse(getInputStream(infile));
 
         var outfile = infile.split("\\.")[0] + EXT;
         createMapFromWriters(
-                outfile, new Pair<>(POLYGONS, polygonsWriter), new Pair<>(NEAREST_NEIGHBOR, nearestNeighborWriter), new Pair<>(DIJKSTRA, dijkstraWriter));
+                outfile,
+                new Pair<>(POLYGONS, polygonsWriter),
+                new Pair<>(NEAREST_NEIGHBOR, nearestNeighborWriter),
+                new Pair<>(DIJKSTRA, dijkstraWriter),
+                new Pair<>(ADDRESSES, addressWriter),
+                new Pair<>(BOUNDS, boundsWriter));
 
         return outfile;
     }
@@ -50,26 +64,47 @@ public class FileParser implements IOConstants {
     @SafeVarargs
     private static void createMapFromWriters(String outfile, Pair<String, Writer>... pairs)
             throws IOException {
-        try (var zipStream =
-                new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(outfile), BUFFER_SIZE))) {
+        try (var tarStream =
+                new TarArchiveOutputStream(
+                        new BufferedOutputStream(new FileOutputStream(outfile), BUFFER_SIZE))) {
             for (var pair : pairs) {
-                zipStream.putNextEntry(new ZipEntry(pair.getKey()));
-                pair.getValue().writeTo(zipStream);
-                zipStream.flush();
+                var file = writeToFile(pair.getValue());
+                var entry = tarStream.createArchiveEntry(file, pair.getKey());
+                tarStream.putArchiveEntry(entry);
+                IOUtils.copy(file, tarStream);
+                tarStream.closeArchiveEntry();
             }
         }
     }
 
-    private static ReadResult readMap(String filename) throws IOException {
-        var zipFile = new ZipFile(filename);
-        return new ReadResult(
-                new PolygonsReader(getEntryStream(POLYGONS, zipFile)),
-                new ObjectReader<>(getEntryStream(NEAREST_NEIGHBOR, zipFile)),
-                new ObjectReader<>(getEntryStream(DIJKSTRA, zipFile)));
+    private static File writeToFile(Writer writer) throws IOException {
+        var file = File.createTempFile("osm", "");
+        file.deleteOnExit();
+        try (var pigzStream = new ParallelGZIPOutputStream(new FileOutputStream(file))) {
+            writer.writeTo(pigzStream);
+            pigzStream.flush();
+        }
+        return file;
     }
 
-    private static ObjectInputStream getEntryStream(String name, ZipFile zipFile) throws IOException {
-        return new ObjectInputStream(zipFile.getInputStream(zipFile.getEntry(name)));
+    private static ReadResult readMap(String filename) throws IOException {
+        var tarFile = new TarFile(new File(filename));
+        return new ReadResult(
+                new PolygonsReader(getEntryStream(POLYGONS, tarFile)),
+                new ObjectReader<>(getEntryStream(NEAREST_NEIGHBOR, tarFile)),
+                new ObjectReader<>(getEntryStream(DIJKSTRA, tarFile)),
+                new ObjectReader<>(getEntryStream(ADDRESSES, tarFile)),
+                new ObjectReader<>(getEntryStream(BOUNDS, tarFile)));
+    }
+
+    private static ObjectInputStream getEntryStream(String name, TarFile tarFile) throws IOException {
+        return new ObjectInputStream(
+                new ParallelGZIPInputStream(
+                        tarFile.getInputStream(
+                                tarFile.getEntries().stream()
+                                        .filter(e -> e.getName().equals(name))
+                                        .findFirst()
+                                        .orElseThrow())));
     }
 
     private static InputStream getInputStream(String filename) throws IOException {

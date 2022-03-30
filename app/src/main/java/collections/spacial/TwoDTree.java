@@ -1,5 +1,7 @@
 package collections.spacial;
 
+import geometry.Point;
+import geometry.Rect;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,7 @@ public class TwoDTree<E> implements SpacialTree<E>, Serializable {
 
         if (isEmpty()) {
             root = insert(point, value, root, 0);
-            root.rect = new Rect(left, top, right, bottom);
+            root.rect = new Rect(top, left, bottom, right);
         } else {
             root = insert(point, value, root, 1);
         }
@@ -64,14 +66,14 @@ public class TwoDTree<E> implements SpacialTree<E>, Serializable {
 
                 // If the child node has an uninitialized rect we initialize it.
                 if (node.left.rect == null) {
-                    node.left.rect = new Rect(node.rect.left(), node.rect.top(), node.rect.right(), node.y());
+                    node.left.rect = new Rect(node.rect.top(), node.rect.left(), node.y(), node.rect.right());
                 }
             } else {
                 node.right = insert(point, value, node.right, level + 1);
 
                 if (node.right.rect == null) {
                     node.right.rect =
-                            new Rect(node.rect.left(), node.y(), node.rect.right(), node.rect.bottom());
+                            new Rect(node.y(), node.rect.left(), node.rect.bottom(), node.rect.right());
                 }
             }
         } else {
@@ -83,14 +85,14 @@ public class TwoDTree<E> implements SpacialTree<E>, Serializable {
 
                 if (node.left.rect == null) {
                     node.left.rect =
-                            new Rect(node.rect.left(), node.rect.top(), node.x(), node.rect.bottom());
+                            new Rect(node.rect.top(), node.rect.left(), node.rect.bottom(), node.x());
                 }
             } else {
                 node.right = insert(point, value, node.right, level + 1);
 
                 if (node.right.rect == null) {
                     node.right.rect =
-                            new Rect(node.x(), node.rect.top(), node.rect.right(), node.rect.bottom());
+                            new Rect(node.rect.top(), node.x(), node.rect.bottom(), node.rect.right());
                 }
             }
         }

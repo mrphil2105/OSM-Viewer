@@ -1,5 +1,8 @@
 package collections.spacial;
 
+import geometry.Point;
+import geometry.Rect;
+
 public interface SpacialTree<E> {
     int size();
 
