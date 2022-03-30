@@ -45,7 +45,7 @@ public class FileParser implements IOConstants {
         var dijkstraWriter = new ObjectWriter<>(new Dijkstra());
         var addressWriter = new ObjectWriter<>(new AddressDatabase());
         var boundsWriter = new ObjectWriter<>(new OSMBounds());
-        reader.addObservers(polygonsWriter, dijkstraWriter, addressWriter, boundsWriter);
+        reader.addObservers(polygonsWriter, nearestNeighborWriter, dijkstraWriter, addressWriter, boundsWriter);
 
         reader.parse(getInputStream(infile));
 
