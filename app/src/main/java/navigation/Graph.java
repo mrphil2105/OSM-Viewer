@@ -10,7 +10,7 @@ import java.util.Map;
 class Graph implements Serializable {
     private final int vertexCount;
     // Use a hashmap to support non-index values.
-    private final Map<Integer, List<Edge>> adjacentEdges;
+    private final Map<Long, List<Edge>> adjacentEdges;
     private int edgeCount;
 
     public Graph(int vertexCount) {
