@@ -10,7 +10,7 @@ public class AutofillTextField extends TextField {
     AutofillContextMenu popupEntries;
     AddressDatabase addressDatabase;
 
-    public AutofillTextField(){
+    public AutofillTextField(){ //TODO: rename to SearchTextField
     }
 
     public void init(AddressDatabase addressDatabase){
@@ -18,25 +18,40 @@ public class AutofillTextField extends TextField {
         popupEntries = new AutofillContextMenu(this, addressDatabase);
     }
 
-    public void handleSearchChange(String text){
-        int inputLength = getText().length();
-        if(inputLength == 0){
+
+    public void handleSearch() {
+        var parsedAddress = parseAddress();
+        if(parsedAddress == null){
+            // throw new Exception("No match");
+            //TODO display error "message" to user
+            return;
+        }
+        var results = addressDatabase.search(parsedAddress);
+        if(results == null){
+            //TODO display error "message" to user
+            return;
+        }
+
+        if(results.size() == 1){
+            var result = results.get(0).node();
+            System.out.println("Found node with lat: " + result.lat() + " and lon: " + result.lon());
+        } else{
+            System.out.println("SIZE: " + results.size());
+        }
+    }
+
+    public void handleSearchChange(){
+        if(getText().length() == 0){
             popupEntries.hide();
             showHistory(addressDatabase.getHistory());
         } else{
             List<Address> results;
 
+            var searchedAddress = parseAddress();
+            if(searchedAddress == null) return;
 
-            var searchedAddressBuilder = AddressDatabase.parse(getText());
+            results = addressDatabase.possibleAddresses(searchedAddress,5);
 
-            if(searchedAddressBuilder == null){
-                return;
-            };
-
-            searchedAddressBuilder.street(capitalize(searchedAddressBuilder.getStreet()));
-            searchedAddressBuilder.city(capitalize(searchedAddressBuilder.getCity()));
-
-            var searchedAddress = searchedAddressBuilder.build();
 
             boolean showStreet = (searchedAddress.street() != null);
             boolean showHouse = (searchedAddress.houseNumber() != null);
@@ -44,10 +59,6 @@ public class AutofillTextField extends TextField {
             boolean showPostcode = (searchedAddress.postcode() != null);
             if(searchedAddress.street() != null) showCity = true;
 
-            //TODO evt. lav alle bogstaver store i starten af ord
-
-
-            results = addressDatabase.autofillSearch(searchedAddressBuilder,5);
             popupEntries.getItems().clear();
 
             for(Address a : results){
@@ -74,6 +85,19 @@ public class AutofillTextField extends TextField {
         }
 
         return stringBuilder.toString();
+    }
+
+    private Address parseAddress(){
+        var searchedAddressBuilder = AddressDatabase.parse(getText());
+
+        if(searchedAddressBuilder == null){
+            return null;
+        };
+
+        searchedAddressBuilder.street(capitalize(searchedAddressBuilder.getStreet()));
+        searchedAddressBuilder.city(capitalize(searchedAddressBuilder.getCity()));
+
+        return searchedAddressBuilder.build();
     }
 
     public void showHistory(List<Address> history){
