@@ -5,6 +5,12 @@ import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
 import java.util.Arrays;
+import java.util.EventListener;
+
+import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
@@ -98,11 +104,12 @@ public class Controller implements MouseListener {
 
     @FXML
     public void handleKeyTyped(){
-        searchTextField.handleSearchChange(searchTextField.getText());
+        searchTextField.handleSearchChange();
     }
 
     @FXML
     public void handleSearchClick(){
+        searchTextField.handleSearch();
         searchTextField.clear();
     }
 
