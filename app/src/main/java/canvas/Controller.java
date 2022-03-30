@@ -104,7 +104,11 @@ public class Controller implements MouseListener {
 
     @FXML
     public void handleSearchClick() {
-        searchTextField.clear();
+        if (searchTextField.getCurrentAddress()==null) return;
+        Point point = Point.geoToMap(new Point((float)searchTextField.getCurrentAddress().node().lon(),(float)searchTextField.getCurrentAddress().node().lat()));
+        canvas.setZoom(25);
+        canvas.center(point);
+
     }
 
     @FXML
