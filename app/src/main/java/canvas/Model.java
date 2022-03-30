@@ -1,9 +1,9 @@
 package canvas;
 
-import Search.Address;
 import Search.AddressDatabase;
 import com.jogamp.opengl.*;
 import drawing.Drawable;
+import geometry.Rect;
 import io.FileParser;
 import io.PolygonsReader;
 
@@ -17,9 +17,9 @@ public class Model {
     private final GLAutoDrawable sharedDrawable;
     private final IntBuffer vbo = IntBuffer.allocate(VBOType.values().length);
     private final IntBuffer tex = IntBuffer.allocate(TexType.values().length);
+    public final Rect bounds;
     private int indexCount;
     AddressDatabase addresses;
-
 
     public Model(String filename) throws Exception {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
@@ -34,11 +34,11 @@ public class Model {
         sharedDrawable.display();
 
         try (var result = FileParser.readFile(filename)) {
+            bounds = result.bounds().read().getRect();
             loadPolygons(result.polygons());
-            addresses=result.addresses().read();
+            addresses = result.addresses().read();
             addresses.buildTries();
         }
-
     }
 
     private void loadPolygons(PolygonsReader reader) {
