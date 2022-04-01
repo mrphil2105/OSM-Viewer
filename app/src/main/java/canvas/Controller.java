@@ -6,6 +6,12 @@ import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
+import java.util.EventListener;
+
+import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
@@ -99,16 +105,16 @@ public class Controller implements MouseListener {
 
     @FXML
     public void handleKeyTyped() {
-        searchTextField.handleSearchChange(searchTextField.getText());
+        searchTextField.handleSearchChange();
     }
 
     @FXML
     public void handleSearchClick() {
-        if (searchTextField.getCurrentAddress()==null) return;
-        Point point = Point.geoToMap(new Point((float)searchTextField.getCurrentAddress().node().lon(),(float)searchTextField.getCurrentAddress().node().lat()));
+        var address = searchTextField.handleSearch();
+        if (address == null) return; //TODO: handle exception and show message?
+        Point point = Point.geoToMap(new Point((float)address.node().lon(),(float)address.node().lat()));
         canvas.setZoom(25);
         canvas.center(point);
-
     }
 
     @FXML
