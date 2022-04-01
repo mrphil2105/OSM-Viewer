@@ -55,7 +55,11 @@ public class Dijkstra implements OSMObserver, Serializable {
 
     public Map<Long, Edge> shortestPath(long sourceVertex, EdgeRole mode) {
         this.mode = mode;
+
         distTo.clear();
+        edgeTo.clear();
+        settled.clear();
+        queue.clear();
 
         queue.add(new Node(sourceVertex, 0));
         distTo.put(sourceVertex, 0f);
