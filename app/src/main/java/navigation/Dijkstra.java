@@ -58,6 +58,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         distTo.clear();
 
         queue.add(new Node(sourceVertex, 0));
+        distTo.put(sourceVertex, 0f);
 
         while (!queue.isEmpty()) {
             var vertex = queue.remove().vertex;
