@@ -1,17 +1,12 @@
 package canvas;
 
-import Search.AutofillTextField;
+import Search.SearchTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
-import java.util.EventListener;
 
-import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
@@ -23,7 +18,7 @@ public class Controller implements MouseListener {
 
     @FXML private MapCanvas canvas;
 
-    @FXML private AutofillTextField searchTextField;
+    @FXML private SearchTextField searchTextField;
 
     @FXML private TextField fromRouteTextField;
 
@@ -115,6 +110,12 @@ public class Controller implements MouseListener {
         Point point = Point.geoToMap(new Point((float)address.node().lon(),(float)address.node().lat()));
         canvas.setZoom(25);
         canvas.center(point);
+        searchTextField.clear();
+    }
+
+    @FXML
+    public void handleInFocus(){
+        searchTextField.showHistory();
     }
 
     @FXML
