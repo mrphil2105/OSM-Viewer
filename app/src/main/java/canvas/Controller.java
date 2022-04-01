@@ -4,7 +4,14 @@ import Search.AutofillTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
+import geometry.Point;
 import java.util.Arrays;
+import java.util.EventListener;
+
+import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
@@ -97,13 +104,17 @@ public class Controller implements MouseListener {
     }
 
     @FXML
-    public void handleKeyTyped(){
-        searchTextField.handleSearchChange(searchTextField.getText());
+    public void handleKeyTyped() {
+        searchTextField.handleSearchChange();
     }
 
     @FXML
-    public void handleSearchClick(){
-        searchTextField.clear();
+    public void handleSearchClick() {
+        var address = searchTextField.handleSearch();
+        if (address == null) return; //TODO: handle exception and show message?
+        Point point = Point.geoToMap(new Point((float)address.node().lon(),(float)address.node().lat()));
+        canvas.setZoom(25);
+        canvas.center(point);
     }
 
     @FXML
@@ -124,14 +135,14 @@ public class Controller implements MouseListener {
     public void handleColorblind() {
         if (radioButtonColorBlind.isSelected()) {
             setStyleSheets("colorblindStyle.css");
-            canvas.setShader(Renderer.Shader.MONOTONE);
+            canvas.setShader(Renderer.Shader.MONOCHROME);
         }
     }
 
     @FXML
     public void handlePartyMode() {
         if (radioButtonPartyMode.isSelected()) {
-            setStyleSheets("style.css");
+            setStyleSheets("partyStyle.css");
             canvas.setShader(Renderer.Shader.PARTY);
         }
     }
@@ -166,8 +177,17 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseWheelMoved(MouseEvent mouseEvent) {
-        canvas.zoom(
-                (float) Math.pow(1.05, mouseEvent.getRotation()[1]), mouseEvent.getX(), mouseEvent.getY());
+        if (mouseEvent.getRotation()[0] == 0.0) {
+            canvas.zoom(
+                    (float) Math.pow(1.05, mouseEvent.getRotation()[1]),
+                    mouseEvent.getX(),
+                    mouseEvent.getY());
+        } else {
+            canvas.zoom(
+                    (float) Math.pow(1.15, mouseEvent.getRotation()[0]),
+                    mouseEvent.getX(),
+                    mouseEvent.getY());
+        }
     }
 
     public void setStyleSheets(String stylesheet) {
@@ -175,5 +195,9 @@ public class Controller implements MouseListener {
         leftVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
         rightVBox.getStylesheets().clear();
         rightVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
+    }
+
+    public void centerOn(Point point) {
+        canvas.center(point);
     }
 }
