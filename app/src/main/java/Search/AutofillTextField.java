@@ -17,21 +17,19 @@ public class AutofillTextField extends TextField {
     }
 
 
-    public void handleSearch() {
+    public Address handleSearch() {
         var parsedAddress = parseAddress();
         if(parsedAddress == null){
             // throw new Exception("No match");
             //TODO display error "message" to user
-            return;
+            return null;
         }
         var result = addressDatabase.search(parsedAddress);
         if(result == null){
             //TODO display error "message" to user
-            return;
+            return null;
         }
-        var node = result.node();
-
-        System.out.println("Found node with lat: " + node.lat() + " and lon: " + node.lon());
+        return result;
     }
 
     public void handleSearchChange(){
