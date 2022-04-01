@@ -29,6 +29,6 @@ class Graph implements Serializable {
     }
 
     public Iterable<Edge> adjacent(long vertex) {
-        return adjacentEdges.get(vertex);
+        return adjacentEdges.computeIfAbsent(vertex, v -> new ArrayList<>());
     }
 }
