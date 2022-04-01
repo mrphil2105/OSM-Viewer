@@ -2,9 +2,7 @@ package Search;
 
 import javafx.geometry.Side;
 import javafx.scene.control.TextField;
-
 import java.util.List;
-import java.util.Locale;
 
 public class AutofillTextField extends TextField {
     AutofillContextMenu popupEntries;
@@ -26,24 +24,20 @@ public class AutofillTextField extends TextField {
             //TODO display error "message" to user
             return;
         }
-        var results = addressDatabase.search(parsedAddress);
-        if(results == null){
+        var result = addressDatabase.search(parsedAddress);
+        if(result == null){
             //TODO display error "message" to user
             return;
         }
+        var node = result.node();
 
-        if(results.size() == 1){
-            var result = results.get(0).node();
-            System.out.println("Found node with lat: " + result.lat() + " and lon: " + result.lon());
-        } else{
-            System.out.println("SIZE: " + results.size());
-        }
+        System.out.println("Found node with lat: " + node.lat() + " and lon: " + node.lon());
     }
 
     public void handleSearchChange(){
         if(getText().length() == 0){
             popupEntries.hide();
-            showHistory(addressDatabase.getHistory());
+            addressDatabase.getHistory().forEach(e -> popupEntries.getItems().add(new AddressMenuItem(e)));
         } else{
             List<Address> results;
 
@@ -67,9 +61,9 @@ public class AutofillTextField extends TextField {
                 item.setOnAction(popupEntries::onMenuClick);
                 popupEntries.getItems().add(item);
             }
-            if (!popupEntries.isShowing()) {
-                popupEntries.show(this, Side.BOTTOM, 0, 0);
-            }
+        }
+        if (!popupEntries.isShowing()) {
+            popupEntries.show(this, Side.BOTTOM, 0, 0);
         }
     }
     private String capitalize(String string){
@@ -101,10 +95,6 @@ public class AutofillTextField extends TextField {
         searchedAddressBuilder.city(capitalize(searchedAddressBuilder.getCity()));
 
         return searchedAddressBuilder.build();
-    }
-
-    public void showHistory(List<Address> history){
-        //TODO
     }
 
 }
