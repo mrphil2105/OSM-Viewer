@@ -156,7 +156,8 @@ public class Controller implements MouseListener {
     public void mouseClicked(MouseEvent mouseEvent) {
 
       if (mouseEvent.getButton()==MouseEvent.BUTTON3){
-          addPointOfInterest(new PointOfInterest((float)mouseEvent.getX(),(float)mouseEvent.getY(),"Test"));
+          Point point = canvas.canvasToMap(new Point((float)mouseEvent.getX(),(float)mouseEvent.getY()));
+          addPointOfInterest(new PointOfInterest(point.x(),point.y(),"Test"));
       }
     }
 
@@ -222,7 +223,7 @@ public class Controller implements MouseListener {
             if (((PointsOfInterestHBox)n).getPointOfInterest()==point){
                var hBox = (PointsOfInterestHBox)n;
                hBox.getFind().setOnAction(e -> {
-                  zoomOn(canvas.canvasToMap(new Point(hBox.getPointOfInterest().lon(),hBox.getPointOfInterest().lat())));
+                  zoomOn(new Point(hBox.getPointOfInterest().lon(),hBox.getPointOfInterest().lat()));
                });
                hBox.getRemove().setOnAction(e -> {
                     model.getPointsOfInterest().remove(hBox.getPointOfInterest());
