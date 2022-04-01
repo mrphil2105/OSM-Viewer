@@ -5,6 +5,7 @@ import static osm.elements.OSMTag.Key.*;
 import java.io.Serializable;
 import java.util.*;
 
+import javafx.util.Pair;
 import osm.OSMObserver;
 import osm.elements.OSMTag;
 import osm.elements.OSMWay;
@@ -51,6 +52,23 @@ public class Dijkstra implements OSMObserver, Serializable {
 
         var road = new Road(name, calculateDistance(way), maxSpeed);
         roads.add(road);
+    }
+
+    private static long coordinatesToLong(float lon, float lat) {
+        var lonBits = Float.floatToIntBits(lon);
+        var latBits = Float.floatToIntBits(lat);
+
+        return (((long)lonBits) << 32) | (latBits & 0xFFFFFFFFL);
+    }
+
+    private static Pair<Float, Float> longToCoordinates(long value) {
+        var lonBits = (int)(value >>> 32);
+        var latBits = (int)(value & 0xFFFFFFFFL);
+
+        var lon = Float.intBitsToFloat(lonBits);
+        var lat = Float.intBitsToFloat(latBits);
+
+        return new Pair<>(lon, lat);
     }
 
     public Map<Long, Edge> shortestPath(long sourceVertex, EdgeRole mode) {
