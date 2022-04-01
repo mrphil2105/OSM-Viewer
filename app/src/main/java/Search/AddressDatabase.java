@@ -11,6 +11,8 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 
 public class AddressDatabase implements OSMObserver, Serializable {
@@ -108,7 +110,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
     private final static String REGEX = "^[ .,]*(?<street>[A-Za-zæøåÆØÅ.é ]+?)(([ .,]+)(?<house>[0-9]+[A-Za-z]?(-[0-9]+)?)([ ,.]+(?<floor>[0-9]{1,3})([ ,.]+(?<side>tv|th|mf|[0-9]{1,3})?))?([ ,.]*(?<postcode>[0-9]{4})??[ ,.]*(?<city>[A-Za-zæøåÆØÅ ]+?)?)?)?[ ,.]*$";
     private final static Pattern PATTERN = Pattern.compile(REGEX);
 
-    public List<Address> search(Address input){
+    public Address search(Address input){
         var results = new LinkedList<Address>();
 
         var searchedStreets = streetToAddress.get(input.street());
@@ -121,19 +123,22 @@ public class AddressDatabase implements OSMObserver, Serializable {
             searchedStreets.retainAll(cityToAddress.get(input.city()));
         }
         if(input.houseNumber() != null){
-            //TODO: find out how to collect stream
-            var tmp = new HashSet<AddressBuilder>();
-            searchedStreets.stream().filter(e -> e.getHouse().equals(input.houseNumber())).forEach(tmp::add);
-            searchedStreets = tmp;
+            searchedStreets = searchedStreets.stream().filter(e -> e.getHouse().equals(input.houseNumber())).collect(Collectors.toSet());
         }
         searchedStreets.forEach(e -> results.add(e.build()));
-        return results;
+        if(results.size() == 1){
+            var result = results.get(0);
+            history.add(result);
+            return result;
+        }else{
+            return null;
+        }
     }
 
     public List<Address> possibleAddresses(Address input, int maxEntries) {
         final LinkedList<Address> results = new LinkedList<>();
         var parsedStreetsAndCities = new HashSet<String>();
-        var filteringSet = new HashSet<AddressBuilder>();
+        Set<AddressBuilder> filteringSet = new HashSet<AddressBuilder>();
 
 
         if(input.street() != null){
@@ -149,10 +154,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
         if(input.houseNumber() !=null){
             //we know that we must have a full street name, and since there probably isn't that many streets with the
             // same address it shouldn't take long to go through them linearly, to check if they have the specified house number
-            var set = new HashSet<AddressBuilder>();
-
-            filteringSet.stream().filter(e -> e.getHouse().startsWith(input.houseNumber())).forEach(set::add);
-            filteringSet = set;
+            filteringSet = filteringSet.stream().filter(e -> e.getHouse().startsWith(input.houseNumber())).collect(Collectors.toSet());
         }
 
 
@@ -193,17 +195,6 @@ public class AddressDatabase implements OSMObserver, Serializable {
         return results;
 
 
-
-        /*
-
-        if(inputAddress.city() != null){
-            filterStream.filter(e -> e.getCity().startsWith(inputAddress.city()));
-        }
-        if(inputAddress.postcode() != null){
-            filterStream.filter(e -> e.getPostcode().startsWith((inputAddress.postcode())));
-        }
-
-         */
     }
 
 
