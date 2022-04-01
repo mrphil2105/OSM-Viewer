@@ -11,6 +11,7 @@ import osm.elements.OSMWay;
 
 public class Dijkstra implements OSMObserver, Serializable {
     private final Map<Long, Float> distTo;
+    private final Map<Long, Edge> edgeTo;
     private final Set<Long> settled;
     private final PriorityQueue<Node> queue;
 
@@ -21,6 +22,7 @@ public class Dijkstra implements OSMObserver, Serializable {
 
     public Dijkstra() {
         distTo = new HashMap<>();
+        edgeTo = new HashMap<>();
         settled = new HashSet<>();
         queue = new PriorityQueue<>();
 
@@ -53,7 +55,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         roads.add(road);
     }
 
-    public Map<Long, Float> shortestPath(long sourceVertex, EdgeRole mode) {
+    public Map<Long, Edge> shortestPath(long sourceVertex, EdgeRole mode) {
         this.mode = mode;
         distTo.clear();
 
@@ -74,7 +76,7 @@ public class Dijkstra implements OSMObserver, Serializable {
             relax(vertex);
         }
 
-        return new HashMap<>(distTo);
+        return new HashMap<>(edgeTo);
     }
 
     private void relax(long vertex) {
@@ -87,6 +89,7 @@ public class Dijkstra implements OSMObserver, Serializable {
                 // TODO: Might have to use 'computeIfAbsent' here with Float.POSITIVE_INFINITY.
                 if (newDistance < distTo.computeIfAbsent(to, v -> Float.POSITIVE_INFINITY)) {
                     distTo.put(to, newDistance);
+                    edgeTo.put(to, edge);
                 }
 
                 queue.add(new Node(to, distTo.get(to)));
