@@ -7,19 +7,19 @@ import java.util.*;
 
 import javafx.util.Pair;
 import osm.OSMObserver;
-import osm.elements.OSMTag;
-import osm.elements.OSMWay;
+import osm.elements.*;
 
 public class Dijkstra implements OSMObserver, Serializable {
+    private final Graph graph;
     private final Map<Long, Float> distTo;
     private final Map<Long, Edge> edgeTo;
     private final Set<Long> settled;
     private final PriorityQueue<Node> queue;
 
-    private Graph graph;
     private EdgeRole mode;
 
     public Dijkstra() {
+        graph = new Graph();
         distTo = new HashMap<>();
         edgeTo = new HashMap<>();
         settled = new HashSet<>();
@@ -36,22 +36,30 @@ public class Dijkstra implements OSMObserver, Serializable {
             return;
         }
 
-        String name =
-                tags.stream().filter(t -> t.key() == NAME).map(OSMTag::value).findFirst().orElse(null);
+        int maxSpeed = tags.stream()
+            .filter(t -> t.key() == MAXSPEED &&
+                !t.value().equals("signals") &&
+                !t.value().equals("none"))
+            .map(t -> Integer.parseInt(t.value()))
+            .findFirst()
+            .orElse(0);
 
-        int maxSpeed =
-                tags.stream()
-                        .filter(
-                                t ->
-                                        t.key() == MAXSPEED
-                                                && !t.value().equals("signals")
-                                                && !t.value().equals("none"))
-                        .map(t -> Integer.parseInt(t.value()))
-                        .findFirst()
-                        .orElse(0);
+        var nodes = way.nodes();
+        var firstNode = nodes[0];
 
-        var road = new Road(name, calculateDistance(way), maxSpeed);
-        roads.add(road);
+        for (int i = 1; i < nodes.length; i++) {
+            var secondNode = nodes[i];
+
+            // TODO: Handle direction, e.g. one-way and both ways (add two edges).
+            var firstVertex = coordinatesToLong((float)firstNode.lon(), (float)firstNode.lat());
+            var secondVertex = coordinatesToLong((float)secondNode.lon(), (float)secondNode.lat());
+            var distance = calculateDistance(firstNode, secondNode);
+            // TODO: Parse roles from way.
+            var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, null);
+            graph.addEdge(edge);
+
+            firstNode = secondNode;
+        }
     }
 
     private static long coordinatesToLong(float lon, float lat) {
@@ -125,6 +133,15 @@ public class Dijkstra implements OSMObserver, Serializable {
         }
 
         return weight;
+    }
+
+    private static float calculateDistance(SlimOSMNode firstNode, SlimOSMNode secondNode) {
+        var x1 = firstNode.lon();
+        var y1 = firstNode.lat();
+        var x2 = secondNode.lon();
+        var y2 = secondNode.lat();
+
+        return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
     private static float calculateDistance(OSMWay way) {
