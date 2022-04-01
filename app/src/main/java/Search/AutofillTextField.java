@@ -2,15 +2,13 @@ package Search;
 
 import javafx.geometry.Side;
 import javafx.scene.control.TextField;
-
 import java.util.List;
 
 public class AutofillTextField extends TextField {
     AutofillContextMenu popupEntries;
     AddressDatabase addressDatabase;
-    Address currentAddress;
 
-    public AutofillTextField(){
+    public AutofillTextField(){ //TODO: rename to SearchTextField
     }
 
     public void init(AddressDatabase addressDatabase){
@@ -18,23 +16,34 @@ public class AutofillTextField extends TextField {
         popupEntries = new AutofillContextMenu(this, addressDatabase);
     }
 
-    public void handleSearchChange(String text){
-        int inputLength = getText().length();
-        if(inputLength == 0){
+
+    public Address handleSearch() {
+        var parsedAddress = parseAddress();
+        if(parsedAddress == null){
+            // throw new Exception("No match");
+            //TODO display error "message" to user
+            return null;
+        }
+        var result = addressDatabase.search(parsedAddress);
+        if(result == null){
+            //TODO display error "message" to user
+            return null;
+        }
+        return result;
+    }
+
+    public void handleSearchChange(){
+        if(getText().length() == 0){
             popupEntries.hide();
-            showHistory(addressDatabase.getHistory());
+            addressDatabase.getHistory().forEach(e -> popupEntries.getItems().add(new AddressMenuItem(e)));
         } else{
             List<Address> results;
 
+            var searchedAddress = parseAddress();
+            if(searchedAddress == null) return;
 
-            var searchedAddressBuilder = AddressDatabase.parse(getText());
+            results = addressDatabase.possibleAddresses(searchedAddress,5);
 
-            if(searchedAddressBuilder == null){
-                return;
-            };
-
-
-            var searchedAddress = searchedAddressBuilder.build();
 
             boolean showStreet = (searchedAddress.street() != null);
             boolean showHouse = (searchedAddress.houseNumber() != null);
@@ -42,8 +51,6 @@ public class AutofillTextField extends TextField {
             boolean showPostcode = (searchedAddress.postcode() != null);
             if(searchedAddress.street() != null) showCity = true;
 
-
-            results = addressDatabase.autofillSearch(searchedAddressBuilder,5);
             popupEntries.getItems().clear();
 
             for(Address a : results){
@@ -52,21 +59,40 @@ public class AutofillTextField extends TextField {
                 item.setOnAction(popupEntries::onMenuClick);
                 popupEntries.getItems().add(item);
             }
-            if (!popupEntries.isShowing()) {
-                popupEntries.show(this, Side.BOTTOM, 0, 0);
-            }
+        }
+        if (!popupEntries.isShowing()) {
+            popupEntries.show(this, Side.BOTTOM, 0, 0);
         }
     }
+    private String capitalize(String string){
+        if(string == null) return null;
 
-    public void showHistory(List<Address> history){
-        //TODO
+        string = string.toLowerCase();
+
+        var stringBuilder = new StringBuilder();
+        var split = string.split(" ");
+        for(String s : split){
+            char[] charArray = s.toCharArray();
+            charArray[0] = Character.toUpperCase(charArray[0]);
+            var result = new String(charArray);
+            stringBuilder.append(result);
+        }
+
+        return stringBuilder.toString();
     }
 
-    public Address getCurrentAddress() {
-        return currentAddress;
+    private Address parseAddress(){
+        var searchedAddressBuilder = AddressDatabase.parse(getText());
+
+        if(searchedAddressBuilder == null){
+            return null;
+        };
+
+
+        searchedAddressBuilder.street(capitalize(searchedAddressBuilder.getStreet()));
+        searchedAddressBuilder.city(capitalize(searchedAddressBuilder.getCity()));
+
+        return searchedAddressBuilder.build();
     }
 
-    public void setCurrentAddress(Address currentAddress) {
-        this.currentAddress = currentAddress;
-    }
 }

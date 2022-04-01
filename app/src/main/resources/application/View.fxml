@@ -22,7 +22,7 @@
                 <Insets top="10" bottom="10" left="10" right="10" />
             </padding>
                 <GridPane alignment="center" hgap="10" vgap="10">
-                    <AutofillTextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0" GridPane.rowIndex="0" onKeyTyped="#handleKeyTyped"/>
+                    <AutofillTextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0" GridPane.rowIndex="0" onAction="#handleSearchClick" onKeyTyped="#handleKeyTyped"/>
                      <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="1">
                         <Button fx:id="searchButton" id="allButtons" text="Search" onAction="#handleSearchClick">
                         </Button>
