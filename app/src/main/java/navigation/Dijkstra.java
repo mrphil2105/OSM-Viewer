@@ -85,7 +85,7 @@ public class Dijkstra implements OSMObserver, Serializable {
                 var newDistance = distTo.get(vertex) + calculateWeight(edge);
 
                 // TODO: Might have to use 'computeIfAbsent' here with Float.POSITIVE_INFINITY.
-                if (newDistance < distTo.get(to)) {
+                if (newDistance < distTo.computeIfAbsent(to, v -> Float.POSITIVE_INFINITY)) {
                     distTo.put(to, newDistance);
                 }
 
