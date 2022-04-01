@@ -144,28 +144,6 @@ public class Dijkstra implements OSMObserver, Serializable {
         return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
-    private static float calculateDistance(OSMWay way) {
-        var nodes = way.nodes();
-        var firstNode = nodes[0];
-        float totalDistance = 0;
-
-        for (int i = 1; i < nodes.length; i++) {
-            var secondNode = nodes[i];
-
-            var x1 = firstNode.lat();
-            var y1 = firstNode.lon();
-            var x2 = secondNode.lat();
-            var y2 = secondNode.lon();
-
-            var distance = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-            totalDistance += distance;
-
-            firstNode = secondNode;
-        }
-
-        return totalDistance;
-    }
-
     private record Node(long vertex, float weight) implements Comparable<Node> {
         @Override
         public int compareTo(Node other) {
