@@ -8,18 +8,12 @@ import java.util.Map;
 
 /** A directed graph that supports non-indexed vertexes */
 class Graph implements Serializable {
-    private final int vertexCount;
     // Use a hashmap to support non-index values.
     private final Map<Long, List<Edge>> adjacentEdges;
     private int edgeCount;
 
-    public Graph(int vertexCount) {
-        this.vertexCount = vertexCount;
+    public Graph() {
         adjacentEdges = new HashMap<>();
-    }
-
-    public int vertexCount() {
-        return vertexCount;
     }
 
     public int edgeCount() {

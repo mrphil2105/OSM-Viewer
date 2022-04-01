@@ -15,9 +15,7 @@ public class Dijkstra implements OSMObserver, Serializable {
     private final Set<Long> settled;
     private final PriorityQueue<Node> queue;
 
-    private int vertexCount;
     private Graph graph;
-
     private EdgeRole mode;
 
     public Dijkstra() {
