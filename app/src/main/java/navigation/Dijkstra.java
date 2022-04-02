@@ -62,14 +62,14 @@ public class Dijkstra implements OSMObserver, Serializable {
         }
     }
 
-    private static long coordinatesToLong(float lon, float lat) {
+    public static long coordinatesToLong(float lon, float lat) {
         var lonBits = Float.floatToIntBits(lon);
         var latBits = Float.floatToIntBits(lat);
 
         return (((long)lonBits) << 32) | (latBits & 0xFFFFFFFFL);
     }
 
-    private static Pair<Float, Float> longToCoordinates(long value) {
+    public static Pair<Float, Float> longToCoordinates(long value) {
         var lonBits = (int)(value >>> 32);
         var latBits = (int)(value & 0xFFFFFFFFL);
 
