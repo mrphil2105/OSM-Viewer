@@ -6,6 +6,8 @@ import com.jogamp.opengl.GLEventListener;
 import drawing.Drawable;
 import java.io.File;
 import java.nio.FloatBuffer;
+
+import drawing.Drawing;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.MatrixType;
@@ -25,6 +27,7 @@ public class Renderer implements GLEventListener {
         }
     }
 
+    private final Drawing drawing = new Drawing();
     private final Color clear = Drawable.WATER.color;
     private final Model model;
     private final MapCanvas canvas;
@@ -36,6 +39,14 @@ public class Renderer implements GLEventListener {
     public Renderer(Model model, MapCanvas canvas) {
         this.model = model;
         this.canvas = canvas;
+    }
+
+    public void draw(Drawing drawing) {
+        this.drawing.draw(drawing);
+    }
+
+    public void clear() {
+        drawing.clear();
     }
 
     public void setShader(Shader newShader) {
