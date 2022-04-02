@@ -79,7 +79,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         return new Pair<>(lon, lat);
     }
 
-    public Map<Long, Edge> shortestPath(long sourceVertex, EdgeRole mode) {
+    public Map<Long, Edge> shortestPath(long sourceVertex, long targetVertex, EdgeRole mode) {
         this.mode = mode;
 
         distTo.clear();
@@ -93,6 +93,11 @@ public class Dijkstra implements OSMObserver, Serializable {
         while (!queue.isEmpty()) {
             var vertex = queue.remove().vertex;
 
+            if (vertex == targetVertex) {
+                // We've reached the target destination, no need to continue.
+                break;
+            }
+
             // TODO: Check if a settled set is really necessary.
             //  It probably is when we have cycles or loops in the graph.
             if (settled.contains(vertex)) {
@@ -101,13 +106,13 @@ public class Dijkstra implements OSMObserver, Serializable {
 
             // We settle the vertex BEFORE relaxing (and not after), in case there happens to be a loop.
             settled.add(vertex);
-            relax(vertex);
+            relax(vertex, targetVertex);
         }
 
         return new HashMap<>(edgeTo);
     }
 
-    private void relax(long vertex) {
+    private void relax(long vertex, long target) {
         for (var edge : graph.adjacent(vertex)) {
             var to = edge.to();
 
@@ -120,7 +125,8 @@ public class Dijkstra implements OSMObserver, Serializable {
                     edgeTo.put(to, edge);
                 }
 
-                queue.add(new Node(to, distTo.get(to)));
+                var priority = distTo.get(to) + heuristic(to, target);
+                queue.add(new Node(to, priority));
             }
         }
     }
@@ -133,6 +139,19 @@ public class Dijkstra implements OSMObserver, Serializable {
         }
 
         return weight;
+    }
+
+    // TODO: Include max speed in heuristic if mode is 'CAR'.
+    private static float heuristic(long from, long to) {
+        var fromCoordinates = longToCoordinates(from);
+        var toCoordinates = longToCoordinates(to);
+
+        var x1 = fromCoordinates.getKey();
+        var y1 = fromCoordinates.getValue();
+        var x2 = toCoordinates.getKey();
+        var y2 = toCoordinates.getValue();
+
+        return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
     private static float calculateDistance(SlimOSMNode firstNode, SlimOSMNode secondNode) {
