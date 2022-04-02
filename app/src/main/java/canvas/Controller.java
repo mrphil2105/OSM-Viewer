@@ -23,6 +23,7 @@ public class Controller implements MouseListener {
     private Point2D lastMouse;
     private ScaleBar scaleBar = new ScaleBar();
     private float currentScale;
+    private float zoomLevel = 0;
 
     @FXML private MapCanvas canvas;
 
@@ -75,8 +76,6 @@ public class Controller implements MouseListener {
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
         initScaleBar(model);
-        zoomLevelText.setText(Float.toString(canvas.getZoom()));
-
 
         // FIXME: yuck
         categories
@@ -217,9 +216,10 @@ public class Controller implements MouseListener {
                     mouseEvent.getX(),
                     mouseEvent.getY());
         }
-        
+        // percentage is not correct if zoomed horizontal 
         handleScaleBar(zoom);
-        zoomLevelText.setText(Float.toString(canvas.getZoom() * 100) + "%");
+        zoomLevel += ((zoom - 1) * 100); 
+        zoomLevelText.setText(Float.toString(Math.round(zoomLevel)) + "%");
     }
 
     public void setStyleSheets(String stylesheet) {

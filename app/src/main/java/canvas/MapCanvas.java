@@ -75,7 +75,9 @@ public class MapCanvas extends Region {
         renderer = new Renderer(model, this);
         window.addGLEventListener(renderer);
         animator = new Animator(window);
-        animator.start();       
+        animator.start();
+        setZoom((float) (canvas.getHeight()/(Point.geoToMap(model.bounds.getTopLeft()).y() - Point.geoToMap(model.bounds.getBottomRight()).y())));
+        System.out.println(Point.geoToMap(model.bounds.getTopLeft()) + " " + Point.geoToMap(model.bounds.getBottomRight()));       
             
     }
 
