@@ -79,7 +79,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         return new Pair<>(lon, lat);
     }
 
-    public Map<Long, Edge> shortestPath(long sourceVertex, long targetVertex, EdgeRole mode) {
+    public List<Long> shortestPath(long sourceVertex, long targetVertex, EdgeRole mode) {
         this.mode = mode;
 
         distTo.clear();
@@ -109,7 +109,7 @@ public class Dijkstra implements OSMObserver, Serializable {
             relax(vertex, targetVertex);
         }
 
-        return new HashMap<>(edgeTo);
+        return extractPath(sourceVertex, targetVertex, edgeTo);
     }
 
     private void relax(long vertex, long target) {
@@ -152,6 +152,33 @@ public class Dijkstra implements OSMObserver, Serializable {
         var y2 = toCoordinates.getValue();
 
         return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
+    private static List<Long> extractPath(long sourceVertex, long targetVertex, Map<Long, Edge> edgeTo) {
+        var path = new ArrayList<Long>();
+
+        long from = coordinatesToLong(Float.NaN, Float.NaN);
+        long to = targetVertex;
+        path.add(to);
+
+        while (true) {
+            var edge = edgeTo.get(to);
+
+            if (edge == null) {
+                break;
+            }
+
+            from = edge.from();
+            path.add(from);
+            to = from;
+        }
+
+        if (from == sourceVertex) {
+            Collections.reverse(path);
+            return path;
+        }
+
+        return null;
     }
 
     private static float calculateDistance(SlimOSMNode firstNode, SlimOSMNode secondNode) {
