@@ -70,12 +70,13 @@ public class MapCanvas extends Region {
 
         canvas.setWidth(getPrefWidth());
         canvas.setHeight(getPrefHeight());
-
+        
         // Start rendering the model
         renderer = new Renderer(model, this);
         window.addGLEventListener(renderer);
         animator = new Animator(window);
-        animator.start();
+        animator.start();       
+            
     }
 
     public void setShader(Renderer.Shader shader) {
@@ -118,5 +119,9 @@ public class MapCanvas extends Region {
         transform.setMxx(zoom);
         transform.setMyy(zoom);
 
+    }
+
+    public float getZoom(){
+        return (float) transform.getMxx();
     }
 }

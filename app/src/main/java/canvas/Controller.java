@@ -16,10 +16,13 @@ import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 
 public class Controller implements MouseListener {
     public Menu categories;
     private Point2D lastMouse;
+    private ScaleBar scaleBar = new ScaleBar();
+    private float currentScale;
 
     @FXML private MapCanvas canvas;
 
@@ -55,6 +58,12 @@ public class Controller implements MouseListener {
 
     @FXML private VBox rightVBox;
 
+    @FXML private Label scaleBarText;
+
+    @FXML private Rectangle scaleBarRectangle;
+
+    @FXML private Label zoomLevelText;
+
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
@@ -65,6 +74,9 @@ public class Controller implements MouseListener {
         radioButtonDefaultMode.setSelected(true);
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
+        initScaleBar(model);
+        zoomLevelText.setText(Float.toString(canvas.getZoom()));
+
 
         // FIXME: yuck
         categories
@@ -101,6 +113,20 @@ public class Controller implements MouseListener {
 
     public void dispose() {
         canvas.dispose();
+    }
+
+    public void initScaleBar(Model model){
+        currentScale = scaleBar.getScaleBarDistance(
+            model.bounds.getBottomLeft().x(), 
+            model.bounds.getBottomLeft().y(), 
+            model.bounds.getBottomRight().x(), 
+            model.bounds.getBottomRight().y());
+        scaleBarText.setText(Float.toString(currentScale));
+    }
+
+    public void handleScaleBar(float zoom){
+        currentScale *= ((zoom - 1) * -1) + 1;
+        scaleBarText.setText(Float.toString(currentScale));
     }
 
     @FXML
@@ -177,17 +203,23 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseWheelMoved(MouseEvent mouseEvent) {
+        float zoom;
         if (mouseEvent.getRotation()[0] == 0.0) {
+            zoom = (float) Math.pow(1.05, mouseEvent.getRotation()[1]);
             canvas.zoom(
-                    (float) Math.pow(1.05, mouseEvent.getRotation()[1]),
+                    zoom,
                     mouseEvent.getX(),
                     mouseEvent.getY());
         } else {
+            zoom = (float) Math.pow(1.15, mouseEvent.getRotation()[0]);
             canvas.zoom(
-                    (float) Math.pow(1.15, mouseEvent.getRotation()[0]),
+                    zoom,
                     mouseEvent.getX(),
                     mouseEvent.getY());
         }
+        
+        handleScaleBar(zoom);
+        zoomLevelText.setText(Float.toString(canvas.getZoom() * 100) + "%");
     }
 
     public void setStyleSheets(String stylesheet) {
