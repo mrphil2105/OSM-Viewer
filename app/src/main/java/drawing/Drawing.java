@@ -32,6 +32,23 @@ public class Drawing implements Comparable<Drawing>, Serializable {
         this.drawables = drawables;
     }
 
+    public void clear() {
+        drawings.clear();
+        indices.truncate(indices.size());
+        vertices.truncate(vertices.size());
+        drawables.truncate(drawables.size());
+    }
+
+    public static Drawing create(List<Vector2D> points, Drawable drawable) {
+        return create(points, drawable, 0);
+    }
+
+    public static Drawing create(List<Vector2D> points, Drawable drawable, int offset) {
+        var drawing = new Drawing();
+        drawing.draw(points, drawable, offset);
+        return drawing;
+    }
+
     public void draw(Drawing drawing) {
         draw(drawing, false);
     }
@@ -50,6 +67,17 @@ public class Drawing implements Comparable<Drawing>, Serializable {
                                 .toArray()));
         vertices.extend(drawing.vertices());
         drawables.extend(drawing.drawables());
+    }
+
+    public void draw(List<Vector2D> points, Drawable drawable) {
+        draw(points, drawable, 0);
+    }
+
+    public void draw(List<Vector2D> points, Drawable drawable, int offset) {
+        switch (drawable.shape) {
+            case POLYLINE -> drawLine(points, drawable, offset);
+            case FILL -> drawPolygon(points, drawable, offset);
+        }
     }
 
     public void drawPolygon(List<Vector2D> points, Drawable drawable) {
