@@ -1,14 +1,14 @@
 package drawing;
 
 import geometry.Vector2D;
-import javafx.util.Pair;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import javafx.util.Pair;
 
 public class DrawingManager {
-    private record DrawingInfo(Drawing drawing, int indicesStart, int verticesStart, int drawablesStart) {
+    private record DrawingInfo(
+            Drawing drawing, int indicesStart, int verticesStart, int drawablesStart) {
         private DrawingInfo(Drawing drawing) {
             this(drawing, 0, 0, 0);
         }
@@ -28,11 +28,17 @@ public class DrawingManager {
     private int cacheByteSize;
 
     private DrawingInfo createDrawingInfo(Drawing drawing) {
-        return new DrawingInfo(drawing, this.drawing.indices().size(), this.drawing.vertices().size(), this.drawing.drawables().size());
+        return new DrawingInfo(
+                drawing,
+                this.drawing.indices().size(),
+                this.drawing.vertices().size(),
+                this.drawing.drawables().size());
     }
 
     /**
-     * Helper method that creates a drawing, adds it to the manager, and returns a reference to the newly created drawing.
+     * Helper method that creates a drawing, adds it to the manager, and returns a reference to the
+     * newly created drawing.
+     *
      * @param points
      * @param drawable
      * @return
@@ -42,7 +48,9 @@ public class DrawingManager {
     }
 
     /**
-     * Helper method that creates a drawing, adds it to the manager, and returns a reference to the newly created drawing.
+     * Helper method that creates a drawing, adds it to the manager, and returns a reference to the
+     * newly created drawing.
+     *
      * @param points
      * @param drawable
      * @return
@@ -55,6 +63,7 @@ public class DrawingManager {
 
     /**
      * Add a drawing to the manager.
+     *
      * @param drawing Drawing to add.
      */
     public void draw(Drawing drawing) {
@@ -68,7 +77,9 @@ public class DrawingManager {
     }
 
     /**
-     * Helper method that creates a drawing, adds it orderly to the manager, and returns a reference to the newly created drawing.
+     * Helper method that creates a drawing, adds it orderly to the manager, and returns a reference
+     * to the newly created drawing.
+     *
      * @param points
      * @param drawable
      * @return
@@ -78,7 +89,9 @@ public class DrawingManager {
     }
 
     /**
-     * Helper method that creates a drawing, adds it orderly to the manager, and returns a reference to the newly created drawing.
+     * Helper method that creates a drawing, adds it orderly to the manager, and returns a reference
+     * to the newly created drawing.
+     *
      * @param points
      * @param drawable
      * @param offset
@@ -92,6 +105,7 @@ public class DrawingManager {
 
     /**
      * Add a drawing to the manager, but in a specific order relative to other drawings.
+     *
      * @param drawing Drawing to add.
      * @param order Relative order to other drawings.
      */
@@ -111,9 +125,7 @@ public class DrawingManager {
         cacheByteSize = 0;
     }
 
-    /**
-     * Remove all drawings, but retain allocated memory.
-     */
+    /** Remove all drawings, but retain allocated memory. */
     public void clear() {
         drawingCache.clear();
         drawings.clear();
@@ -121,7 +133,10 @@ public class DrawingManager {
     }
 
     /**
-     * Clear a single drawing from the manager. This operation takes linear time in the worst case and constant time if the drawing being removed was the latest added. One should prefer to clear drawings in a LIFO order.
+     * Clear a single drawing from the manager. This operation takes linear time in the worst case and
+     * constant time if the drawing being removed was the latest added. One should prefer to clear
+     * drawings in a LIFO order.
+     *
      * @param drawing Exact reference to the Drawing to clear.
      */
     public void clear(Drawing drawing) {
@@ -136,7 +151,8 @@ public class DrawingManager {
         this.drawing.vertices().limit(info.verticesStart());
         this.drawing.drawables().limit(info.drawablesStart());
 
-        // Shift every drawing to the right of idx left by 1, rewriting history as if the drawing was never there
+        // Shift every drawing to the right of idx left by 1, rewriting history as if the drawing was
+        // never there
         for (int i = idx; i < drawings.size() - 1; i++) {
             var d = drawings.get(i + 1).drawing();
             this.drawing.draw(d);
@@ -152,6 +168,7 @@ public class DrawingManager {
 
     /**
      * Reference to underlying drawing. Do not mutate.
+     *
      * @return
      */
     public Drawing drawing() {
