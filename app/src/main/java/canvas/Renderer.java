@@ -4,6 +4,7 @@ import com.jogamp.nativewindow.javafx.JFXAccessor;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.Threading;
 import drawing.Drawable;
 import drawing.Drawing;
 import java.io.File;
@@ -58,21 +59,21 @@ public class Renderer implements GLEventListener {
         nextShader = newShader;
     }
 
-    private ShaderProgram setShader(GLAutoDrawable glAutoDrawable, int vertexVBO, int drawableVBO) {
+    private ShaderProgram setShader(GLAutoDrawable glAutoDrawable, VBOWrapper vertexVBO, VBOWrapper drawableVBO) {
         GL3 gl = glAutoDrawable.getGL().getGL3();
 
         shader = nextShader;
         var shaderProgram = shaderPrograms[shader.ordinal()];
 
         // Set the current buffer to the vertex vbo
-        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, vertexVBO);
+        vertexVBO.bind();
         // Tell OpenGL that the current buffer holds position data. 2 floats per position.
         gl.glVertexAttribPointer(
                 shaderProgram.getLocation(Location.POSITION), 2, GL3.GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.POSITION));
 
         // Set the current buffer to the drawable vbo. We're done initialising the vertex vbo now.
-        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, drawableVBO);
+        drawableVBO.bind();
         // Tell OpenGL that the current buffer holds drawable data. 1 byte per drawable.
         gl.glVertexAttribIPointer(
                 shaderProgram.getLocation(Location.DRAWABLE_ID), 1, GL3.GL_BYTE, 0, 0);
@@ -155,7 +156,8 @@ public class Renderer implements GLEventListener {
     public void display(GLAutoDrawable glAutoDrawable) {
         GL3 gl = glAutoDrawable.getGL().getGL3();
 
-        ShaderProgram shaderProgram = setShader(glAutoDrawable, model.getVBO(Model.VBOType.VERTEX).vbo, model.getVBO(Model.VBOType.DRAWABLE).vbo);
+        model.getVBO(Model.VBOType.INDEX).bind();
+        ShaderProgram shaderProgram = setShader(glAutoDrawable, model.getVBO(Model.VBOType.VERTEX), model.getVBO(Model.VBOType.DRAWABLE));
 
         // Set the color used when clearing the screen
         gl.glClearColor(
@@ -190,7 +192,8 @@ public class Renderer implements GLEventListener {
         // This will use the currently bound index buffer
         gl.glDrawElements(GL3.GL_TRIANGLES, model.getCount(), GL3.GL_UNSIGNED_INT, 0);
 
-        shaderProgram = setShader(glAutoDrawable, vertexVBO.vbo, drawableVBO.vbo);
+        indexVBO.bind();
+        shaderProgram = setShader(glAutoDrawable, vertexVBO, drawableVBO);
 
         gl.glUseProgram(shaderProgram.getProgramId());
 
