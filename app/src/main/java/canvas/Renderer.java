@@ -1,5 +1,6 @@
 package canvas;
 
+import com.jogamp.nativewindow.javafx.JFXAccessor;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -7,6 +8,8 @@ import drawing.Drawable;
 import drawing.Drawing;
 import java.io.File;
 import java.nio.FloatBuffer;
+
+import drawing.DrawingManager;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.MatrixType;
@@ -26,7 +29,7 @@ public class Renderer implements GLEventListener {
         }
     }
 
-    private final Drawing drawing = new Drawing();
+    private final DrawingManager manager = new DrawingManager();
     private final Color clear = Drawable.WATER.color;
     private final Model model;
     private final MapCanvas canvas;
@@ -41,11 +44,11 @@ public class Renderer implements GLEventListener {
     }
 
     public void draw(Drawing drawing) {
-        this.drawing.draw(drawing);
+        manager.draw(drawing);
     }
 
     public void clear() {
-        drawing.clear();
+        manager.clear();
     }
 
     public void setShader(Shader newShader) {
@@ -59,14 +62,14 @@ public class Renderer implements GLEventListener {
         var shaderProgram = shaderPrograms[shader.ordinal()];
 
         // Set the current buffer to the vertex vbo
-        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.VERTEX));
+        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.VERTEX).vbo);
         // Tell OpenGL that the current buffer holds position data. 2 floats per position.
         gl.glVertexAttribPointer(
                 shaderProgram.getLocation(Location.POSITION), 2, GL3.GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shaderProgram.getLocation(Location.POSITION));
 
         // Set the current buffer to the drawable vbo. We're done initialising the vertex vbo now.
-        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.DRAWABLE));
+        gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, model.getVBO(Model.VBOType.DRAWABLE).vbo);
         // Tell OpenGL that the current buffer holds drawable data. 1 byte per drawable.
         gl.glVertexAttribIPointer(
                 shaderProgram.getLocation(Location.DRAWABLE_ID), 1, GL3.GL_BYTE, 0, 0);
@@ -129,7 +132,7 @@ public class Renderer implements GLEventListener {
         setShader(Shader.DEFAULT);
 
         // Set the current index buffer to the index buffer from the model
-        gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, model.getVBO(Model.VBOType.INDEX));
+        gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, model.getVBO(Model.VBOType.INDEX).vbo);
     }
 
     @Override

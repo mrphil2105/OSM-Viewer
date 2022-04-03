@@ -10,7 +10,7 @@ import java.nio.IntBuffer;
 public class VBOWrapper {
     //private long capacity;
     private final int type;
-    private final int vbo;
+    public final int vbo;
     private final GL3 gl;
 
     public VBOWrapper(GLAutoDrawable glAutoDrawable, int type) {

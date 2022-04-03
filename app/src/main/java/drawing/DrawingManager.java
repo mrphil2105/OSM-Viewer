@@ -7,7 +7,7 @@ import java.util.List;
 import javafx.util.Pair;
 
 public class DrawingManager {
-    private record DrawingInfo(
+    public record DrawingInfo(
             Drawing drawing, int indicesStart, int verticesStart, int drawablesStart) {
         private DrawingInfo(Drawing drawing) {
             this(drawing, 0, 0, 0);
@@ -43,7 +43,7 @@ public class DrawingManager {
      * @param drawable
      * @return
      */
-    public Drawing draw(List<Vector2D> points, Drawable drawable) {
+    public DrawingInfo draw(List<Vector2D> points, Drawable drawable) {
         return draw(points, drawable, 0);
     }
 
@@ -55,10 +55,8 @@ public class DrawingManager {
      * @param drawable
      * @return
      */
-    public Drawing draw(List<Vector2D> points, Drawable drawable, int offset) {
-        var drawing = Drawing.create(points, drawable, offset);
-        draw(drawing);
-        return drawing;
+    public DrawingInfo draw(List<Vector2D> points, Drawable drawable, int offset) {
+        return draw(Drawing.create(points, drawable, offset));
     }
 
     /**
@@ -66,14 +64,16 @@ public class DrawingManager {
      *
      * @param drawing Drawing to add.
      */
-    public void draw(Drawing drawing) {
+    public DrawingInfo draw(Drawing drawing) {
         flush();
-        drawInternal(drawing);
+        return drawInternal(drawing);
     }
 
-    private void drawInternal(Drawing drawing) {
-        drawings.add(createDrawingInfo(drawing));
+    private DrawingInfo drawInternal(Drawing drawing) {
+        var info = createDrawingInfo(drawing);
+        drawings.add(info);
         this.drawing.draw(drawing);
+        return info;
     }
 
     /**
@@ -138,12 +138,13 @@ public class DrawingManager {
      * drawings in a LIFO order.
      *
      * @param drawing Exact reference to the Drawing to clear.
+     * @return Info after which the changes have been made.
      */
-    public void clear(Drawing drawing) {
+    public DrawingInfo clear(Drawing drawing) {
         flush();
 
         var idx = drawings.indexOf(new DrawingInfo(drawing));
-        if (idx == -1) return;
+        if (idx == -1) return null;
 
         // Reset state to how it was before the drawing was added
         var info = drawings.get(idx);
@@ -160,6 +161,7 @@ public class DrawingManager {
         }
 
         drawings.remove(drawings.size() - 1);
+        return info;
     }
 
     public int byteSize() {
