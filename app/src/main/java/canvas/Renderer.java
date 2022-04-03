@@ -4,10 +4,9 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import drawing.Drawable;
+import drawing.Drawing;
 import java.io.File;
 import java.nio.FloatBuffer;
-
-import drawing.Drawing;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.MatrixType;

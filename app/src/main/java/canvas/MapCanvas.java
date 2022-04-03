@@ -9,7 +9,6 @@ import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
 import drawing.Category;
-import drawing.Drawing;
 import geometry.Point;
 import javafx.application.Platform;
 import javafx.scene.layout.Region;
