@@ -31,20 +31,24 @@ public class VBOWrapper {
         gl.glBufferData(type, initialCapacity, null, GL3.GL_DYNAMIC_DRAW);
     }
 
+    public void bind() {
+        gl.glBindBuffer(type, vbo);
+    }
+
     public void set(IntBuffer buffer, long offset, int length) {
         //if (capacity < offset + length) grow(offset + length);
 
-        gl.glBindBuffer(type, vbo);
+        bind();
         gl.glBufferSubData(type, offset * Integer.BYTES, ((long) length) * Integer.BYTES, buffer);
     }
 
     public void set(FloatBuffer buffer, long offset, int length) {
-        gl.glBindBuffer(type, vbo);
+        bind();
         gl.glBufferSubData(type, offset * Float.BYTES, ((long) length) * Float.BYTES, buffer);
     }
 
     public void set(ByteBuffer buffer, long offset, int length) {
-        gl.glBindBuffer(type, vbo);
+        bind();
         gl.glBufferSubData(type, offset * Byte.BYTES, ((long) length) * Byte.BYTES, buffer);
     }
 
