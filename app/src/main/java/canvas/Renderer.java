@@ -146,7 +146,9 @@ public class Renderer implements GLEventListener {
     @Override
     public void dispose(GLAutoDrawable glAutoDrawable) {
         GL3 gl = glAutoDrawable.getGL().getGL3();
-        shaderPrograms[shader.ordinal()].dispose(gl);
+        for (var shaderProgram : shaderPrograms) {
+            shaderProgram.dispose(gl);
+        }
     }
 
     @Override
