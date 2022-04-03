@@ -98,7 +98,7 @@ public class DrawingManager {
      * @return
      */
     public Drawing drawOrdered(List<Vector2D> points, Drawable drawable, int offset) {
-        var drawing = Drawing.create(points, drawable, 0);
+        var drawing = Drawing.create(points, drawable, offset);
         drawOrdered(drawing, drawable.ordinal());
         return drawing;
     }
