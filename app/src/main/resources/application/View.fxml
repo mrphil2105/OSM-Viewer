@@ -81,7 +81,6 @@
         </top>
         <center>
             <MapCanvas fx:id="canvas" prefWidth="1280" prefHeight="720">
-                <TextField fx:id="pointsOfInterestInput"  />
             </MapCanvas>
 
         </center>

@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
@@ -161,12 +162,20 @@ public class Controller implements MouseListener {
 
       if (mouseEvent.getButton()==MouseEvent.BUTTON3){
           Point point = canvas.canvasToMap(new Point((float)mouseEvent.getX(),(float)mouseEvent.getY()));
-          pointsOfInterestInput.relocate(mouseEvent.getX(),mouseEvent.getY());
-          pointsOfInterestInput.toFront();
-          pointsOfInterestInput.clear();
+          var cm = new ContextMenu();
+          var tf = new TextField("POI name");
+          var mi = new CustomMenuItem(tf);
+          mi.setHideOnClick(false);
+          cm.getItems().add(mi);
 
-          pointsOfInterestInput.setOnAction(e -> {
-              addPointOfInterest(new PointOfInterest(point.x(),point.y(),pointsOfInterestInput.getText()));
+          cm.show(canvas, Side.LEFT, mouseEvent.getX(), mouseEvent.getY());
+          tf.requestFocus();
+          canvas.giveFocus();
+
+          tf.setOnAction(e -> {
+              addPointOfInterest(new PointOfInterest(point.x(),point.y(),tf.getText()));
+              tf.setDisable(true);
+              cm.hide();
           });
 
 
