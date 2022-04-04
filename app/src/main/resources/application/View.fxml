@@ -67,10 +67,10 @@
             </VBox>
         </right>
          <center>
-            <MapCanvas fx:id="canvas"
-                       prefWidth="1280"
-                       prefHeight="720"
-            />
+
+
+
+
         </center>
         <top>
             <MenuBar>
@@ -80,10 +80,10 @@
             </MenuBar>
         </top>
         <center>
-            <MapCanvas fx:id="canvas"
-                       prefWidth="1280"
-                       prefHeight="720"
-            />
+            <MapCanvas fx:id="canvas" prefWidth="1280" prefHeight="720">
+                <TextField fx:id="pointsOfInterestInput"  />
+            </MapCanvas>
+
         </center>
     </BorderPane>
 </Scene>
