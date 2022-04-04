@@ -4,20 +4,18 @@ import javafx.geometry.Side;
 import javafx.scene.control.TextField;
 import java.util.List;
 
-public class AutofillTextField extends TextField {
+public class SearchTextField extends TextField {
     AutofillContextMenu popupEntries;
     AddressDatabase addressDatabase;
 
-    public AutofillTextField(){ //TODO: rename to SearchTextField
-    }
 
     public void init(AddressDatabase addressDatabase){
         this.addressDatabase = addressDatabase;
         popupEntries = new AutofillContextMenu(this, addressDatabase);
     }
 
-
     public Address handleSearch() {
+        popupEntries.hide();
         var parsedAddress = parseAddress();
         if(parsedAddress == null){
             // throw new Exception("No match");
@@ -32,18 +30,26 @@ public class AutofillTextField extends TextField {
         return result;
     }
 
+    public void showHistory(){
+        popupEntries.hide();
+        popupEntries.getItems().clear();
+        addressDatabase.getHistory().forEach(e -> popupEntries.getItems().add(new AddressMenuItem(e)));
+        if (!popupEntries.isShowing()) {
+            popupEntries.show(this, Side.BOTTOM, 0, 0);
+        }
+    }
+
     public void handleSearchChange(){
         if(getText().length() == 0){
-            popupEntries.hide();
-            addressDatabase.getHistory().forEach(e -> popupEntries.getItems().add(new AddressMenuItem(e)));
+            showHistory();
         } else{
+            popupEntries.hide();
             List<Address> results;
 
             var searchedAddress = parseAddress();
             if(searchedAddress == null) return;
 
             results = addressDatabase.possibleAddresses(searchedAddress,5);
-
 
             boolean showStreet = (searchedAddress.street() != null);
             boolean showHouse = (searchedAddress.houseNumber() != null);
@@ -59,12 +65,13 @@ public class AutofillTextField extends TextField {
                 item.setOnAction(popupEntries::onMenuClick);
                 popupEntries.getItems().add(item);
             }
+            if (!popupEntries.isShowing()) {
+                popupEntries.show(this, Side.BOTTOM, 0, 0);
+            }
         }
-        if (!popupEntries.isShowing()) {
-            popupEntries.show(this, Side.BOTTOM, 0, 0);
-        }
+
     }
-    private String capitalize(String string){
+    private String reformat(String string){
         if(string == null) return null;
 
         string = string.toLowerCase();
@@ -72,13 +79,14 @@ public class AutofillTextField extends TextField {
         var stringBuilder = new StringBuilder();
         var split = string.split(" ");
         for(String s : split){
+            if(s.length() == 0) continue;
             char[] charArray = s.toCharArray();
             charArray[0] = Character.toUpperCase(charArray[0]);
             var result = new String(charArray);
-            stringBuilder.append(result);
+            stringBuilder.append(result).append(" ");
         }
 
-        return stringBuilder.toString();
+        return stringBuilder.toString().trim();
     }
 
     private Address parseAddress(){
@@ -87,10 +95,8 @@ public class AutofillTextField extends TextField {
         if(searchedAddressBuilder == null){
             return null;
         };
-
-
-        searchedAddressBuilder.street(capitalize(searchedAddressBuilder.getStreet()));
-        searchedAddressBuilder.city(capitalize(searchedAddressBuilder.getCity()));
+        searchedAddressBuilder.street(reformat(searchedAddressBuilder.getStreet()));
+        searchedAddressBuilder.city(reformat(searchedAddressBuilder.getCity()));
 
         return searchedAddressBuilder.build();
     }

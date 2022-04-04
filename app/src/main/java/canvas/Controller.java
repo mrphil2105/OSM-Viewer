@@ -1,6 +1,6 @@
 package canvas;
 
-import Search.AutofillTextField;
+import Search.SearchTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
@@ -25,7 +25,7 @@ public class Controller implements MouseListener {
 
     @FXML private MapCanvas canvas;
 
-    @FXML private AutofillTextField searchTextField;
+    @FXML private SearchTextField searchTextField;
 
     @FXML private TextField fromRouteTextField;
 
@@ -122,7 +122,14 @@ public class Controller implements MouseListener {
         var address = searchTextField.handleSearch();
         if (address == null) return; //TODO: handle exception and show message?
         Point point = Point.geoToMap(new Point((float)address.node().lon(),(float)address.node().lat()));
+
         zoomOn(point);
+
+    }
+
+    @FXML
+    public void handleInFocus(){
+        searchTextField.showHistory();
     }
 
     @FXML
