@@ -58,6 +58,8 @@ public class Controller implements MouseListener {
 
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
+    @FXML private TextField pointsOfInterestInput;
+
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
@@ -155,9 +157,19 @@ public class Controller implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
 
+
+
       if (mouseEvent.getButton()==MouseEvent.BUTTON3){
           Point point = canvas.canvasToMap(new Point((float)mouseEvent.getX(),(float)mouseEvent.getY()));
-          addPointOfInterest(new PointOfInterest(point.x(),point.y(),"Test"));
+          pointsOfInterestInput.relocate(mouseEvent.getX(),mouseEvent.getY());
+          pointsOfInterestInput.toFront();
+          pointsOfInterestInput.clear();
+
+          pointsOfInterestInput.setOnAction(e -> {
+              addPointOfInterest(new PointOfInterest(point.x(),point.y(),pointsOfInterestInput.getText()));
+          });
+
+
       }
     }
 
@@ -184,6 +196,7 @@ public class Controller implements MouseListener {
                 (float) (mouseEvent.getX() - lastMouse.getX()),
                 (float) (mouseEvent.getY() - lastMouse.getY()));
         lastMouse = new Point2D(mouseEvent.getX(), mouseEvent.getY());
+
     }
 
     @Override

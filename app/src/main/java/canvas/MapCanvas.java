@@ -11,11 +11,13 @@ import com.jogamp.opengl.util.Animator;
 import drawing.Category;
 import geometry.Point;
 import javafx.application.Platform;
+import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
-public class MapCanvas extends Region {
+public class MapCanvas extends Pane {
     final Affine transform = new Affine();
     private Animator animator;
     private GLWindow window;
@@ -122,6 +124,12 @@ public class MapCanvas extends Region {
     public void setZoom(float zoom){
         transform.setMxx(zoom);
         transform.setMyy(zoom);
+
+    }
+
+    public void add(Node n){
+        getChildren().add(n);
+        n.setViewOrder(-1.0);;
 
     }
 }
