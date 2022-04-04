@@ -51,12 +51,7 @@ public class MapCanvas extends Pane {
                             if (!newValue) {
                                 JFXAccessor.runOnJFXThread(
                                         false,
-                                        () -> {
-                                            if (window.isVisible()) {
-                                                window.setVisible(false);
-                                                window.setVisible(true);
-                                            }
-                                        });
+                                        this::giveFocus);
                             }
                         });
 
@@ -131,5 +126,12 @@ public class MapCanvas extends Pane {
         getChildren().add(n);
         n.setViewOrder(-1.0);;
 
+    }
+
+    public void giveFocus() {
+        if (window.isVisible()) {
+            window.setVisible(false);
+            window.setVisible(true);
+        }
     }
 }
