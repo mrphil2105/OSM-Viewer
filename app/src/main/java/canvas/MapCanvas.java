@@ -115,6 +115,10 @@ public class MapCanvas extends Pane {
         setZoom(25);
         center(point);
     }
+    public void zoomOn(Point point, float zoom) {
+        setZoom(zoom);
+        center(point);
+    }
 
     public void setZoom(float zoom){
         transform.setMxx(zoom);
