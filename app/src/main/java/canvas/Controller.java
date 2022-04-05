@@ -7,6 +7,7 @@ import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.geometry.Side;
@@ -14,6 +15,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
 import pointsOfInterest.PointsOfInterestVBox;
@@ -60,6 +62,8 @@ public class Controller implements MouseListener {
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
     @FXML private TextField pointsOfInterestInput;
+    boolean pointOfInterestMode = false;
+    ContextMenu addPointOfInterestText;
 
     public void init(Model model) {
         canvas.init(model);
@@ -73,6 +77,8 @@ public class Controller implements MouseListener {
         setStyleSheets("style.css");
         pointsOfInterestVBox.init();
         this.model=model;
+
+
 
 
         // FIXME: yuck
@@ -167,7 +173,7 @@ public class Controller implements MouseListener {
 
 
 
-      if (mouseEvent.getButton()==MouseEvent.BUTTON3){
+      if (pointOfInterestMode){
           Point point = canvas.canvasToMap(new Point((float)mouseEvent.getX(),(float)mouseEvent.getY()));
           var cm = new ContextMenu();
           var tf = new TextField("POI name");
@@ -184,7 +190,8 @@ public class Controller implements MouseListener {
               tf.setDisable(true);
               cm.hide();
           });
-
+        pointOfInterestMode=false;
+        addPointOfInterestText.hide();
 
       }
     }
@@ -204,7 +211,12 @@ public class Controller implements MouseListener {
     public void mouseReleased(MouseEvent mouseEvent) {}
 
     @Override
-    public void mouseMoved(MouseEvent mouseEvent) {}
+    public void mouseMoved(MouseEvent mouseEvent) {
+        if (pointOfInterestMode){
+            addPointOfInterestText.show(canvas, Side.LEFT, mouseEvent.getX()+140, mouseEvent.getY()-30);
+        }
+
+    }
 
     @Override
     public void mouseDragged(MouseEvent mouseEvent) {
@@ -260,5 +272,21 @@ public class Controller implements MouseListener {
                });
             }
         }
+    }
+
+    @FXML
+    public void enterPointOfInterestMode(ActionEvent actionEvent) {
+
+        if (addPointOfInterestText==null){
+            addPointOfInterestText=new ContextMenu();
+            var ta = new Text("Add point of Interest");
+            var mi = new CustomMenuItem(ta);
+            mi.setHideOnClick(false);
+            addPointOfInterestText.getItems().add(mi);
+        }
+        pointOfInterestMode=true;
+        addPointOfInterestText.requestFocus();
+        canvas.giveFocus();
+
     }
 }
