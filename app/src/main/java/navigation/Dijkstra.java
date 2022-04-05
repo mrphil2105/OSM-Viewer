@@ -5,6 +5,7 @@ import static osm.elements.OSMTag.Key.*;
 import java.io.Serializable;
 import java.util.*;
 
+import collections.enumflags.EnumFlags;
 import javafx.util.Pair;
 import osm.OSMObserver;
 import osm.elements.*;
@@ -50,6 +51,8 @@ public class Dijkstra implements OSMObserver, Serializable {
             direction = Direction.BOTH;
         }
 
+        var edgeRoles = getEdgeRoles(way);
+
         var nodes = way.nodes();
         var firstNode = nodes[0];
 
@@ -59,15 +62,14 @@ public class Dijkstra implements OSMObserver, Serializable {
             var firstVertex = coordinatesToLong((float)firstNode.lon(), (float)firstNode.lat());
             var secondVertex = coordinatesToLong((float)secondNode.lon(), (float)secondNode.lat());
             var distance = calculateDistance(firstNode, secondNode);
-            // TODO: Parse roles from way.
 
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
-                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, null);
+                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles);
                 graph.addEdge(edge);
             }
 
             if (direction == Direction.REVERSE || direction == Direction.BOTH) {
-                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, null);
+                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, edgeRoles);
                 graph.addEdge(edge);
             }
 
@@ -218,6 +220,48 @@ public class Dijkstra implements OSMObserver, Serializable {
             };
             default -> Direction.UNKNOWN;
         };
+    }
+
+    private static EnumFlags<EdgeRole> getEdgeRoles(OSMWay way) {
+        var highwayTag = way.tags().stream().filter(t -> t.key() == HIGHWAY).findFirst().orElse(null);
+
+        if (highwayTag == null) {
+            throw new IllegalArgumentException("The OSM way must be a highway or cycleway.");
+        }
+
+        var edgeRoles = new EnumFlags<EdgeRole>(false);
+
+        boolean isCycleway = way.tags().stream().anyMatch(t -> t.key() == CYCLEWAY);
+
+        if (isCycleway) {
+            edgeRoles.set(EdgeRole.BIKE);
+        }
+
+        boolean isFootway = way.tags().stream().anyMatch(t -> t.key() == FOOTWAY);
+
+        if (isFootway) {
+            edgeRoles.set(EdgeRole.WALK);
+        }
+
+        switch (highwayTag.value()) {
+            case "motorway",
+                "trunk",
+                "primary",
+                "secondary",
+                "tertiary",
+                "unclassified",
+                "residential",
+                "motorway_link",
+                "trunk_link",
+                "primary_link",
+                "secondary_link",
+                "tertiary_link",
+                "living_street" -> edgeRoles.set(EdgeRole.CAR);
+            case "cycleway" -> edgeRoles.set(EdgeRole.BIKE);
+            case "footway" -> edgeRoles.set(EdgeRole.WALK);
+        }
+
+        return edgeRoles;
     }
 
     private static float calculateDistance(SlimOSMNode firstNode, SlimOSMNode secondNode) {
