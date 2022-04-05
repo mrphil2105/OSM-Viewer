@@ -44,19 +44,32 @@ public class Dijkstra implements OSMObserver, Serializable {
             .findFirst()
             .orElse(0);
 
+        var direction = determineDirection(way);
+
+        if (direction == Direction.UNKNOWN) {
+            direction = Direction.BOTH;
+        }
+
         var nodes = way.nodes();
         var firstNode = nodes[0];
 
         for (int i = 1; i < nodes.length; i++) {
             var secondNode = nodes[i];
 
-            // TODO: Handle direction, e.g. one-way and both ways (add two edges).
             var firstVertex = coordinatesToLong((float)firstNode.lon(), (float)firstNode.lat());
             var secondVertex = coordinatesToLong((float)secondNode.lon(), (float)secondNode.lat());
             var distance = calculateDistance(firstNode, secondNode);
             // TODO: Parse roles from way.
-            var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, null);
-            graph.addEdge(edge);
+
+            if (direction == Direction.SINGLE || direction == Direction.BOTH) {
+                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, null);
+                graph.addEdge(edge);
+            }
+
+            if (direction == Direction.REVERSE || direction == Direction.BOTH) {
+                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, null);
+                graph.addEdge(edge);
+            }
 
             firstNode = secondNode;
         }
@@ -119,7 +132,6 @@ public class Dijkstra implements OSMObserver, Serializable {
             if (!settled.contains(to)) {
                 var newDistance = distTo.get(vertex) + calculateWeight(edge);
 
-                // TODO: Might have to use 'computeIfAbsent' here with Float.POSITIVE_INFINITY.
                 if (newDistance < distTo.computeIfAbsent(to, v -> Float.POSITIVE_INFINITY)) {
                     distTo.put(to, newDistance);
                     edgeTo.put(to, edge);
@@ -181,6 +193,33 @@ public class Dijkstra implements OSMObserver, Serializable {
         return null;
     }
 
+    private static Direction determineDirection(OSMWay way) {
+        var direction = Direction.UNKNOWN;
+
+        for (var tag : way.tags()) {
+            direction = determineDirection(tag);
+            if (direction != Direction.UNKNOWN) break;
+        }
+
+        return direction;
+    }
+
+    private static Direction determineDirection(OSMTag tag) {
+        return switch (tag.key()) {
+            case JUNCTION -> switch (tag.value()) {
+                case "roundabout" -> Direction.SINGLE;
+                default -> Direction.UNKNOWN;
+            };
+            case ONEWAY -> switch (tag.value()) {
+                case "yes", "true", "1" -> Direction.SINGLE;
+                case "no", "false", "0" -> Direction.BOTH;
+                case "-1" -> Direction.REVERSE;
+                default -> Direction.UNKNOWN;
+            };
+            default -> Direction.UNKNOWN;
+        };
+    }
+
     private static float calculateDistance(SlimOSMNode firstNode, SlimOSMNode secondNode) {
         var x1 = firstNode.lon();
         var y1 = firstNode.lat();
@@ -195,5 +234,9 @@ public class Dijkstra implements OSMObserver, Serializable {
         public int compareTo(Node other) {
             return Float.compare(weight, other.weight);
         }
+    }
+
+    private enum Direction {
+        SINGLE, BOTH, REVERSE, UNKNOWN
     }
 }
