@@ -16,6 +16,8 @@ public record OSMTag(Key key, String value) implements Serializable {
         PLACE,
         TYPE,
         NAME,
+        JUNCTION,
+        ONEWAY,
         MAXSPEED,
         STREET,
         HOUSENUMBER,
@@ -36,6 +38,8 @@ public record OSMTag(Key key, String value) implements Serializable {
                 case "place" -> PLACE;
                 case "type" -> TYPE;
                 case "name" -> NAME;
+                case "junction" -> JUNCTION;
+                case "oneway" -> ONEWAY;
                 case "maxspeed" -> MAXSPEED;
                 case "addr:street" -> STREET;
                 case "addr:housenumber" -> HOUSENUMBER;
