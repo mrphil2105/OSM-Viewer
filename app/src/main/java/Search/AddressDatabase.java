@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import osm.OSMObserver;
@@ -163,9 +162,9 @@ public class AddressDatabase implements OSMObserver, Serializable {
             filterStream = filterStream.filter(retain::contains);
         }
 
-        if(input.houseNumber() != null){
+        if (input.houseNumber() != null) {
             return filterStream.limit(maxEntries).map(AddressBuilder::build).toList();
-        }else{
+        } else {
             return filterStream
                     .filter(
                             Predicates.distinctByKey(e -> e.getStreet().hashCode() * e.getPostcode().hashCode()))
