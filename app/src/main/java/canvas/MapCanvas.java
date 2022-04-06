@@ -83,7 +83,6 @@ public class MapCanvas extends Region {
         //set zoom
         startZoom = (float) canvas.getWidth()/(Point.geoToMap(model.bounds.getBottomRight()).x() - Point.geoToMap(model.bounds.getTopLeft()).x());
         setZoom(startZoom);  
-        scale = (float) (100.0/canvas.getWidth());
         center = model.bounds.center();
     }
 
@@ -140,14 +139,7 @@ public class MapCanvas extends Region {
     }
 
     public float getZoom(){
-        return (float) ((transform.getMxx() / startZoom) - 0.5);
-    }
-
-    public float getZoomScale(){
         return (float) ((transform.getMxx() / startZoom));
     }
 
-    public float getScale(){
-        return scale;
-    }
 }
