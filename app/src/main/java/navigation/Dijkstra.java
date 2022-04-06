@@ -240,7 +240,12 @@ public class Dijkstra implements OSMObserver, Serializable {
 
         var edgeRoles = new EnumFlags<EdgeRole>(false);
 
-        boolean isCycleway = way.tags().stream().anyMatch(t -> t.key() == CYCLEWAY);
+        boolean isCycleway = way.tags()
+            .stream()
+            .anyMatch(t -> t.key() == CYCLEWAY ||
+                t.key() == CYCLEWAY_LEFT ||
+                t.key() == CYCLEWAY_RIGHT ||
+                t.key() == CYCLEWAY_BOTH);
 
         if (isCycleway) {
             edgeRoles.set(EdgeRole.BIKE);
