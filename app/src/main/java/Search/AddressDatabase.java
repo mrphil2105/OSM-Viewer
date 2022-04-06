@@ -7,9 +7,12 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import osm.OSMObserver;
 import osm.elements.OSMNode;
 import osm.elements.OSMTag;
+import util.Predicates;
 
 public class AddressDatabase implements OSMObserver, Serializable {
     private Trie<Set<AddressBuilder>> streetToAddress;
@@ -106,59 +109,35 @@ public class AddressDatabase implements OSMObserver, Serializable {
             "^[ .,]*(?<street>[A-Za-zæøåÆØÅ.é ]+?)(([ .,]+)(?<house>[0-9]+[A-Za-z]?(-[0-9]+)?)([ ,.]+(?<floor>[0-9]{1,3})([ ,.]+(?<side>tv|th|mf|[0-9]{1,3})?))?([ ,.]*(?<postcode>[0-9]{4})??[ ,.]*(?<city>[A-Za-zæøåÆØÅ ]+?)?)?)?[ ,.]*$";
     private static final Pattern PATTERN = Pattern.compile(REGEX);
 
-    public Address search(Address input) {
-        var results = new LinkedList<Address>();
+    public List<Address> search(Address input) {
 
         var searchedStreets = streetToAddress.get(input.street());
         if (searchedStreets == null) return null;
 
+        var filterStream = searchedStreets.stream();
+
         if (input.postcode() != null) {
-            searchedStreets.retainAll(postcodeToAddress.get(input.postcode()));
+            filterStream = filterStream.filter(e -> e.getPostcode().equals(input.postcode()));
         }
         if (input.city() != null) {
-            searchedStreets.retainAll(cityToAddress.get(input.city()));
+            filterStream = filterStream.filter(e -> e.getCity().equals(input.city()));
         }
         if (input.houseNumber() != null) {
-            searchedStreets =
-                    searchedStreets.stream()
-                            .filter(e -> e.getHouse().equals(input.houseNumber()))
-                            .collect(Collectors.toSet());
+            filterStream = filterStream.filter(e -> e.getHouse().equals(input.houseNumber()));
         }
-        searchedStreets.forEach(e -> results.add(e.build()));
-        if (results.size() == 1) {
-            var result = results.get(0);
-            history.add(result);
-            return result;
-        } else {
-            return null;
-        }
+        return filterStream.map(AddressBuilder::build).toList();
     }
 
     public List<Address> possibleAddresses(Address input, int maxEntries) {
-        final LinkedList<Address> results = new LinkedList<>();
-        var parsedStreetsAndCities = new HashSet<String>();
-        Set<AddressBuilder> filteringSet = new HashSet<AddressBuilder>();
-
-        if (input.street() != null) {
-            var searchedStreets = streetToAddress.withPrefix(input.street());
-            while (searchedStreets.hasNext()) {
-                filteringSet.addAll(searchedStreets.next().getValue());
-            }
-        } else {
-            throw new RuntimeException();
-            // Street can never be null due to the regex. If the regex doesn't match, this method is never
-            // called.
-        }
+        Stream<AddressBuilder> filterStream =
+                StreamSupport.stream(
+                                Spliterators.spliteratorUnknownSize(
+                                        streetToAddress.withPrefix(input.street()), Spliterator.ORDERED),
+                                false)
+                        .flatMap(e -> e.getValue().stream());
 
         if (input.houseNumber() != null) {
-            // we know that we must have a full street name, and since there probably isn't that many
-            // streets with the
-            // same address it shouldn't take long to go through them linearly, to check if they have the
-            // specified house number
-            filteringSet =
-                    filteringSet.stream()
-                            .filter(e -> e.getHouse().startsWith(input.houseNumber()))
-                            .collect(Collectors.toSet());
+            filterStream = filterStream.filter(e -> e.getHouse().startsWith(input.houseNumber()));
         }
 
         if (input.postcode() != null) {
@@ -170,7 +149,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
                 retain.addAll(entry);
             }
 
-            filteringSet.retainAll(retain);
+            filterStream = filterStream.filter(retain::contains);
         }
 
         if (input.city() != null) {
@@ -180,23 +159,34 @@ public class AddressDatabase implements OSMObserver, Serializable {
                 var entry = searchedCities.next().getValue();
                 retain.addAll(entry);
             }
-            filteringSet.retainAll(retain);
+
+            filterStream = filterStream.filter(retain::contains);
         }
 
-        if (input.houseNumber() != null) {
-            filteringSet.stream().limit(maxEntries).forEach(e -> results.add(e.build()));
-        } else {
-            filteringSet.stream()
+        if(input.houseNumber() != null){
+            return filterStream.limit(maxEntries).map(AddressBuilder::build).toList();
+        }else{
+            return filterStream
+                    .filter(
+                            Predicates.distinctByKey(e -> e.getStreet().hashCode() * e.getPostcode().hashCode()))
                     .limit(maxEntries)
-                    .forEach(
-                            e -> {
-                                if (parsedStreetsAndCities.add(e.getStreet() + "|" + e.getPostcode())) {
-                                    results.add(e.build());
-                                }
-                            });
+                    .map(AddressBuilder::build)
+                    .toList();
         }
 
-        return results;
+        //        if (input.houseNumber() != null) {
+        //            filteringSet.stream().limit(maxEntries).forEach(e -> results.add(e.build()));
+        //        } else {
+        //            filteringSet.stream()
+        //                    .limit(maxEntries)
+        //                    .forEach(
+        //                            e -> {
+        //                                if (parsedStreetsAndCities.add(e.getStreet() + "|" +
+        // e.getPostcode())) {
+        //                                    results.add(e.build());
+        //                                }
+        //                            });
+        //        }
     }
 
     // test method
