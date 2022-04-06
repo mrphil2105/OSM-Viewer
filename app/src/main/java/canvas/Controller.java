@@ -24,6 +24,7 @@ public class Controller implements MouseListener {
     private ScaleBar scaleBar = new ScaleBar();
     private float currentScale;
     private float zoomLevel = 0;
+    private Point center;
 
     @FXML private MapCanvas canvas;
 
@@ -77,6 +78,7 @@ public class Controller implements MouseListener {
         setStyleSheets("style.css");
         initScaleBar(model);
         updateZoom();
+        center = model.bounds.center();
 
         // FIXME: yuck
         categories
@@ -120,12 +122,12 @@ public class Controller implements MouseListener {
             model.bounds.getBottomLeft().x(), 
             model.bounds.getBottomLeft().y(), 
             model.bounds.getBottomRight().x(), 
-            model.bounds.getBottomRight().y()) * canvas.getScale();
+            model.bounds.getBottomRight().y()) * (float) (scaleBarRectangle.getWidth()/canvas.getWidth());
         handleScaleBar();
     }
 
     public void handleScaleBar(){
-        var newScale = (float) (currentScale *  (1/canvas.getZoomScale()));
+        var newScale = (float) (currentScale *  (1/canvas.getZoom()));
         if (newScale < 1000){
             scaleBarText.setText(Float.toString((float) (Math.round(newScale*100.0)/100.0)) + "m");
         } else {
@@ -136,11 +138,14 @@ public class Controller implements MouseListener {
     @FXML void handleZoomInButton(){
         canvas.zoomChange(true);
         updateZoom();
+        canvas.center(center);
+        
     }
 
     @FXML void handleZoomOutButton(){
         canvas.zoomChange(false);
         updateZoom();
+        canvas.center(center);
     }
 
     @FXML
@@ -232,14 +237,12 @@ public class Controller implements MouseListener {
                     mouseEvent.getX(),
                     mouseEvent.getY());
         }
-        // percentage is not correct if zoomed horizontal 
-        updateZoom();
-        
+        updateZoom(); 
     }
 
     public void updateZoom(){
         handleScaleBar();
-        zoomLevel = canvas.getZoom()*100;
+        zoomLevel = (float) ((canvas.getZoom() - 0.5)*100);
         zoomLevelText.setText(Float.toString((float) (Math.round(zoomLevel*100.0)/100.0)) + "%");
     }
 
