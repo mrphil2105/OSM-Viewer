@@ -1,15 +1,17 @@
 package canvas;
 
+import Search.Address;
 import Search.AddressDatabase;
 import com.jogamp.opengl.*;
 import drawing.Drawable;
 import geometry.Rect;
 import io.FileParser;
 import io.PolygonsReader;
-
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class Model {
 
@@ -19,7 +21,9 @@ public class Model {
     private final IntBuffer tex = IntBuffer.allocate(TexType.values().length);
     public final Rect bounds;
     private int indexCount;
-    AddressDatabase addresses;
+    private final AddressDatabase addresses;
+    private final ObservableList<Address> results = FXCollections.observableArrayList();
+    private final ObservableList<Address> suggestions = FXCollections.observableArrayList();
 
     public Model(String filename) throws Exception {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
@@ -187,5 +191,13 @@ public class Model {
 
     public AddressDatabase getAddresses() {
         return addresses;
+    }
+
+    public ObservableList<Address> getObservableResults() {
+        return results;
+    }
+
+    public ObservableList<Address> getObservableSuggestions() {
+        return suggestions;
     }
 }

@@ -1,12 +1,13 @@
 package canvas;
 
+import Search.Address;
 import Search.SearchTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
-
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
@@ -53,7 +54,22 @@ public class Controller implements MouseListener {
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
-        searchTextField.init(model.getAddresses());
+        searchTextField.init(model);
+        model
+                .getObservableResults()
+                .addListener(
+                        (ListChangeListener<Address>)
+                                c -> {
+                                    // TODO
+
+                                });
+        model
+                .getObservableSuggestions()
+                .addListener(
+                        (ListChangeListener<Address>)
+                                c -> {
+                                    // TODO
+                                });
         checkBoxBuildings.setSelected(true);
         checkBoxHighways.setSelected(true);
         checkBoxWater.setSelected(true);
@@ -106,15 +122,16 @@ public class Controller implements MouseListener {
     @FXML
     public void handleSearchClick() {
         var address = searchTextField.handleSearch();
-        if (address == null) return; //TODO: handle exception and show message?
-        Point point = Point.geoToMap(new Point((float)address.node().lon(),(float)address.node().lat()));
+        if (address == null) return; // TODO: handle exception and show message?
+        Point point =
+                Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
         canvas.setZoom(25);
         canvas.center(point);
         searchTextField.clear();
     }
 
     @FXML
-    public void handleInFocus(){
+    public void handleInFocus() {
         searchTextField.showHistory();
     }
 
