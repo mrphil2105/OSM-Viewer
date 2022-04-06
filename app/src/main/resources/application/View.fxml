@@ -61,13 +61,13 @@
                     <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0" GridPane.rowIndex="7" toggleGroup="$groupMode" onAction="#handleDefaultMode"/>
                     <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0" GridPane.rowIndex="8" toggleGroup="$groupMode" onAction="#handlePartyMode"/>
                 </GridPane>
-                <HBox alignment="BOTTOM_CENTER" spacing="20">
+                <HBox alignment="BOTTOM_CENTER" spacing="5">
                     <padding>
                         <Insets top="20" bottom="20" left="10" right="10"/>
                     </padding>
-                <Button fx:id="zoomDecreaseButton" text="-" />
-                <Label fx:id="zoomLevelText" alignment="center" text="0%" />
-                <Button fx:id="zoomIncreaseButton" text="+"/>
+                <Button fx:id="zoomDecreaseButton" text="-" onAction="#handleZoomOutButton"/>
+                <Label fx:id="zoomLevelText" alignment="center" />
+                <Button fx:id="zoomIncreaseButton" text="+" onAction="#handleZoomInButton"/>
                 </HBox>
             </VBox>
         </right>
@@ -79,7 +79,7 @@
             </MenuBar>
         </top>
         <center>
-            <VBox id="allVBox">
+            <VBox id="allVBox" fx:id="middleVBox">
                 <MapCanvas fx:id="canvas"
                         prefWidth="1280"
                         prefHeight="720"
@@ -87,7 +87,7 @@
                 <StackPane>
                     <Rectangle fx:id="scaleBarRectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" 
                     height="40.0" stroke="BLACK" 
-                    strokeType="INSIDE" width="100.0"/> 
+                    strokeType="INSIDE" width="100"/> 
                     <Label fx:id="scaleBarText" text="1 km"/>
                 </StackPane>
             </VBox>
