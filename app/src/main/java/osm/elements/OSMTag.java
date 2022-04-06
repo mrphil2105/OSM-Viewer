@@ -7,6 +7,9 @@ public record OSMTag(Key key, String value) implements Serializable {
         BUILDING,
         HIGHWAY,
         CYCLEWAY,
+        CYCLEWAY_LEFT,
+        CYCLEWAY_RIGHT,
+        CYCLEWAY_BOTH,
         FOOTWAY,
         NATURAL,
         LANDUSE,
@@ -31,6 +34,9 @@ public record OSMTag(Key key, String value) implements Serializable {
                 case "building" -> BUILDING;
                 case "highway" -> HIGHWAY;
                 case "cycleway" -> CYCLEWAY;
+                case "cycleway:left" -> CYCLEWAY_LEFT;
+                case "cycleway:right" -> CYCLEWAY_RIGHT;
+                case "cycleway:both" -> CYCLEWAY_BOTH;
                 case "footway" -> FOOTWAY;
                 case "natural" -> NATURAL;
                 case "landuse" -> LANDUSE;
