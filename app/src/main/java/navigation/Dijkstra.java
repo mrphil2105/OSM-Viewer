@@ -129,6 +129,10 @@ public class Dijkstra implements OSMObserver, Serializable {
 
     private void relax(long vertex, long target) {
         for (var edge : graph.adjacent(vertex)) {
+            if (!edge.hasRole(mode)) {
+                continue;
+            }
+
             var to = edge.to();
 
             if (!settled.contains(to)) {
