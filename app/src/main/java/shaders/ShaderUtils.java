@@ -95,5 +95,7 @@ public class ShaderUtils {
             }
             throw new Exception("Error linking shader program!");
         }
+
+       
     }
 }
