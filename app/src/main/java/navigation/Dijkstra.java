@@ -43,7 +43,7 @@ public class Dijkstra implements OSMObserver, Serializable {
                 !t.value().equals("none"))
             .map(t -> Integer.parseInt(t.value()))
             .findFirst()
-            .orElse(0);
+            .orElse(getExpectedMaxSpeed(way));
 
         var direction = determineDirection(way);
 
@@ -262,6 +262,23 @@ public class Dijkstra implements OSMObserver, Serializable {
         }
 
         return edgeRoles;
+    }
+
+    private int getExpectedMaxSpeed(OSMWay way) {
+        var highwayTag = way.tags().stream().filter(t -> t.key() == HIGHWAY).findFirst().orElse(null);
+
+        if (highwayTag == null) {
+            throw new IllegalArgumentException("The OSM way must be a highway or cycleway.");
+        }
+
+        return switch (highwayTag.value()) {
+            case "motorway", "motorway_link" -> 110;
+            case "primary", "primary_link", "trunk", "trunk_link" -> 80;
+            case "secondary", "secondary_link", "unclassified" -> 60;
+            case "tertiary", "tertiary_link" -> 50;
+            case "residential", "living_street" -> 40;
+            default -> 0; // Return 0 for highways that aren't handled by Dijkstra in CAR mode.
+        };
     }
 
     private static float calculateDistance(SlimOSMNode firstNode, SlimOSMNode secondNode) {
