@@ -76,6 +76,7 @@ public class Controller implements MouseListener {
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
         initScaleBar(model);
+        updateZoom();
 
         // FIXME: yuck
         categories
@@ -115,17 +116,31 @@ public class Controller implements MouseListener {
     }
 
     public void initScaleBar(Model model){
-        currentScale = scaleBar.getScaleBarDistance(
+        currentScale = (float) scaleBar.getScaleBarDistance(
             model.bounds.getBottomLeft().x(), 
             model.bounds.getBottomLeft().y(), 
             model.bounds.getBottomRight().x(), 
-            model.bounds.getBottomRight().y());
-        scaleBarText.setText(Float.toString(currentScale));
+            model.bounds.getBottomRight().y()) * canvas.getScale();
+        handleScaleBar();
     }
 
-    public void handleScaleBar(float zoom){
-        currentScale *= ((zoom - 1) * -1) + 1;
-        scaleBarText.setText(Float.toString(currentScale));
+    public void handleScaleBar(){
+        var newScale = (float) (currentScale *  (1/canvas.getZoomScale()));
+        if (newScale < 1000){
+            scaleBarText.setText(Float.toString((float) (Math.round(newScale*100.0)/100.0)) + "m");
+        } else {
+            scaleBarText.setText(Float.toString((float) (Math.round((newScale/1000)*100.0)/100.0)) + "km");
+        } 
+    }
+
+    @FXML void handleZoomInButton(){
+        canvas.zoomChange(true);
+        updateZoom();
+    }
+
+    @FXML void handleZoomOutButton(){
+        canvas.zoomChange(false);
+        updateZoom();
     }
 
     @FXML
@@ -204,6 +219,7 @@ public class Controller implements MouseListener {
     public void mouseWheelMoved(MouseEvent mouseEvent) {
         float zoom;
         if (mouseEvent.getRotation()[0] == 0.0) {
+            if (mouseEvent.getRotation()[1] < 0 ){}
             zoom = (float) Math.pow(1.05, mouseEvent.getRotation()[1]);
             canvas.zoom(
                     zoom,
@@ -217,9 +233,14 @@ public class Controller implements MouseListener {
                     mouseEvent.getY());
         }
         // percentage is not correct if zoomed horizontal 
-        handleScaleBar(zoom);
-        zoomLevel += ((zoom - 1) * 100); 
-        zoomLevelText.setText(Float.toString(Math.round(zoomLevel)) + "%");
+        updateZoom();
+        
+    }
+
+    public void updateZoom(){
+        handleScaleBar();
+        zoomLevel = canvas.getZoom()*100;
+        zoomLevelText.setText(Float.toString((float) (Math.round(zoomLevel*100.0)/100.0)) + "%");
     }
 
     public void setStyleSheets(String stylesheet) {

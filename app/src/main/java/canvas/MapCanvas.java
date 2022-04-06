@@ -20,6 +20,9 @@ public class MapCanvas extends Region {
     private Animator animator;
     private GLWindow window;
     private Renderer renderer;
+    private float scale;
+    private float startZoom;
+    private Point center;
 
     public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
 
@@ -76,9 +79,12 @@ public class MapCanvas extends Region {
         window.addGLEventListener(renderer);
         animator = new Animator(window);
         animator.start();
-        setZoom((float) (canvas.getHeight()/(Point.geoToMap(model.bounds.getTopLeft()).y() - Point.geoToMap(model.bounds.getBottomRight()).y())));
-        System.out.println(Point.geoToMap(model.bounds.getTopLeft()) + " " + Point.geoToMap(model.bounds.getBottomRight()));       
-            
+
+        //set zoom
+        startZoom = (float) canvas.getWidth()/(Point.geoToMap(model.bounds.getBottomRight()).x() - Point.geoToMap(model.bounds.getTopLeft()).x());
+        setZoom(startZoom);  
+        scale = (float) (100.0/canvas.getWidth());
+        center = model.bounds.center();
     }
 
     public void setShader(Renderer.Shader shader) {
@@ -105,6 +111,7 @@ public class MapCanvas extends Region {
         transform.prependTranslation(-x, -y);
         transform.prependScale(zoom, zoom);
         transform.prependTranslation(x, y);
+        System.out.println(zoom);
     }
 
     public void pan(float dx, float dy) {
@@ -123,7 +130,24 @@ public class MapCanvas extends Region {
 
     }
 
+    public void zoomChange(boolean positive){
+        if (positive){
+            transform.setMxx(transform.getMxx() + (0.1 * startZoom));
+        } else {
+            transform.setMxx(transform.getMxx() - (0.1 * startZoom));
+        }
+                
+    }
+
     public float getZoom(){
-        return (float) transform.getMxx();
+        return (float) ((transform.getMxx() / startZoom) - 0.5);
+    }
+
+    public float getZoomScale(){
+        return (float) ((transform.getMxx() / startZoom));
+    }
+
+    public float getScale(){
+        return scale;
     }
 }
