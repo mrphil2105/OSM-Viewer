@@ -11,23 +11,20 @@ public class PointsOfInterestVBox extends VBox {
 
     private List<PointOfInterest> pointsOfInterest;
 
-    public void init(){
-        pointsOfInterest=new ArrayList<>();
-    }
-
-    public PointsOfInterestVBox(){
+    public void init(List<PointOfInterest> points){
+        pointsOfInterest=points;
 
     }
 
-    public void update(List<PointOfInterest> points){
-        for (PointOfInterest point : points){
-            if (!pointsOfInterest.contains(point)){
+    public void update(){
+        for (PointOfInterest point : pointsOfInterest){
+            if (!contains(point)){
                 addPointOfInterest(point);
             }
         }
-        for (PointOfInterest point : pointsOfInterest){
-            if (!points.contains(point)){
-                removePointOfInterest(point);
+        for (Node n :getChildren()){
+            if (!pointsOfInterest.contains(((PointsOfInterestHBox)n).getPointOfInterest())){
+                removePointOfInterest(((PointsOfInterestHBox) n).getPointOfInterest());
             }
         }
 
@@ -36,20 +33,23 @@ public class PointsOfInterestVBox extends VBox {
     }
 
     public void addPointOfInterest(PointOfInterest point){
-        pointsOfInterest.add(point);
         getChildren().add(new PointsOfInterestHBox(point));
 
     }
 
     public void removePointOfInterest(PointOfInterest point){
-        pointsOfInterest.remove(point);
+        getChildren().removeIf(n -> ((PointsOfInterestHBox) n).getPointOfInterest() == point);
+
+
+    }
+
+    public boolean contains (PointOfInterest point){
         for (Node n :getChildren()){
             if (((PointsOfInterestHBox)n).getPointOfInterest() == point ){
-                getChildren().remove(n);
+                return true;
             }
         }
-
-
+        return false;
     }
 
 

@@ -61,7 +61,6 @@ public class Controller implements MouseListener {
 
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
-    @FXML private TextField pointsOfInterestInput;
     boolean pointOfInterestMode = false;
     ContextMenu addPointOfInterestText;
 
@@ -75,7 +74,7 @@ public class Controller implements MouseListener {
         radioButtonDefaultMode.setSelected(true);
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
-        pointsOfInterestVBox.init();
+        pointsOfInterestVBox.init(model.getPointsOfInterest());
         this.model=model;
 
 
@@ -171,8 +170,6 @@ public class Controller implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
 
-
-
       if (pointOfInterestMode){
           Point point = canvas.canvasToMap(new Point((float)mouseEvent.getX(),(float)mouseEvent.getY()));
           var cm = new ContextMenu();
@@ -187,7 +184,6 @@ public class Controller implements MouseListener {
 
           tf.setOnAction(e -> {
               addPointOfInterest(new PointOfInterest(point.x(),point.y(),tf.getText()));
-              tf.setDisable(true);
               cm.hide();
           });
         pointOfInterestMode=false;
@@ -258,7 +254,7 @@ public class Controller implements MouseListener {
 
     public void addPointOfInterest(PointOfInterest point){
         model.getPointsOfInterest().add(point);
-        pointsOfInterestVBox.update(model.getPointsOfInterest());
+        pointsOfInterestVBox.update();
         for (Node n:pointsOfInterestVBox.getChildren()){
 
             if (((PointsOfInterestHBox)n).getPointOfInterest()==point){
@@ -268,7 +264,7 @@ public class Controller implements MouseListener {
                });
                hBox.getRemove().setOnAction(e -> {
                     model.getPointsOfInterest().remove(hBox.getPointOfInterest());
-                    pointsOfInterestVBox.update(model.getPointsOfInterest());
+                    pointsOfInterestVBox.update();
                });
             }
         }
@@ -283,10 +279,11 @@ public class Controller implements MouseListener {
             var mi = new CustomMenuItem(ta);
             mi.setHideOnClick(false);
             addPointOfInterestText.getItems().add(mi);
+            addPointOfInterestText.requestFocus();
+            canvas.giveFocus();
         }
         pointOfInterestMode=true;
-        addPointOfInterestText.requestFocus();
-        canvas.giveFocus();
+
 
     }
 }
