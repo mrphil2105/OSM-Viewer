@@ -1,5 +1,6 @@
 package canvas;
 
+import collections.Entity;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -46,8 +47,17 @@ public class Renderer implements GLEventListener {
         this.canvas = canvas;
     }
 
-    public void draw(Drawing drawing) {
+    /**
+     * Add a drawing to the renderer, causing it to be rendered from the next frame onwards.
+     *
+     * @param drawing The drawing to render.
+     * @return The actual drawing that was rendered. Can be used with `clear` to later remove this
+     *     drawing from the renderer.
+     */
+    public Drawing draw(Drawing drawing) {
         var info = manager.draw(drawing);
+
+        // Upload new triangles to OpenGL
         model
                 .getSharedDrawable()
                 .invoke(
@@ -67,10 +77,43 @@ public class Renderer implements GLEventListener {
                                     info.drawing().drawables().size());
                             return true;
                         });
+
+        return info.drawing();
     }
 
+    /** Clear all drawings from the renderer. */
     public void clear() {
         manager.clear();
+    }
+
+    /**
+     * Clear a drawing from the renderer.
+     *
+     * @param drawing The drawing to stop rendering.
+     */
+    public void clear(Entity drawing) {
+        var info = manager.clear(drawing);
+
+        // Upload new triangles to OpenGL
+        model
+                .getSharedDrawable()
+                .invoke(
+                        true,
+                        glAutoDrawable -> {
+                            indexVBO.set(
+                                    IntBuffer.wrap(info.drawing().indices().getArray()),
+                                    info.indicesStart(),
+                                    info.drawing().indices().size());
+                            vertexVBO.set(
+                                    FloatBuffer.wrap(info.drawing().vertices().getArray()),
+                                    info.verticesStart(),
+                                    info.drawing().vertices().size());
+                            drawableVBO.set(
+                                    ByteBuffer.wrap(info.drawing().drawables().getArray()),
+                                    info.drawablesStart(),
+                                    info.drawing().drawables().size());
+                            return true;
+                        });
     }
 
     public void setShader(Shader newShader) {

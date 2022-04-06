@@ -1,5 +1,6 @@
 package drawing;
 
+import collections.Entity;
 import geometry.Vector2D;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,19 +9,7 @@ import javafx.util.Pair;
 
 public class DrawingManager {
     public record DrawingInfo(
-            Drawing drawing, int indicesStart, int verticesStart, int drawablesStart) {
-        private DrawingInfo(Drawing drawing) {
-            this(drawing, 0, 0, 0);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == this) return true;
-            if (o instanceof DrawingInfo drawingInfo) return drawing() == drawingInfo.drawing();
-            if (o instanceof Drawing drawing) return drawing() == drawing;
-            return false;
-        }
-    }
+            Drawing drawing, int indicesStart, int verticesStart, int drawablesStart) {}
 
     private final List<DrawingInfo> drawings = new ArrayList<>();
     private final List<Pair<Integer, Drawing>> drawingCache = new ArrayList<>();
@@ -137,13 +126,20 @@ public class DrawingManager {
      * constant time if the drawing being removed was the latest added. One should prefer to clear
      * drawings in a LIFO order.
      *
-     * @param drawing Exact reference to the Drawing to clear.
+     * @param drawing The Drawing to clear.
      * @return Info after which the changes have been made.
      */
-    public DrawingInfo clear(Drawing drawing) {
+    public DrawingInfo clear(Entity drawing) {
         flush();
 
-        var idx = drawings.indexOf(new DrawingInfo(drawing));
+        // Search for entity
+        var idx = -1;
+        for (int i = 0; i < drawings.size(); i++) {
+            if (drawings.get(i).drawing.equals(drawing)) {
+                idx = i;
+                break;
+            }
+        }
         if (idx == -1) return null;
 
         // Reset state to how it was before the drawing was added
@@ -154,14 +150,21 @@ public class DrawingManager {
 
         // Shift every drawing to the right of idx left by 1, rewriting history as if the drawing was
         // never there
+        var infoDrawing = new Drawing();
         for (int i = idx; i < drawings.size() - 1; i++) {
-            var d = drawings.get(i + 1).drawing();
-            this.drawing.draw(d);
+            var curInfo = drawings.get(i + 1);
+            var d = curInfo.drawing().offset(-curInfo.verticesStart() / 2);
             drawings.set(i, createDrawingInfo(d));
+            infoDrawing.draw(d);
+            this.drawing.draw(d);
         }
-
         drawings.remove(drawings.size() - 1);
-        return info;
+
+        return new DrawingInfo(
+                infoDrawing.offset(info.verticesStart() / 2),
+                info.indicesStart(),
+                info.verticesStart(),
+                info.drawablesStart());
     }
 
     public int byteSize() {
