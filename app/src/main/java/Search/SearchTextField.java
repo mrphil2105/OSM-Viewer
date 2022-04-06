@@ -15,20 +15,11 @@ public class SearchTextField extends TextField {
         popupEntries = new AutofillContextMenu(this, addressDatabase);
     }
 
-    public Address handleSearch() {
+    public List<Address> handleSearch() {
         popupEntries.hide();
         var parsedAddress = parseAddress();
-        if (parsedAddress == null) {
-            // throw new Exception("No match");
-            // TODO display error "message" to user
-            return null;
-        }
-        var result = addressDatabase.search(parsedAddress);
-        if (result == null) {
-            // TODO display error "message" to user
-            return null;
-        }
-        return result;
+        if(parsedAddress == null) return null;
+        return addressDatabase.search(parsedAddress);
     }
 
     public void showHistory() {

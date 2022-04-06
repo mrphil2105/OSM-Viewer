@@ -121,8 +121,18 @@ public class Controller implements MouseListener {
 
     @FXML
     public void handleSearchClick() {
-        var address = searchTextField.handleSearch();
-        if (address == null) return; // TODO: handle exception and show message?
+        Address address;
+        var results = searchTextField.handleSearch();
+
+        if(results.size() == 1){
+            address = results.get(0);
+        } else{
+            //TODO: give user ability to clarify
+            return;
+        }
+
+
+        if (address == null) return;
         Point point =
                 Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
         canvas.setZoom(25);
