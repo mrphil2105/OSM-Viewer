@@ -56,28 +56,7 @@ public class Renderer implements GLEventListener {
      */
     public Drawing draw(Drawing drawing) {
         var info = manager.draw(drawing);
-
-        // Upload new triangles to OpenGL
-        model
-                .getSharedDrawable()
-                .invoke(
-                        true,
-                        glAutoDrawable -> {
-                            indexVBO.set(
-                                    IntBuffer.wrap(info.drawing().indices().getArray()),
-                                    info.indicesStart(),
-                                    info.drawing().indices().size());
-                            vertexVBO.set(
-                                    FloatBuffer.wrap(info.drawing().vertices().getArray()),
-                                    info.verticesStart(),
-                                    info.drawing().vertices().size());
-                            drawableVBO.set(
-                                    ByteBuffer.wrap(info.drawing().drawables().getArray()),
-                                    info.drawablesStart(),
-                                    info.drawing().drawables().size());
-                            return true;
-                        });
-
+        updateInfo(info);
         return info.drawing();
     }
 
@@ -93,7 +72,10 @@ public class Renderer implements GLEventListener {
      */
     public void clear(Entity drawing) {
         var info = manager.clear(drawing);
+        updateInfo(info);
+    }
 
+    private void updateInfo(DrawingManager.DrawingInfo info) {
         // Upload new triangles to OpenGL
         model
                 .getSharedDrawable()
