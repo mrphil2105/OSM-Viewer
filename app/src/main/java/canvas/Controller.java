@@ -1,29 +1,33 @@
 package canvas;
 
-import Search.AutofillTextField;
+import Search.SearchTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
-import java.util.EventListener;
 
-import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
+import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import pointsOfInterest.PointOfInterest;
+import pointsOfInterest.PointsOfInterestHBox;
+import pointsOfInterest.PointsOfInterestVBox;
 
 public class Controller implements MouseListener {
     public Menu categories;
     private Point2D lastMouse;
+    Model model;
 
     @FXML private MapCanvas canvas;
 
-    @FXML private AutofillTextField searchTextField;
+    @FXML private SearchTextField searchTextField;
 
     @FXML private TextField fromRouteTextField;
 
@@ -55,6 +59,11 @@ public class Controller implements MouseListener {
 
     @FXML private VBox rightVBox;
 
+    @FXML private PointsOfInterestVBox pointsOfInterestVBox;
+
+    boolean pointOfInterestMode = false;
+    ContextMenu addPointOfInterestText;
+
     public void init(Model model) {
         canvas.init(model);
         canvas.addMouseListener(this);
@@ -65,6 +74,11 @@ public class Controller implements MouseListener {
         radioButtonDefaultMode.setSelected(true);
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
+        pointsOfInterestVBox.init(model.getPointsOfInterest());
+        this.model=model;
+
+
+
 
         // FIXME: yuck
         categories
@@ -113,8 +127,14 @@ public class Controller implements MouseListener {
         var address = searchTextField.handleSearch();
         if (address == null) return; //TODO: handle exception and show message?
         Point point = Point.geoToMap(new Point((float)address.node().lon(),(float)address.node().lat()));
-        canvas.setZoom(25);
-        canvas.center(point);
+
+        zoomOn(point);
+
+    }
+
+    @FXML
+    public void handleInFocus(){
+        searchTextField.showHistory();
     }
 
     @FXML
@@ -148,7 +168,29 @@ public class Controller implements MouseListener {
     }
 
     @Override
-    public void mouseClicked(MouseEvent mouseEvent) {}
+    public void mouseClicked(MouseEvent mouseEvent) {
+
+      if (pointOfInterestMode){
+          Point point = canvas.canvasToMap(new Point((float)mouseEvent.getX(),(float)mouseEvent.getY()));
+          var cm = new ContextMenu();
+          var tf = new TextField("POI name");
+          var mi = new CustomMenuItem(tf);
+          mi.setHideOnClick(false);
+          cm.getItems().add(mi);
+
+          cm.show(canvas, Side.LEFT, mouseEvent.getX(), mouseEvent.getY());
+          tf.requestFocus();
+          canvas.giveFocus();
+
+          tf.setOnAction(e -> {
+              addPointOfInterest(new PointOfInterest(point.x(),point.y(),tf.getText()));
+              cm.hide();
+          });
+        pointOfInterestMode=false;
+        addPointOfInterestText.hide();
+
+      }
+    }
 
     @Override
     public void mouseEntered(MouseEvent mouseEvent) {}
@@ -165,7 +207,12 @@ public class Controller implements MouseListener {
     public void mouseReleased(MouseEvent mouseEvent) {}
 
     @Override
-    public void mouseMoved(MouseEvent mouseEvent) {}
+    public void mouseMoved(MouseEvent mouseEvent) {
+        if (pointOfInterestMode){
+            addPointOfInterestText.show(canvas, Side.LEFT, mouseEvent.getX()+140, mouseEvent.getY()-30);
+        }
+
+    }
 
     @Override
     public void mouseDragged(MouseEvent mouseEvent) {
@@ -173,6 +220,7 @@ public class Controller implements MouseListener {
                 (float) (mouseEvent.getX() - lastMouse.getX()),
                 (float) (mouseEvent.getY() - lastMouse.getY()));
         lastMouse = new Point2D(mouseEvent.getX(), mouseEvent.getY());
+
     }
 
     @Override
@@ -199,5 +247,43 @@ public class Controller implements MouseListener {
 
     public void centerOn(Point point) {
         canvas.center(point);
+    }
+    public void zoomOn(Point point) {
+        canvas.zoomOn(point);
+    }
+
+    public void addPointOfInterest(PointOfInterest point){
+        model.getPointsOfInterest().add(point);
+        pointsOfInterestVBox.update();
+        for (Node n:pointsOfInterestVBox.getChildren()){
+
+            if (((PointsOfInterestHBox)n).getPointOfInterest()==point){
+               var hBox = (PointsOfInterestHBox)n;
+               hBox.getFind().setOnAction(e -> {
+                  zoomOn(new Point(hBox.getPointOfInterest().lon(),hBox.getPointOfInterest().lat()));
+               });
+               hBox.getRemove().setOnAction(e -> {
+                    model.getPointsOfInterest().remove(hBox.getPointOfInterest());
+                    pointsOfInterestVBox.update();
+               });
+            }
+        }
+    }
+
+    @FXML
+    public void enterPointOfInterestMode(ActionEvent actionEvent) {
+
+        if (addPointOfInterestText==null){
+            addPointOfInterestText=new ContextMenu();
+            var ta = new Text("Add point of Interest");
+            var mi = new CustomMenuItem(ta);
+            mi.setHideOnClick(false);
+            addPointOfInterestText.getItems().add(mi);
+            addPointOfInterestText.requestFocus();
+            canvas.giveFocus();
+        }
+        pointOfInterestMode=true;
+
+
     }
 }
