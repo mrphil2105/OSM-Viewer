@@ -1,5 +1,6 @@
 package drawing;
 
+import collections.Entity;
 import collections.lists.ByteList;
 import collections.lists.FloatList;
 import collections.lists.IntList;
@@ -12,10 +13,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /** A Drawing represents drawn elements in a format that can be easily passed to OpenGL */
-public class Drawing implements Serializable {
+public class Drawing extends Entity implements Serializable {
     private IntList indices;
     private FloatList vertices;
     private ByteList drawables;
+    private final long id;
 
     public Drawing() {
         this(new IntList(), new FloatList(), new ByteList());
@@ -25,6 +27,14 @@ public class Drawing implements Serializable {
         this.indices = indices;
         this.vertices = vertices;
         this.drawables = drawables;
+        this.id = hashCode();
+    }
+
+    public Drawing(IntList indices, FloatList vertices, ByteList drawables, long id) {
+        this.indices = indices;
+        this.vertices = vertices;
+        this.drawables = drawables;
+        this.id = id;
     }
 
     public void clear() {
@@ -68,7 +78,8 @@ public class Drawing implements Serializable {
         return new Drawing(
                 new IntList(Arrays.stream(indices().toArray()).map(i -> i + offset).toArray()),
                 new FloatList(vertices().toArray()),
-                new ByteList(drawables().toArray()));
+                new ByteList(drawables().toArray()),
+                id());
     }
 
     void draw(Vector2D point, Drawable drawable, int offset) {
@@ -76,7 +87,7 @@ public class Drawing implements Serializable {
 
         // Add points forming a circle counterclockwise around `point`
         // TODO: Fix pacman
-        for (double i = 0; i < Math.PI * 2; i += Math.PI / 10) {
+        for (double i = 0; i < Math.PI * 2; i += Math.PI / 15) {
             points.add(
                     new Vector2D(
                             point.x() + Math.cos(i) * drawable.size, point.y() + Math.sin(i) * drawable.size));
@@ -233,5 +244,10 @@ public class Drawing implements Serializable {
         out.writeUnshared(indices());
         out.writeUnshared(vertices());
         out.writeUnshared(drawables());
+    }
+
+    @Override
+    public long id() {
+        return id;
     }
 }
