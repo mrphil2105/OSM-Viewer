@@ -6,14 +6,12 @@ import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import pointsOfInterest.PointOfInterest;
@@ -75,10 +73,7 @@ public class Controller implements MouseListener {
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
         pointsOfInterestVBox.init(model.getPointsOfInterest());
-        this.model=model;
-
-
-
+        this.model = model;
 
         // FIXME: yuck
         categories
@@ -125,15 +120,15 @@ public class Controller implements MouseListener {
     @FXML
     public void handleSearchClick() {
         var address = searchTextField.handleSearch();
-        if (address == null) return; //TODO: handle exception and show message?
-        Point point = Point.geoToMap(new Point((float)address.node().lon(),(float)address.node().lat()));
+        if (address == null) return; // TODO: handle exception and show message?
+        Point point =
+                Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
 
         zoomOn(point);
-
     }
 
     @FXML
-    public void handleInFocus(){
+    public void handleInFocus() {
         searchTextField.showHistory();
     }
 
@@ -170,26 +165,27 @@ public class Controller implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
 
-      if (pointOfInterestMode){
-          Point point = canvas.canvasToMap(new Point((float)mouseEvent.getX(),(float)mouseEvent.getY()));
-          var cm = new ContextMenu();
-          var tf = new TextField("POI name");
-          var mi = new CustomMenuItem(tf);
-          mi.setHideOnClick(false);
-          cm.getItems().add(mi);
+        if (pointOfInterestMode) {
+            Point point =
+                    canvas.canvasToMap(new Point((float) mouseEvent.getX(), (float) mouseEvent.getY()));
+            var cm = new ContextMenu();
+            var tf = new TextField("POI name");
+            var mi = new CustomMenuItem(tf);
+            mi.setHideOnClick(false);
+            cm.getItems().add(mi);
 
-          cm.show(canvas, Side.LEFT, mouseEvent.getX(), mouseEvent.getY());
-          tf.requestFocus();
-          canvas.giveFocus();
+            cm.show(canvas, Side.LEFT, mouseEvent.getX(), mouseEvent.getY());
+            tf.requestFocus();
+            canvas.giveFocus();
 
-          tf.setOnAction(e -> {
-              addPointOfInterest(new PointOfInterest(point.x(),point.y(),tf.getText()));
-              cm.hide();
-          });
-        pointOfInterestMode=false;
-        addPointOfInterestText.hide();
-
-      }
+            tf.setOnAction(
+                    e -> {
+                        addPointOfInterest(new PointOfInterest(point.x(), point.y(), tf.getText()));
+                        cm.hide();
+                    });
+            pointOfInterestMode = false;
+            addPointOfInterestText.hide();
+        }
     }
 
     @Override
@@ -208,10 +204,10 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
-        if (pointOfInterestMode){
-            addPointOfInterestText.show(canvas, Side.LEFT, mouseEvent.getX()+140, mouseEvent.getY()-30);
+        if (pointOfInterestMode) {
+            addPointOfInterestText.show(
+                    canvas, Side.LEFT, mouseEvent.getX() + 140, mouseEvent.getY() - 30);
         }
-
     }
 
     @Override
@@ -220,7 +216,6 @@ public class Controller implements MouseListener {
                 (float) (mouseEvent.getX() - lastMouse.getX()),
                 (float) (mouseEvent.getY() - lastMouse.getY()));
         lastMouse = new Point2D(mouseEvent.getX(), mouseEvent.getY());
-
     }
 
     @Override
@@ -248,24 +243,30 @@ public class Controller implements MouseListener {
     public void centerOn(Point point) {
         canvas.center(point);
     }
+
     public void zoomOn(Point point) {
         canvas.zoomOn(point);
     }
 
-    public void addPointOfInterest(PointOfInterest point){
+    public void addPointOfInterest(PointOfInterest point) {
         model.getPointsOfInterest().add(point);
         pointsOfInterestVBox.update();
-        for (Node n:pointsOfInterestVBox.getChildren()){
+        for (Node n : pointsOfInterestVBox.getChildren()) {
 
-            if (((PointsOfInterestHBox)n).getPointOfInterest()==point){
-               var hBox = (PointsOfInterestHBox)n;
-               hBox.getFind().setOnAction(e -> {
-                  zoomOn(new Point(hBox.getPointOfInterest().lon(),hBox.getPointOfInterest().lat()));
-               });
-               hBox.getRemove().setOnAction(e -> {
-                    model.getPointsOfInterest().remove(hBox.getPointOfInterest());
-                    pointsOfInterestVBox.update();
-               });
+            if (((PointsOfInterestHBox) n).getPointOfInterest() == point) {
+                var hBox = (PointsOfInterestHBox) n;
+                hBox.getFind()
+                        .setOnAction(
+                                e -> {
+                                    zoomOn(
+                                            new Point(hBox.getPointOfInterest().lon(), hBox.getPointOfInterest().lat()));
+                                });
+                hBox.getRemove()
+                        .setOnAction(
+                                e -> {
+                                    model.getPointsOfInterest().remove(hBox.getPointOfInterest());
+                                    pointsOfInterestVBox.update();
+                                });
             }
         }
     }
@@ -273,8 +274,8 @@ public class Controller implements MouseListener {
     @FXML
     public void enterPointOfInterestMode(ActionEvent actionEvent) {
 
-        if (addPointOfInterestText==null){
-            addPointOfInterestText=new ContextMenu();
+        if (addPointOfInterestText == null) {
+            addPointOfInterestText = new ContextMenu();
             var ta = new Text("Add point of Interest");
             var mi = new CustomMenuItem(ta);
             mi.setHideOnClick(false);
@@ -282,8 +283,6 @@ public class Controller implements MouseListener {
             addPointOfInterestText.requestFocus();
             canvas.giveFocus();
         }
-        pointOfInterestMode=true;
-
-
+        pointOfInterestMode = true;
     }
 }
