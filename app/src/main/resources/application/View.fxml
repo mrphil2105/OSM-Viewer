@@ -74,12 +74,6 @@
                 </GridPane>
             </VBox>
         </right>
-         <center>
-
-
-
-
-        </center>
         <top>
             <MenuBar>
                 <Menu text="Appearance">

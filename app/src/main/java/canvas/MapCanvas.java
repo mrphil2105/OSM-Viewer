@@ -17,7 +17,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
-public class MapCanvas extends Pane {
+public class MapCanvas extends Region {
     final Affine transform = new Affine();
     private Animator animator;
     private GLWindow window;
@@ -126,11 +126,6 @@ public class MapCanvas extends Pane {
 
     }
 
-    public void add(Node n){
-        getChildren().add(n);
-        n.setViewOrder(-1.0);;
-
-    }
 
     public void giveFocus() {
         if (window.isVisible()) {
