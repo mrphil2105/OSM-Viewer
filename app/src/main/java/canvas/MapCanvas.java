@@ -47,14 +47,7 @@ public class MapCanvas extends Region {
                 .addListener(
                         (observable, oldValue, newValue) -> {
                             if (!newValue) {
-                                JFXAccessor.runOnJFXThread(
-                                        false,
-                                        () -> {
-                                            if (window.isVisible()) {
-                                                window.setVisible(false);
-                                                window.setVisible(true);
-                                            }
-                                        });
+                                JFXAccessor.runOnJFXThread(false, this::giveFocus);
                             }
                         });
 
@@ -113,8 +106,25 @@ public class MapCanvas extends Region {
         transform.setTy(-center.y() * transform.getMyy() + getHeight() / 2);
     }
 
+    public void zoomOn(Point point) {
+        setZoom(25);
+        center(point);
+    }
+
+    public void zoomOn(Point point, float zoom) {
+        setZoom(zoom);
+        center(point);
+    }
+
     public void setZoom(float zoom) {
         transform.setMxx(zoom);
         transform.setMyy(zoom);
+    }
+
+    public void giveFocus() {
+        if (window.isVisible()) {
+            window.setVisible(false);
+            window.setVisible(true);
+        }
     }
 }
