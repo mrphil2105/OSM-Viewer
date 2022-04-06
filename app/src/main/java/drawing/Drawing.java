@@ -7,6 +7,7 @@ import earcut4j.Earcut;
 import geometry.Line;
 import geometry.Vector2D;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +33,16 @@ public class Drawing implements Serializable {
         drawables.truncate(drawables.size());
     }
 
+    public static Drawing create(Vector2D point, Drawable drawable) {
+        return create(point, drawable, 0);
+    }
+
+    public static Drawing create(Vector2D point, Drawable drawable, int offset) {
+        var drawing = new Drawing();
+        drawing.draw(point, drawable, offset);
+        return drawing;
+    }
+
     public static Drawing create(List<Vector2D> points, Drawable drawable) {
         return create(points, drawable, 0);
     }
@@ -50,6 +61,28 @@ public class Drawing implements Serializable {
                                 .toArray()));
         vertices.extend(drawing.vertices());
         drawables.extend(drawing.drawables());
+    }
+
+    Drawing offset(int offset) {
+        // Return a new instance with the same points, just with indices shifted by `offset`
+        return new Drawing(
+                new IntList(Arrays.stream(indices().toArray()).map(i -> i + offset).toArray()),
+                new FloatList(vertices().toArray()),
+                new ByteList(drawables().toArray()));
+    }
+
+    void draw(Vector2D point, Drawable drawable, int offset) {
+        var points = new ArrayList<Vector2D>();
+
+        // Add points forming a circle counterclockwise around `point`
+        // TODO: Fix pacman
+        for (double i = 0; i < Math.PI * 2; i += Math.PI / 10) {
+            points.add(
+                    new Vector2D(
+                            point.x() + Math.cos(i) * drawable.size, point.y() + Math.sin(i) * drawable.size));
+        }
+
+        draw(points, drawable, offset);
     }
 
     void draw(List<Vector2D> points, Drawable drawable, int offset) {

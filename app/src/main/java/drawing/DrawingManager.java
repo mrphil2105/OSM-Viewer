@@ -29,7 +29,7 @@ public class DrawingManager {
 
     private DrawingInfo createDrawingInfo(Drawing drawing) {
         return new DrawingInfo(
-                drawing,
+                drawing.offset(this.drawing.vertices().size() / 2),
                 this.drawing.indices().size(),
                 this.drawing.vertices().size(),
                 this.drawing.drawables().size());
