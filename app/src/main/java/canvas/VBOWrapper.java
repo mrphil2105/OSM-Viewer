@@ -2,13 +2,13 @@ package canvas;
 
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
-
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 public class VBOWrapper {
-    //private long capacity;
+    // private long capacity;
     private final int type;
     public final int vbo;
     private final GL3 gl;
@@ -19,7 +19,7 @@ public class VBOWrapper {
 
     public VBOWrapper(GLAutoDrawable glAutoDrawable, int type, long initialCapacity) {
         this.type = type;
-        //this.capacity = initialCapacity;
+        // this.capacity = initialCapacity;
         GL3 gl = glAutoDrawable.getGL().getGL3();
         this.gl = gl;
 
@@ -36,23 +36,25 @@ public class VBOWrapper {
     }
 
     public void set(IntBuffer buffer, long offset, int length) {
-        //if (capacity < offset + length) grow(offset + length);
-
-        bind();
-        gl.glBufferSubData(type, offset * Integer.BYTES, ((long) length) * Integer.BYTES, buffer);
+        set(buffer, offset * Integer.BYTES, ((long) length) * Integer.BYTES);
     }
 
     public void set(FloatBuffer buffer, long offset, int length) {
-        bind();
-        gl.glBufferSubData(type, offset * Float.BYTES, ((long) length) * Float.BYTES, buffer);
+        set(buffer, offset * Float.BYTES, ((long) length) * Float.BYTES);
     }
 
     public void set(ByteBuffer buffer, long offset, int length) {
-        bind();
-        gl.glBufferSubData(type, offset * Byte.BYTES, ((long) length) * Byte.BYTES, buffer);
+        set(buffer, offset * Byte.BYTES, ((long) length) * Byte.BYTES);
     }
 
-    //private void grow(long newSize) {
+    private void set(Buffer buffer, long offset, long length) {
+        // if (capacity < offset + length) grow(offset + length);
+
+        bind();
+        gl.glBufferSubData(type, offset, length, buffer);
+    }
+
+    // private void grow(long newSize) {
     //    while (capacity < newSize) capacity *= 2;
 
     //    GL3 gl = glAutoDrawable.getGL().getGL3();
@@ -68,7 +70,6 @@ public class VBOWrapper {
     //    gl.glCopyBufferSubData(GL3.GL_COPY_READ_BUFFER, GL3.GL_COPY_WRITE_BUFFER, 0, 0, buf.get(0));
     //    gl.delete
 
-
     //    vbo = newVBO;
-    //}
+    // }
 }

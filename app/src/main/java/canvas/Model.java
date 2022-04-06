@@ -52,9 +52,14 @@ public class Model {
                     var drawableCount = reader.getDrawableCount();
 
                     // Pre-allocate buffers with correct size
-                    var indexVBO = new VBOWrapper(glAutoDrawable, GL3.GL_ELEMENT_ARRAY_BUFFER, (long) indexCount * Integer.BYTES);
-                    var vertexVBO = new VBOWrapper(glAutoDrawable, GL3.GL_ARRAY_BUFFER, (long) vertexCount * Float.BYTES);
-                    var drawableVBO = new VBOWrapper(glAutoDrawable, GL3.GL_ARRAY_BUFFER, (long) drawableCount * Byte.BYTES);
+                    var indexVBO =
+                            new VBOWrapper(
+                                    glAutoDrawable, GL3.GL_ELEMENT_ARRAY_BUFFER, (long) indexCount * Integer.BYTES);
+                    var vertexVBO =
+                            new VBOWrapper(glAutoDrawable, GL3.GL_ARRAY_BUFFER, (long) vertexCount * Float.BYTES);
+                    var drawableVBO =
+                            new VBOWrapper(
+                                    glAutoDrawable, GL3.GL_ARRAY_BUFFER, (long) drawableCount * Byte.BYTES);
                     vbo = new VBOWrapper[] {indexVBO, vertexVBO, drawableVBO};
 
                     // Get new id's for textures
@@ -95,9 +100,16 @@ public class Model {
 
                     for (var drawing : reader.read()) {
                         // Upload chunk
-                        indexVBO.set(IntBuffer.wrap(drawing.indices().getArray()), curIndex, drawing.indices().size());
-                        vertexVBO.set(FloatBuffer.wrap(drawing.vertices().getArray()), curVertex, drawing.vertices().size());
-                        drawableVBO.set(ByteBuffer.wrap(drawing.drawables().getArray()), curDrawable, drawing.drawables().size());
+                        indexVBO.set(
+                                IntBuffer.wrap(drawing.indices().getArray()), curIndex, drawing.indices().size());
+                        vertexVBO.set(
+                                FloatBuffer.wrap(drawing.vertices().getArray()),
+                                curVertex,
+                                drawing.vertices().size());
+                        drawableVBO.set(
+                                ByteBuffer.wrap(drawing.drawables().getArray()),
+                                curDrawable,
+                                drawing.drawables().size());
 
                         curIndex += drawing.indices().size();
                         curVertex += drawing.vertices().size();
@@ -119,10 +131,10 @@ public class Model {
     }
 
     /**
-     * Get the generated id of the buffer with the given type
+     * Get the generated buffer with the given type
      *
      * @param type
-     * @return Buffer id as seen from OpenGL
+     * @return Buffer wrapper
      */
     public VBOWrapper getVBO(Model.VBOType type) {
         return vbo[type.ordinal()];
