@@ -304,7 +304,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
-    private record Node(long vertex, float weight) implements Comparable<Node> {
+    private record Node(long vertex, float weight) implements Comparable<Node>, Serializable {
         @Override
         public int compareTo(Node other) {
             return Float.compare(weight, other.weight);
