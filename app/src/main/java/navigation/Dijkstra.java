@@ -37,6 +37,13 @@ public class Dijkstra implements OSMObserver, Serializable {
             return;
         }
 
+        var edgeRoles = getEdgeRoles(way);
+
+        if (edgeRoles.getFlags() == 0) {
+            // The way is a highway that should not be used for navigation.
+            return;
+        }
+
         int maxSpeed = tags.stream()
             .filter(t -> t.key() == MAXSPEED &&
                 !t.value().equals("signals") &&
@@ -50,8 +57,6 @@ public class Dijkstra implements OSMObserver, Serializable {
         if (direction == Direction.UNKNOWN) {
             direction = Direction.BOTH;
         }
-
-        var edgeRoles = getEdgeRoles(way);
 
         var nodes = way.nodes();
         var firstNode = nodes[0];
