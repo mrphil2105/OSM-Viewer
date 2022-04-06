@@ -124,13 +124,12 @@ public class Controller implements MouseListener {
         Address address;
         var results = searchTextField.handleSearch();
 
-        if(results.size() == 1){
+        if (results.size() == 1) {
             address = results.get(0);
-        } else{
-            //TODO: give user ability to clarify
+        } else {
+            // TODO: give user ability to clarify which address they mean
             return;
         }
-
 
         if (address == null) return;
         Point point =

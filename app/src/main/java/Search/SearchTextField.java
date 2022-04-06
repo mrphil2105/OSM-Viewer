@@ -18,7 +18,7 @@ public class SearchTextField extends TextField {
     public List<Address> handleSearch() {
         popupEntries.hide();
         var parsedAddress = parseAddress();
-        if(parsedAddress == null) return null;
+        if (parsedAddress == null) return null;
         return addressDatabase.search(parsedAddress);
     }
 
