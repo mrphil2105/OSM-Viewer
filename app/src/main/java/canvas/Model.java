@@ -6,12 +6,13 @@ import drawing.Drawable;
 import geometry.Rect;
 import io.FileParser;
 import io.PolygonsReader;
+import pointsOfInterest.PointOfInterest;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import pointsOfInterest.PointOfInterest;
 
 public class Model {
 
@@ -42,7 +43,7 @@ public class Model {
             addresses = result.addresses().read();
             addresses.buildTries();
         }
-        PointsOfInterest = new ArrayList<>();
+        PointsOfInterest=new ArrayList<>();
     }
 
     private void loadPolygons(PolygonsReader reader) {

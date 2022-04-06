@@ -13,6 +13,7 @@ import geometry.Point;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
@@ -48,7 +49,9 @@ public class MapCanvas extends Pane {
                 .addListener(
                         (observable, oldValue, newValue) -> {
                             if (!newValue) {
-                                JFXAccessor.runOnJFXThread(false, this::giveFocus);
+                                JFXAccessor.runOnJFXThread(
+                                        false,
+                                        this::giveFocus);
                             }
                         });
 
@@ -105,27 +108,28 @@ public class MapCanvas extends Pane {
     public void center(Point center) {
         transform.setTx(-center.x() * transform.getMxx() + getWidth() / 2);
         transform.setTy(-center.y() * transform.getMyy() + getHeight() / 2);
+
     }
 
     public void zoomOn(Point point) {
         setZoom(25);
         center(point);
     }
-
     public void zoomOn(Point point, float zoom) {
         setZoom(zoom);
         center(point);
     }
 
-    public void setZoom(float zoom) {
+    public void setZoom(float zoom){
         transform.setMxx(zoom);
         transform.setMyy(zoom);
+
     }
 
-    public void add(Node n) {
+    public void add(Node n){
         getChildren().add(n);
-        n.setViewOrder(-1.0);
-        ;
+        n.setViewOrder(-1.0);;
+
     }
 
     public void giveFocus() {
