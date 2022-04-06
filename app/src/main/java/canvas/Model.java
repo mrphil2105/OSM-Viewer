@@ -10,8 +10,11 @@ import io.PolygonsReader;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import pointsOfInterest.PointOfInterest;
 
 public class Model {
 
@@ -24,6 +27,7 @@ public class Model {
     private final AddressDatabase addresses;
     private final ObservableList<Address> results = FXCollections.observableArrayList();
     private final ObservableList<Address> suggestions = FXCollections.observableArrayList();
+    private List<PointOfInterest> PointsOfInterest;
 
     public Model(String filename) throws Exception {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
@@ -43,6 +47,7 @@ public class Model {
             addresses = result.addresses().read();
             addresses.buildTries();
         }
+        PointsOfInterest = new ArrayList<>();
     }
 
     private void loadPolygons(PolygonsReader reader) {
@@ -199,5 +204,9 @@ public class Model {
 
     public ObservableList<Address> getObservableSuggestions() {
         return suggestions;
+    }
+
+    public List<PointOfInterest> getPointsOfInterest() {
+        return PointsOfInterest;
     }
 }

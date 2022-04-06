@@ -7,7 +7,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.Menu?>
+<?import pointsOfInterest.PointsOfInterestVBox?>
+<?import pointsOfInterest.PointsOfInterestVBox?>
+
 <?import Search.SearchTextField?>
+
 
 
 <Scene xmlns="http://javafx.com/javafx"
@@ -59,15 +63,17 @@
                     <RadioButton fx:id="radioButtonColorBlind" text="Colorblind mode" GridPane.columnIndex="0" GridPane.rowIndex="6" toggleGroup="$groupMode" onAction="#handleColorblind"/>
                     <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0" GridPane.rowIndex="7" toggleGroup="$groupMode" onAction="#handleDefaultMode"/>
                     <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0" GridPane.rowIndex="8" toggleGroup="$groupMode" onAction="#handlePartyMode"/>
+                    <HBox fx:id="pointsOfInterestHeader"  GridPane.columnIndex="0" GridPane.rowIndex="9">
+                        <Label text="Points of interest" GridPane.columnIndex="0" GridPane.rowIndex="9"/>
+                        <Button text="+" fx:id="addPointOfInterest" onAction="#enterPointOfInterestMode"/>
+
+                    </HBox>
+
+                    <PointsOfInterestVBox id="allVBox" fx:id="pointsOfInterestVBox" GridPane.rowIndex="10"/>
+
                 </GridPane>
             </VBox>
         </right>
-         <center>
-            <MapCanvas fx:id="canvas"
-                       prefWidth="1280"
-                       prefHeight="720"
-            />
-        </center>
         <top>
             <MenuBar>
                 <Menu text="Appearance">
@@ -76,10 +82,9 @@
             </MenuBar>
         </top>
         <center>
-            <MapCanvas fx:id="canvas"
-                       prefWidth="1280"
-                       prefHeight="720"
-            />
+            <MapCanvas fx:id="canvas" prefWidth="1280" prefHeight="720">
+            </MapCanvas>
+
         </center>
     </BorderPane>
 </Scene>
