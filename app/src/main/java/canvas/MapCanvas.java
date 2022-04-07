@@ -11,7 +11,6 @@ import com.jogamp.opengl.util.Animator;
 import drawing.Category;
 import geometry.Point;
 import javafx.application.Platform;
-import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -112,5 +111,9 @@ public class MapCanvas extends Region {
     public void center(Point center) {
         transform.setTx(-center.x() * transform.getMxx() + getWidth() / 2);
         transform.setTy(-center.y() * transform.getMyy() + getHeight() / 2);
+    }
+
+    public Renderer getRenderer() {
+        return renderer;
     }
 }

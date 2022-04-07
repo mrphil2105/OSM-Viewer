@@ -19,6 +19,6 @@ public class View {
         stage.setTitle("OSM Viewer (OpenGL)");
         stage.show();
 
-        controller.centerOn(Point.geoToMap(model.bounds.center()));
+        controller.center(Point.geoToMap(model.bounds.center()));
     }
 }
