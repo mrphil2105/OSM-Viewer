@@ -11,6 +11,7 @@ public class TwoDTree<E> implements SpacialTree<E>, Serializable {
 
     private Node<E> root;
     private int size;
+    private int height;
 
     public TwoDTree() {
         this(0, 0, 1, 1);
@@ -28,6 +29,10 @@ public class TwoDTree<E> implements SpacialTree<E>, Serializable {
         return size;
     }
 
+    public int height() {
+        return height;
+    }
+
     @Override
     public void insert(Point point, E value) {
         if (point == null) {
@@ -43,6 +48,8 @@ public class TwoDTree<E> implements SpacialTree<E>, Serializable {
     }
 
     private Node<E> insert(Point point, E value, Node<E> node, int level) {
+        height = Math.max(level + 1, height);
+
         if (node == null) {
             // The base case, insert a new node by returning it to the parent.
             size++;
