@@ -75,11 +75,5 @@
                 </Menu>
             </MenuBar>
         </top>
-        <center>
-            <MapCanvas fx:id="canvas"
-                       prefWidth="1280"
-                       prefHeight="720"
-            />
-        </center>
     </BorderPane>
 </Scene>
