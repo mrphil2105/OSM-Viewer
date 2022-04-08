@@ -27,9 +27,9 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     @Override
     public void onBounds(Rect bounds) {
         twoDTree = new TwoDTree<>((float)Point.geoToMapX(bounds.left()),
-            (float)Point.geoToMapY(bounds.top()),
+            (float)Point.geoToMapY(bounds.bottom()),
             (float)Point.geoToMapX(bounds.right()),
-            (float)Point.geoToMapY(bounds.bottom()));
+            (float)Point.geoToMapY(bounds.top()));
     }
 
     @Override
