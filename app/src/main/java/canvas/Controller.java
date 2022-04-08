@@ -15,6 +15,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
@@ -209,7 +210,8 @@ public class Controller implements MouseListener {
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
         if (pointOfInterestMode){
-            addPointOfInterestText.show(canvas, Side.LEFT, mouseEvent.getX()+140, mouseEvent.getY()-30);
+            addPointOfInterestText.show(canvas, Side.LEFT, mouseEvent.getX()+190, mouseEvent.getY()-40);
+
         }
 
     }
@@ -275,13 +277,17 @@ public class Controller implements MouseListener {
 
         if (addPointOfInterestText==null){
             addPointOfInterestText=new ContextMenu();
-            var ta = new Text("Add point of Interest");
+            var ta = new Text("Place point of interest on map");
+            ta.setFont(new Font(12));
             var mi = new CustomMenuItem(ta);
             mi.setHideOnClick(false);
             addPointOfInterestText.getItems().add(mi);
             addPointOfInterestText.requestFocus();
             canvas.giveFocus();
+            rightVBox.setVisible(false);
+            rightVBox.setVisible(true);
         }
+        addPointOfInterestText.show(rightVBox, Side.TOP,0,260);
         pointOfInterestMode=true;
 
 
