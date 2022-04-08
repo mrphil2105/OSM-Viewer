@@ -91,11 +91,11 @@
                 <padding>
                     <Insets topRightBottomLeft="4" />
                 </padding>
-                <Label id="statusLabel" fx:id="statusLabel">
+                <Label id="nearestRoadLabel" fx:id="nearestRoadLabel">
                     <contextMenu>
                         <ContextMenu>
                             <items>
-                                <CheckMenuItem fx:id="delayCheckMenuItem" text="Enable delay" selected="true" />
+                                <CheckMenuItem fx:id="nearestRoadDelayItem" text="Enable delay" selected="true" />
                             </items>
                         </ContextMenu>
                     </contextMenu>
