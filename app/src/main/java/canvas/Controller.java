@@ -194,7 +194,7 @@ public class Controller implements MouseListener {
           canvas.giveFocus();
 
           tf.setOnAction(e -> {
-              addPointOfInterest(new PointOfInterest(point.x(),point.y(),tf.getText()));
+              addPointOfInterest(new PointOfInterest(point.x(),point.y(),tf.getText(),Drawing.create(new Vector2D(point),Drawable.POI)));
               cm.hide();
           });
         pointOfInterestMode=false;
@@ -266,6 +266,7 @@ public class Controller implements MouseListener {
 
     public void addPointOfInterest(PointOfInterest point){
         model.getPointsOfInterest().add(point);
+        canvas.getRenderer().draw(point.drawing());
         pointsOfInterestVBox.update();
         for (Node n:pointsOfInterestVBox.getChildren()){
 
@@ -276,6 +277,7 @@ public class Controller implements MouseListener {
                });
                hBox.getRemove().setOnAction(e -> {
                     model.getPointsOfInterest().remove(hBox.getPointOfInterest());
+                    canvas.getRenderer().clear(hBox.getPointOfInterest().drawing());
                     pointsOfInterestVBox.update();
                });
             }
