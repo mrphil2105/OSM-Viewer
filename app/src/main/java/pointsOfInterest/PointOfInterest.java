@@ -1,6 +1,8 @@
 package pointsOfInterest;
 
-public record PointOfInterest(float lon, float lat, String name){
+import drawing.Drawing;
+
+public record PointOfInterest(float lon, float lat, String name, Drawing drawing){
 
 
 }
