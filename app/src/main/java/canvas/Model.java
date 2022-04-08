@@ -32,7 +32,7 @@ public class Model {
 
     private final NearestNeighbor nearestNeighbor;
 
-    private final StringProperty nearestRoad = new SimpleStringProperty();
+    private final StringProperty nearestRoad = new SimpleStringProperty("none");
 
     public Model(String filename) throws Exception {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
