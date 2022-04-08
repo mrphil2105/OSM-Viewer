@@ -20,9 +20,8 @@ public class MapCanvas extends Region {
     private Animator animator;
     private GLWindow window;
     private Renderer renderer;
-    private float scale;
     private float startZoom;
-    private Point center;
+    private float startZoomPercentage;
 
     public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
 
@@ -81,9 +80,9 @@ public class MapCanvas extends Region {
         animator.start();
 
         //set zoom
-        startZoom = (float) canvas.getWidth()/(Point.geoToMap(model.bounds.getBottomRight()).x() - Point.geoToMap(model.bounds.getTopLeft()).x());
+        startZoom = (float) (canvas.getWidth()/(Point.geoToMap(model.bounds.getBottomRight()).x() - Point.geoToMap(model.bounds.getTopLeft()).x()));
         setZoom(startZoom);  
-        center = model.bounds.center();
+        startZoomPercentage = (float) ((canvas.getHeight()/(Point.geoToMap(model.bounds.getTopLeft()).y()- Point.geoToMap(model.bounds.getBottomRight()).y()))/startZoom);
     }
 
     public void setShader(Renderer.Shader shader) {
@@ -110,7 +109,6 @@ public class MapCanvas extends Region {
         transform.prependTranslation(-x, -y);
         transform.prependScale(zoom, zoom);
         transform.prependTranslation(x, y);
-        System.out.println(zoom);
     }
 
     public void pan(float dx, float dy) {
@@ -132,14 +130,24 @@ public class MapCanvas extends Region {
     public void zoomChange(boolean positive){
         if (positive){
             transform.setMxx(transform.getMxx() + (0.1 * startZoom));
+            transform.setMyy(transform.getMyy() + (0.1 * startZoom));
         } else {
             transform.setMxx(transform.getMxx() - (0.1 * startZoom));
-        }
-                
+            transform.setMyy(transform.getMyy() - (0.1 * startZoom));
+        }   
+        System.out.println(transform);       
     }
 
     public float getZoom(){
-        return (float) ((transform.getMxx() / startZoom));
+        return (float) (transform.getMxx() / startZoom);
     }
 
+    public float getStartZoom(){
+        if (startZoomPercentage < 1) {
+            return startZoomPercentage;
+        } else {
+            return 1;
+        }
+        
+    }
 }
