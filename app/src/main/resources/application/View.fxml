@@ -7,8 +7,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.Menu?>
-<?import Search.AutofillTextField?>
 <?import javafx.scene.shape.Rectangle?>
+<?import pointsOfInterest.PointsOfInterestVBox?>
+
+<?import Search.SearchTextField?>
+
 
 
 <Scene xmlns="http://javafx.com/javafx"
@@ -23,7 +26,7 @@
                 <Insets top="10" bottom="10" left="10" right="10" />
             </padding>
                 <GridPane alignment="center" hgap="10" vgap="10">
-                    <AutofillTextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0" GridPane.rowIndex="0" onAction="#handleSearchClick" onKeyTyped="#handleKeyTyped"/>
+                    <SearchTextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0" GridPane.rowIndex="0" onAction="#handleSearchClick" onKeyTyped="#handleKeyTyped" onMouseClicked="#handleInFocus" />
                      <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="1">
                         <Button fx:id="searchButton" id="allButtons" text="Search" onAction="#handleSearchClick">
                         </Button>
@@ -60,6 +63,12 @@
                     <RadioButton fx:id="radioButtonColorBlind" text="Colorblind mode" GridPane.columnIndex="0" GridPane.rowIndex="6" toggleGroup="$groupMode" onAction="#handleColorblind"/>
                     <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0" GridPane.rowIndex="7" toggleGroup="$groupMode" onAction="#handleDefaultMode"/>
                     <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0" GridPane.rowIndex="8" toggleGroup="$groupMode" onAction="#handlePartyMode"/>
+                    <HBox fx:id="pointsOfInterestHeader"  GridPane.columnIndex="0" GridPane.rowIndex="9">
+                        <Label text="Points of interest" GridPane.columnIndex="0" GridPane.rowIndex="9"/>
+                        <Button text="+" fx:id="addPointOfInterest" onAction="#enterPointOfInterestMode"/>
+
+                    </HBox>
+                    <PointsOfInterestVBox id="allVBox" fx:id="pointsOfInterestVBox" GridPane.rowIndex="10"/>
                 </GridPane>
             </VBox>
         </right>
