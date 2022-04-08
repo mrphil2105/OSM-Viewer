@@ -21,7 +21,7 @@ public class AutofillContextMenu extends ContextMenu {
 
         AddressBuilder addressBuilder =
                 AddressDatabase.parse(
-                        inputText); // TODO: or keep the typed address as a field in the MenuItem
+                        inputText);
         assert addressBuilder != null;
 
         StringBuilder stringBuilder = new StringBuilder();

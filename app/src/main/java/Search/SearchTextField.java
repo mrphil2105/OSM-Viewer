@@ -31,22 +31,17 @@ public class SearchTextField extends TextField {
         }
     }
 
-    public void showSuggestions() {
-        popupEntries.hide();
-        // List<Address>
-    }
-
-    public void handleSearchChange() {
-        if (getText().length() == 0) {
-            showHistory();
+    public static void handleSearchChange(SearchTextField textField) {
+        if (textField.getText().length() == 0) {
+            textField.showHistory();
         } else {
-            popupEntries.hide();
+            textField.popupEntries.hide();
             List<Address> results;
 
-            var searchedAddress = parseAddress();
+            var searchedAddress = textField.parseAddress();
             if (searchedAddress == null) return;
 
-            results = addressDatabase.possibleAddresses(searchedAddress, 5);
+            results = textField.addressDatabase.possibleAddresses(searchedAddress, 5);
 
             boolean showStreet = (searchedAddress.street() != null);
             boolean showHouse = (searchedAddress.houseNumber() != null);
@@ -54,16 +49,16 @@ public class SearchTextField extends TextField {
             boolean showPostcode = (searchedAddress.postcode() != null);
             if (searchedAddress.street() != null) showCity = true;
 
-            popupEntries.getItems().clear();
+            textField.popupEntries.getItems().clear();
 
             for (Address a : results) {
                 if (a == null) continue;
                 var item = new AddressMenuItem(a, showStreet, showHouse, showCity, showPostcode);
-                item.setOnAction(popupEntries::onMenuClick);
-                popupEntries.getItems().add(item);
+                item.setOnAction(textField.popupEntries::onMenuClick);
+                textField.popupEntries.getItems().add(item);
             }
-            if (!popupEntries.isShowing()) {
-                popupEntries.show(this, Side.BOTTOM, 0, 0);
+            if (!textField.popupEntries.isShowing()) {
+                textField.popupEntries.show(textField, Side.BOTTOM, 0, 0);
             }
         }
     }
