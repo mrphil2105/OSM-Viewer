@@ -65,9 +65,9 @@ public class Controller implements MouseListener {
 
     @FXML private VBox rightVBox;
 
-    @FXML private Label statusLabel;
+    @FXML private Label nearestRoadLabel;
 
-    @FXML private CheckMenuItem delayCheckMenuItem;
+    @FXML private CheckMenuItem nearestRoadDelayItem;
 
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
@@ -87,7 +87,7 @@ public class Controller implements MouseListener {
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
 
-        statusLabel.textProperty().bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
+        nearestRoadLabel.textProperty().bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
         pointsOfInterestVBox.init(model.getPointsOfInterest());
 
         // FIXME: yuck
@@ -224,7 +224,7 @@ public class Controller implements MouseListener {
             model.setQueryPoint(queryPoint);
         };
 
-        if (delayCheckMenuItem.isSelected()) {
+        if (nearestRoadDelayItem.isSelected()) {
             if (queryPointTimer != null) {
                 queryPointTimer.cancel();
             }
