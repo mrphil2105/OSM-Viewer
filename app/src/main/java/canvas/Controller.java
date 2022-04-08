@@ -6,15 +6,11 @@ import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
-import java.util.EventListener;
 
-import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
@@ -56,9 +52,9 @@ public class Controller implements MouseListener {
 
     @FXML private ToggleGroup groupMode;
 
-    @FXML private VBox leftVBox;
+    @FXML private BorderPane borderPane;
 
-    @FXML private VBox rightVBox;
+    @FXML private VBox middleVBox;
 
     @FXML private Label scaleBarText;
 
@@ -229,7 +225,7 @@ public class Controller implements MouseListener {
             model.bounds.getBottomLeft().x(), 
             model.bounds.getBottomLeft().y(), 
             model.bounds.getBottomRight().x(), 
-            model.bounds.getBottomRight().y()) * (scaleBarRectangle.getWidth()/canvas.getPrefWidth()));
+            model.bounds.getBottomRight().y()) * (100/canvas.getPrefWidth()));
         handleScaleBar();
     }
 
@@ -243,10 +239,10 @@ public class Controller implements MouseListener {
     }
 
     public void setStyleSheets(String stylesheet) {
-        leftVBox.getStylesheets().clear();
-        leftVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
-        rightVBox.getStylesheets().clear();
-        rightVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
+        borderPane.getStylesheets().clear();
+        borderPane.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
+        middleVBox.getStylesheets().clear();
+        middleVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
     }
 
     public void centerOn(Point point) {

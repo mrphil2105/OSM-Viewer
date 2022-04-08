@@ -16,7 +16,7 @@
        fx:controller="canvas.Controller"
        fx:id="scene">
 
-    <BorderPane >    
+    <BorderPane fx:id="borderPane">    
         <left>
             <VBox id="allVBox" fx:id="leftVBox">
             <padding>
@@ -61,14 +61,6 @@
                     <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0" GridPane.rowIndex="7" toggleGroup="$groupMode" onAction="#handleDefaultMode"/>
                     <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0" GridPane.rowIndex="8" toggleGroup="$groupMode" onAction="#handlePartyMode"/>
                 </GridPane>
-                <HBox alignment="BOTTOM_CENTER" spacing="5">
-                    <padding>
-                        <Insets top="20" bottom="20" left="10" right="10"/>
-                    </padding>
-                <Button fx:id="zoomDecreaseButton" text="-" onAction="#handleZoomOutButton"/>
-                <Label fx:id="zoomLevelText" alignment="center" />
-                <Button fx:id="zoomIncreaseButton" text="+" onAction="#handleZoomInButton"/>
-                </HBox>
             </VBox>
         </right>
         <top>
@@ -84,12 +76,30 @@
                         prefWidth="1280"
                         prefHeight="720"
                 />
-                <StackPane>
-                    <Rectangle fx:id="scaleBarRectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" 
-                    height="40.0" stroke="BLACK" 
-                    strokeType="INSIDE" width="100"/> 
-                    <Label fx:id="scaleBarText" text="1 km"/>
-                </StackPane>
+                <HBox alignment="center" fx:id="middleHBox">
+                    <padding>
+                    <Insets left="10" right="10" />
+                    </padding>
+                    <VBox alignment="top_center">
+                        <HBox>
+                            <Rectangle id="scaleBarRectangle1" fx:id="scaleBarRectangle1" height="10.0" width="25"/> 
+                            <Rectangle id="scaleBarRectangle2" fx:id="scaleBarRectangle2" height="10.0" width="25"/> 
+                            <Rectangle id="scaleBarRectangle1" fx:id="scaleBarRectangle3" height="10.0" width="25"/> 
+                            <Rectangle id="scaleBarRectangle2" fx:id="scaleBarRectangle4" height="10.0" width="25"/> 
+                        </HBox>
+                        <Label id="rectangleLabel" fx:id="scaleBarText" text="1 km"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <HBox alignment="center_right" spacing="5">
+                        <padding>
+                            <Insets top="20" bottom="20" left="10" right="10"/>
+                        </padding>
+                        
+                        <Button fx:id="zoomDecreaseButton" text="-" onAction="#handleZoomOutButton"/>
+                        <Label fx:id="zoomLevelText" alignment="center" />
+                        <Button fx:id="zoomIncreaseButton" text="+" onAction="#handleZoomInButton"/>
+                    </HBox>
+                </HBox>
             </VBox>
         </center>
     </BorderPane>
