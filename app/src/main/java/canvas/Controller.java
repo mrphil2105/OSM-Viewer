@@ -4,8 +4,13 @@ import Search.SearchTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
+import drawing.Drawable;
+import drawing.Drawing;
 import geometry.Point;
+import geometry.Vector2D;
+
 import java.util.Arrays;
+import java.util.List;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,7 +33,7 @@ public class Controller implements MouseListener {
     private ScaleBar scaleBar = new ScaleBar();
     private float currentScale;
     private float zoomLevel = 0;
-    private Point center;
+    private Renderer renderer;
     Model model;
 
     @FXML private MapCanvas canvas;
@@ -88,9 +93,10 @@ public class Controller implements MouseListener {
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
         initScaleBar();
-        updateZoom();
-        center = model.bounds.center();
+        zoomLevel = (float) ((canvas.getZoom() - canvas.getStartZoom())*100);
+        zoomLevelText.setText(Float.toString((float) (Math.round(zoomLevel*100.0)/100.0)) + "%");
         pointsOfInterestVBox.init(model.getPointsOfInterest());
+        renderer = canvas.getRenderer();
         
         // FIXME: yuck
         categories
@@ -132,14 +138,14 @@ public class Controller implements MouseListener {
     @FXML void handleZoomInButton(){
         canvas.zoomChange(true);
         updateZoom();
-        canvas.center(Point.geoToMap(center));
+        canvas.center(canvas.canvasToMap(new Point(1280/2, 720/2)));
         
     }
 
     @FXML void handleZoomOutButton(){
         canvas.zoomChange(false);
         updateZoom();
-        canvas.center(Point.geoToMap(center));
+        canvas.center(canvas.canvasToMap(new Point(1280/2, 720/2)));
     }
 
     @FXML
@@ -245,6 +251,7 @@ public class Controller implements MouseListener {
                 (float) (mouseEvent.getX() - lastMouse.getX()),
                 (float) (mouseEvent.getY() - lastMouse.getY()));
         lastMouse = new Point2D(mouseEvent.getX(), mouseEvent.getY());
+        drawScaleBar();
 
     }
 
@@ -263,11 +270,27 @@ public class Controller implements MouseListener {
         }
         updateZoom(); 
     }
+    private Drawing drawing;
+    
+    public void drawScaleBar(){
+        Point point1 = canvas.canvasToMap(new Point(20,700));
+        Point point2 = canvas.canvasToMap(new Point(20,690));
+        Point point3 = canvas.canvasToMap(new Point(120,690));
+        Point point4 = canvas.canvasToMap(new Point(120,700));
+        Drawing newDrawing = Drawing.create(List.of(new Vector2D(point1), new Vector2D(point2), new Vector2D(point3), new Vector2D(point4)), Drawable.SCALEBAR);
+        renderer.draw(newDrawing);
+        if (drawing != null){
+            renderer.clear(drawing);
+        }
+        drawing = newDrawing;
+    }
+
 
     public void updateZoom(){
         handleScaleBar();
         zoomLevel = (float) ((canvas.getZoom() - canvas.getStartZoom())*100);
         zoomLevelText.setText(Float.toString((float) (Math.round(zoomLevel*100.0)/100.0)) + "%");
+        drawScaleBar();
     }
 
     public void initScaleBar(){
@@ -296,6 +319,7 @@ public class Controller implements MouseListener {
     }
 
     public void center(Point point) {
+        System.out.println(point);
         canvas.center(point);
     }
     public void zoomOn(Point point) {

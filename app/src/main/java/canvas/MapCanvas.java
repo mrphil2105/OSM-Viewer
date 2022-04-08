@@ -140,8 +140,7 @@ public class MapCanvas extends Region {
         } else {
             transform.setMxx(transform.getMxx() - (0.1 * startZoom));
             transform.setMyy(transform.getMyy() - (0.1 * startZoom));
-        }   
-        System.out.println(transform);       
+        }       
     }
 
     public float getZoom(){
