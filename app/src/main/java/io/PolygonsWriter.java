@@ -49,7 +49,7 @@ public class PolygonsWriter extends TempFileWriter {
             throw new RuntimeException("could not write drawing to stream");
         }
 
-        drawing.clear();
+        manager.clear();
     }
 
     @Override
