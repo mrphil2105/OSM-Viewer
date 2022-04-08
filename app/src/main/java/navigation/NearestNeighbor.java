@@ -18,12 +18,6 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     private transient List<Pair<Point, String>> nodeCache = new ArrayList<>();
     private TwoDTree<String> twoDTree;
 
-    public static NearestNeighbor instance;
-
-    public NearestNeighbor() {
-        instance = this;
-    }
-
     @Override
     public void onBounds(Rect bounds) {
         twoDTree = new TwoDTree<>((float)Point.geoToMapX(bounds.left()),
