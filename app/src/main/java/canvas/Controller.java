@@ -14,6 +14,8 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.InputEvent;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import pointsOfInterest.PointOfInterest;
@@ -29,9 +31,9 @@ public class Controller implements MouseListener {
 
     @FXML private SearchTextField searchTextField;
 
-    @FXML private TextField fromRouteTextField;
+    @FXML private SearchTextField fromRouteTextField;
 
-    @FXML private TextField toRouteTextField;
+    @FXML private SearchTextField toRouteTextField;
 
     @FXML private Button routeButton;
 
@@ -130,8 +132,8 @@ public class Controller implements MouseListener {
     }
 
     @FXML
-    public void handleKeyTyped() {
-        searchTextField.handleSearchChange();
+    public void handleKeyTyped(KeyEvent event) {
+        SearchTextField.handleSearchChange((SearchTextField) event.getSource());
     }
 
     @FXML
