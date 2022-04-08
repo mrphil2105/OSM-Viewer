@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TwoDTree<E> implements SpacialTree<E>, Serializable {
+public class TwoDTree<E> implements SpatialTree<E>, Serializable {
     private final float left, top, right, bottom;
 
     private Node<E> root;
