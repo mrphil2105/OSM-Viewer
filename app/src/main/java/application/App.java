@@ -9,7 +9,7 @@ public class App extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         var model = new Model("data/bornholm.xml.zip");
-
+        
         new View(model, primaryStage);
     }
 }
