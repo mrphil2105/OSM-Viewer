@@ -6,7 +6,10 @@ import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,6 +28,8 @@ public class Controller implements MouseListener {
     private Model model;
     public Menu categories;
     private Point2D lastMouse;
+
+    private Timer queryPointTimer;
 
     @FXML private MapCanvas canvas;
 
@@ -211,9 +216,21 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
-        var mousePoint = new Point(mouseEvent.getX(), mouseEvent.getY());
-        var queryPoint = canvas.canvasToMap(mousePoint);
-        model.setQueryPoint(queryPoint);
+        if (queryPointTimer != null) {
+            queryPointTimer.cancel();
+        }
+
+        queryPointTimer = new Timer();
+        queryPointTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    var mousePoint = new Point(mouseEvent.getX(), mouseEvent.getY());
+                    var queryPoint = canvas.canvasToMap(mousePoint);
+                    model.setQueryPoint(queryPoint);
+                });
+            }
+        }, 50);
 
         if (pointOfInterestMode){
             addPointOfInterestText.show(canvas, Side.LEFT, mouseEvent.getX()+140, mouseEvent.getY()-30);
