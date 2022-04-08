@@ -17,6 +17,7 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -66,7 +67,7 @@ public class Controller implements MouseListener {
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
     boolean pointOfInterestMode = false;
-    ContextMenu addPointOfInterestText;
+    Tooltip addPointOfInterestText;
 
     Drawing lastDrawnAddress;
 
@@ -220,10 +221,10 @@ public class Controller implements MouseListener {
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
         if (pointOfInterestMode){
-            addPointOfInterestText.show(canvas, Side.LEFT, mouseEvent.getX()+190, mouseEvent.getY()-40);
-
+            var bounds =canvas.getBoundsInLocal();
+            var screenBounds=canvas.localToScreen(bounds);
+            addPointOfInterestText.show(canvas,mouseEvent.getX()+screenBounds.getMinX()+50, mouseEvent.getY()+screenBounds.getMinY()-30);
         }
-
     }
 
     @Override
@@ -288,20 +289,14 @@ public class Controller implements MouseListener {
     public void enterPointOfInterestMode(ActionEvent actionEvent) {
 
         if (addPointOfInterestText==null){
-            addPointOfInterestText=new ContextMenu();
-            var ta = new Text("Place point of interest on map");
-            ta.setFont(new Font(12));
-            var mi = new CustomMenuItem(ta);
-            mi.setHideOnClick(false);
-            addPointOfInterestText.getItems().add(mi);
+            addPointOfInterestText=new Tooltip("Place point of interest on map");
             addPointOfInterestText.requestFocus();
             canvas.giveFocus();
-            rightVBox.setVisible(false);
-            rightVBox.setVisible(true);
         }
-        addPointOfInterestText.show(rightVBox, Side.TOP,0,260);
+        var bounds =rightVBox.getBoundsInLocal();
+        var screenBounds=rightVBox.localToScreen(bounds);
+        addPointOfInterestText.show(rightVBox,screenBounds.getMinX(),screenBounds.getMinY()+230);
+
         pointOfInterestMode=true;
-
-
     }
 }
