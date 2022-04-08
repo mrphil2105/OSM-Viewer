@@ -7,9 +7,13 @@ import geometry.Point;
 import geometry.Rect;
 import io.FileParser;
 import io.PolygonsReader;
+import pointsOfInterest.PointOfInterest;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Point2D;
@@ -24,6 +28,7 @@ public class Model {
     public final Rect bounds;
     private int indexCount;
     AddressDatabase addresses;
+    private List<PointOfInterest> pointsOfInterest;
 
     private final NearestNeighbor nearestNeighbor;
 
@@ -48,6 +53,7 @@ public class Model {
             addresses = result.addresses().read();
             addresses.buildTries();
         }
+        pointsOfInterest=new ArrayList<>();
     }
 
     private void loadPolygons(PolygonsReader reader) {
@@ -190,5 +196,9 @@ public class Model {
 
     public AddressDatabase getAddresses() {
         return addresses;
+    }
+
+    public List<PointOfInterest> getPointsOfInterest() {
+        return pointsOfInterest;
     }
 }
