@@ -4,9 +4,12 @@ import Search.SearchTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
+import drawing.Drawable;
+import drawing.Drawing;
 import geometry.Point;
 import java.util.Arrays;
 
+import geometry.Vector2D;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -63,6 +66,8 @@ public class Controller implements MouseListener {
 
     boolean pointOfInterestMode = false;
     ContextMenu addPointOfInterestText;
+
+    Drawing lastDrawnAddress;
 
     public void init(Model model) {
         canvas.init(model);
@@ -127,8 +132,13 @@ public class Controller implements MouseListener {
         var address = searchTextField.handleSearch();
         if (address == null) return; //TODO: handle exception and show message?
         Point point = Point.geoToMap(new Point((float)address.node().lon(),(float)address.node().lat()));
-
         zoomOn(point);
+        var drawing=Drawing.create(new Vector2D(point), Drawable.ADDRESS);
+        canvas.getRenderer().draw(drawing);
+        if (lastDrawnAddress!=null){
+            canvas.getRenderer().clear(lastDrawnAddress);
+        }
+        lastDrawnAddress=drawing;
 
     }
 
