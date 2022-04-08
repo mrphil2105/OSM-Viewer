@@ -67,6 +67,8 @@ public class Controller implements MouseListener {
 
     @FXML private Label statusLabel;
 
+    @FXML private CheckMenuItem delayCheckMenuItem;
+
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
     boolean pointOfInterestMode = false;
@@ -216,21 +218,27 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
-        if (queryPointTimer != null) {
-            queryPointTimer.cancel();
-        }
+        Runnable queryRunnable = () -> {
+            var mousePoint = new Point(mouseEvent.getX(), mouseEvent.getY());
+            var queryPoint = canvas.canvasToMap(mousePoint);
+            model.setQueryPoint(queryPoint);
+        };
 
-        queryPointTimer = new Timer();
-        queryPointTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    var mousePoint = new Point(mouseEvent.getX(), mouseEvent.getY());
-                    var queryPoint = canvas.canvasToMap(mousePoint);
-                    model.setQueryPoint(queryPoint);
-                });
+        if (delayCheckMenuItem.isSelected()) {
+            if (queryPointTimer != null) {
+                queryPointTimer.cancel();
             }
-        }, 50);
+
+            queryPointTimer = new Timer();
+            queryPointTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Platform.runLater(queryRunnable);
+                }
+            }, 50);
+        } else {
+            queryRunnable.run();
+        }
 
         if (pointOfInterestMode){
             addPointOfInterestText.show(canvas, Side.LEFT, mouseEvent.getX()+140, mouseEvent.getY()-30);

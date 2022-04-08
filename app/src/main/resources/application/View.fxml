@@ -91,7 +91,15 @@
                 <padding>
                     <Insets topRightBottomLeft="4" />
                 </padding>
-                <Label id="statusLabel" fx:id="statusLabel" />
+                <Label id="statusLabel" fx:id="statusLabel">
+                    <contextMenu>
+                        <ContextMenu>
+                            <items>
+                                <CheckMenuItem fx:id="delayCheckMenuItem" text="Enable delay" selected="true" />
+                            </items>
+                        </ContextMenu>
+                    </contextMenu>
+                </Label>
             </HBox>
         </bottom>
     </BorderPane>
