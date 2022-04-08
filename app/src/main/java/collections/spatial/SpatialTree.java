@@ -3,7 +3,7 @@ package collections.spatial;
 import geometry.Point;
 import geometry.Rect;
 
-public interface SpacialTree<E> {
+public interface SpatialTree<E> {
     int size();
 
     void insert(Point point, E value);
