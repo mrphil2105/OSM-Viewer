@@ -1,7 +1,12 @@
 package collections.spacial;
 
+import canvas.Renderer;
+import drawing.Drawable;
+import drawing.Drawing;
 import geometry.Point;
 import geometry.Rect;
+import geometry.Vector2D;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -252,6 +257,43 @@ public class TwoDTree<E> implements SpacialTree<E>, Serializable {
 
         range(query, node.left, results);
         range(query, node.right, results);
+    }
+
+    public void draw(Renderer renderer) {
+        var drawing = new Drawing();
+        addToDrawing(root, 1, drawing);
+        renderer.draw(drawing);
+    }
+
+    private void addToDrawing(Node<E> node, int level, Drawing drawing) {
+        if (node == null) {
+            return;
+        }
+
+        drawing.draw(Drawing.create(new Vector2D(node.x(), node.y()), Drawable.POINT));
+
+        var x1 = node.rect.left();
+        var x2 = node.rect.right();
+        var y1 = node.rect.bottom();
+        var y2 = node.rect.top();
+
+        Drawable drawable;
+
+        if ((level & 1) == 0) {
+            y1 = y2 = node.y();
+            drawable = Drawable.PARTITION_HORIZONTAL;
+
+        } else {
+            x1 = x2 = node.x();
+            drawable = Drawable.PARTITION_VERTICAL;
+        }
+
+        var point1 = new Vector2D(x1, y1);
+        var point2 = new Vector2D(x2, y2);
+        drawing.draw(Drawing.create(List.of(point1, point2), drawable));
+
+        addToDrawing(node.left, level + 1, drawing);
+        addToDrawing(node.right, level + 1, drawing);
     }
 
     private static class Node<E> implements Serializable {
