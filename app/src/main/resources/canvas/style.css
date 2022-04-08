@@ -18,6 +18,10 @@
     -fx-text-fill: #ffffff;
 }
 
+#removeButton{
+    -fx-background-color: #db6e60;
+}
+
 .radio-button .radio {
     -fx-background-color: white;
     -fx-border-color:grey;
