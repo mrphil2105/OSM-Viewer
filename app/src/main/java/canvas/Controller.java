@@ -7,6 +7,7 @@ import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
 
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -59,6 +60,8 @@ public class Controller implements MouseListener {
 
     @FXML private VBox rightVBox;
 
+    @FXML private Label statusLabel;
+
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
     boolean pointOfInterestMode = false;
@@ -76,6 +79,8 @@ public class Controller implements MouseListener {
         radioButtonDefaultMode.setSelected(true);
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
+
+        statusLabel.textProperty().bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
         pointsOfInterestVBox.init(model.getPointsOfInterest());
 
         // FIXME: yuck
