@@ -11,6 +11,8 @@ import com.jogamp.opengl.util.Animator;
 import drawing.Category;
 import geometry.Point;
 import javafx.application.Platform;
+import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -51,12 +53,7 @@ public class MapCanvas extends Region {
                             if (!newValue) {
                                 JFXAccessor.runOnJFXThread(
                                         false,
-                                        () -> {
-                                            if (window.isVisible()) {
-                                                window.setVisible(false);
-                                                window.setVisible(true);
-                                            }
-                                        });
+                                        this::giveFocus);
                             }
                         });
 
@@ -121,6 +118,15 @@ public class MapCanvas extends Region {
 
     }
 
+    public void zoomOn(Point point) {
+        setZoom(25);
+        center(point);
+    }
+    public void zoomOn(Point point, float zoom) {
+        setZoom(zoom);
+        center(point);
+    }
+
     public void setZoom(float zoom){
         transform.setMxx(zoom);
         transform.setMyy(zoom);
@@ -148,6 +154,16 @@ public class MapCanvas extends Region {
         } else {
             return 1;
         }
-        
+    }
+
+    public void giveFocus() {
+        if (window.isVisible()) {
+            window.setVisible(false);
+            window.setVisible(true);
+        }
+    }
+
+    public Renderer getRenderer() {
+        return renderer;
     }
 }
