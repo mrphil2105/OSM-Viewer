@@ -86,5 +86,13 @@
             </MapCanvas>
 
         </center>
+        <bottom>
+            <HBox>
+                <padding>
+                    <Insets topRightBottomLeft="4" />
+                </padding>
+                <Label id="statusLabel" fx:id="statusLabel" />
+            </HBox>
+        </bottom>
     </BorderPane>
 </Scene>

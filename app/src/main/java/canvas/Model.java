@@ -180,7 +180,6 @@ public class Model {
     public void setQueryPoint(Point query) {
         var road = nearestNeighbor.nearestTo(query);
         nearestRoadProperty().set(road);
-        System.out.println("Nearest Road: " + road);
     }
 
     enum VBOType {
