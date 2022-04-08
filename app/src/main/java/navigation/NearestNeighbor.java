@@ -3,7 +3,7 @@ package navigation;
 import static osm.elements.OSMTag.Key.HIGHWAY;
 import static osm.elements.OSMTag.Key.NAME;
 
-import collections.spacial.TwoDTree;
+import collections.spatial.TwoDTree;
 import geometry.Point;
 import geometry.Rect;
 import java.io.Serializable;
