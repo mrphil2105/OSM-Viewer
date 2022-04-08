@@ -133,4 +133,8 @@ public class MapCanvas extends Region {
             window.setVisible(true);
         }
     }
+
+    public Renderer getRenderer() {
+        return renderer;
+    }
 }
