@@ -4,9 +4,12 @@ import Search.SearchTextField;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
+import drawing.Drawable;
+import drawing.Drawing;
 import geometry.Point;
 import java.util.Arrays;
 
+import geometry.Vector2D;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -14,7 +17,9 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
@@ -62,7 +67,9 @@ public class Controller implements MouseListener {
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
     boolean pointOfInterestMode = false;
-    ContextMenu addPointOfInterestText;
+    Tooltip addPointOfInterestText;
+
+    Drawing lastDrawnAddress;
 
     public void init(Model model) {
         canvas.init(model);
@@ -127,8 +134,13 @@ public class Controller implements MouseListener {
         var address = searchTextField.handleSearch();
         if (address == null) return; //TODO: handle exception and show message?
         Point point = Point.geoToMap(new Point((float)address.node().lon(),(float)address.node().lat()));
-
         zoomOn(point);
+        var drawing=Drawing.create(new Vector2D(point), Drawable.ADDRESS);
+        canvas.getRenderer().draw(drawing);
+        if (lastDrawnAddress!=null){
+            canvas.getRenderer().clear(lastDrawnAddress);
+        }
+        lastDrawnAddress=drawing;
 
     }
 
@@ -183,7 +195,7 @@ public class Controller implements MouseListener {
           canvas.giveFocus();
 
           tf.setOnAction(e -> {
-              addPointOfInterest(new PointOfInterest(point.x(),point.y(),tf.getText()));
+              addPointOfInterest(new PointOfInterest(point.x(),point.y(),tf.getText(),Drawing.create(new Vector2D(point),Drawable.POI)));
               cm.hide();
           });
         pointOfInterestMode=false;
@@ -209,9 +221,10 @@ public class Controller implements MouseListener {
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
         if (pointOfInterestMode){
-            addPointOfInterestText.show(canvas, Side.LEFT, mouseEvent.getX()+140, mouseEvent.getY()-30);
+            var bounds =canvas.getBoundsInLocal();
+            var screenBounds=canvas.localToScreen(bounds);
+            addPointOfInterestText.show(canvas,mouseEvent.getX()+screenBounds.getMinX()+50, mouseEvent.getY()+screenBounds.getMinY()-30);
         }
-
     }
 
     @Override
@@ -254,6 +267,7 @@ public class Controller implements MouseListener {
 
     public void addPointOfInterest(PointOfInterest point){
         model.getPointsOfInterest().add(point);
+        canvas.getRenderer().draw(point.drawing());
         pointsOfInterestVBox.update();
         for (Node n:pointsOfInterestVBox.getChildren()){
 
@@ -264,6 +278,7 @@ public class Controller implements MouseListener {
                });
                hBox.getRemove().setOnAction(e -> {
                     model.getPointsOfInterest().remove(hBox.getPointOfInterest());
+                    canvas.getRenderer().clear(hBox.getPointOfInterest().drawing());
                     pointsOfInterestVBox.update();
                });
             }
@@ -274,16 +289,14 @@ public class Controller implements MouseListener {
     public void enterPointOfInterestMode(ActionEvent actionEvent) {
 
         if (addPointOfInterestText==null){
-            addPointOfInterestText=new ContextMenu();
-            var ta = new Text("Add point of Interest");
-            var mi = new CustomMenuItem(ta);
-            mi.setHideOnClick(false);
-            addPointOfInterestText.getItems().add(mi);
+            addPointOfInterestText=new Tooltip("Place point of interest on map");
             addPointOfInterestText.requestFocus();
             canvas.giveFocus();
         }
+        var bounds =rightVBox.getBoundsInLocal();
+        var screenBounds=rightVBox.localToScreen(bounds);
+        addPointOfInterestText.show(rightVBox,screenBounds.getMinX(),screenBounds.getMinY()+230);
+
         pointOfInterestMode=true;
-
-
     }
 }
