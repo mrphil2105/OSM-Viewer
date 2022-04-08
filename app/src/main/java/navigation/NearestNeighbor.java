@@ -16,7 +16,7 @@ import osm.elements.OSMWay;
 
 public class NearestNeighbor implements OSMObserver, Serializable {
     private transient List<Pair<Point, String>> nodeCache = new ArrayList<>();
-    private TwoDTree<Node> twoDTree;
+    private TwoDTree<String> twoDTree;
 
     public static NearestNeighbor instance;
 
@@ -60,32 +60,12 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         var nodes = nodeCache;
         nodeCache = null;
         addToTree(nodes, 0);
-
-        var road = nearestTo(new Point(0, 0));
     }
 
     public String nearestTo(Point query) {
         var nearestResult = twoDTree.nearest(query);
 
-        if (nearestResult.value() instanceof AncestorNode node) {
-            return node.name();
-        }
-
-        var node = (LeafNode) nearestResult.value();
-        var points = node.points();
-        float shortest = Float.MAX_VALUE;
-        var bestIndex = 0;
-
-        for (int i = 0; i < points.size(); i++) {
-            var distance = points.get(i).distanceSquaredTo(query);
-
-            if (distance < shortest) {
-                shortest = distance;
-                bestIndex = i;
-            }
-        }
-
-        return node.names().get(bestIndex);
+        return nearestResult.value();
     }
 
     private void addToTree(List<Pair<Point, String>> nodes, int level) {
@@ -96,28 +76,17 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         var halfSize = nodes.size() / 2;
         var median = nodes.get(halfSize);
         var point = median.getKey();
+        var name = median.getValue();
 
-        if (nodes.size() <= 1000) {
-            var points = nodes.stream().map(Pair::getKey).toList();
-            var names = nodes.stream().map(Pair::getValue).toList();
-            var node = new LeafNode(points, names);
-            twoDTree.insert(point, node);
+        twoDTree.insert(point, name);
 
+        if (nodes.size() == 1) {
             return;
         }
-
-        var node = new AncestorNode(median.getValue());
-        twoDTree.insert(point, node);
 
         var firstHalf = nodes.subList(0, halfSize);
         var secondHalf = nodes.subList(halfSize, nodes.size());
         addToTree(firstHalf, level + 1);
         addToTree(secondHalf, level + 1);
     }
-
-    private interface Node extends Serializable {}
-
-    private record AncestorNode(String name) implements Node {}
-
-    private record LeafNode(List<Point> points, List<String> names) implements Node {}
 }
