@@ -35,7 +35,6 @@ public class Controller implements MouseListener {
     private ScaleBar scaleBar = new ScaleBar();
     private float currentScale;
     private float zoomLevel = 0;
-    private Renderer renderer;
     Model model;
 
     @FXML private MapCanvas canvas;
@@ -104,7 +103,6 @@ public class Controller implements MouseListener {
         zoomLevel = (float) ((canvas.getZoom() - canvas.getStartZoom())*100);
         zoomLevelText.setText(Float.toString((float) (Math.round(zoomLevel*100.0)/100.0)) + "%");
         pointsOfInterestVBox.init(model.getPointsOfInterest());
-        renderer = canvas.getRenderer();
         
         // FIXME: yuck
         categories
@@ -265,7 +263,6 @@ public class Controller implements MouseListener {
                 (float) (mouseEvent.getX() - lastMouse.getX()),
                 (float) (mouseEvent.getY() - lastMouse.getY()));
         lastMouse = new Point2D(mouseEvent.getX(), mouseEvent.getY());
-        drawScaleBar();
 
     }
 
@@ -284,27 +281,11 @@ public class Controller implements MouseListener {
         }
         updateZoom(); 
     }
-    private Drawing drawing;
-    
-    public void drawScaleBar(){
-        Point point1 = canvas.canvasToMap(new Point(20,700));
-        Point point2 = canvas.canvasToMap(new Point(20,690));
-        Point point3 = canvas.canvasToMap(new Point(120,690));
-        Point point4 = canvas.canvasToMap(new Point(120,700));
-        Drawing newDrawing = Drawing.create(List.of(new Vector2D(point1), new Vector2D(point2), new Vector2D(point3), new Vector2D(point4)), Drawable.SCALEBAR);
-        renderer.draw(newDrawing);
-        if (drawing != null){
-            renderer.clear(drawing);
-        }
-        drawing = newDrawing;
-    }
-
 
     public void updateZoom(){
         handleScaleBar();
         zoomLevel = (float) ((canvas.getZoom() - canvas.getStartZoom())*100);
         zoomLevelText.setText(Float.toString((float) (Math.round(zoomLevel*100.0)/100.0)) + "%");
-        drawScaleBar();
     }
 
     public void initScaleBar(){
