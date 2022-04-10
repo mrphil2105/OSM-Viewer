@@ -84,7 +84,7 @@
                 <MapCanvas fx:id="canvas" prefWidth="1280" prefHeight="720" />
                 <HBox alignment="center" fx:id="middleHBox">
                     <padding>
-                    <Insets left="10" right="10" />
+                    <Insets left="20" right="10" />
                     </padding>
                     <VBox alignment="top_center">
                         <HBox>
