@@ -11,8 +11,6 @@ import com.jogamp.opengl.util.Animator;
 import drawing.Category;
 import geometry.Point;
 import javafx.application.Platform;
-import javafx.scene.Node;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
