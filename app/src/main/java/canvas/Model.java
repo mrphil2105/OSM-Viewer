@@ -3,6 +3,7 @@ package canvas;
 import Search.AddressDatabase;
 import com.jogamp.opengl.*;
 import drawing.Drawable;
+import geometry.Point;
 import geometry.Rect;
 import io.FileParser;
 import io.PolygonsReader;
@@ -13,6 +14,10 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.geometry.Point2D;
+import navigation.NearestNeighbor;
 
 public class Model {
 
@@ -23,7 +28,11 @@ public class Model {
     public final Rect bounds;
     private int indexCount;
     AddressDatabase addresses;
-    private List<PointOfInterest> PointsOfInterest;
+    private List<PointOfInterest> pointsOfInterest;
+
+    private final NearestNeighbor nearestNeighbor;
+
+    private final StringProperty nearestRoad = new SimpleStringProperty("none");
 
     public Model(String filename) throws Exception {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
@@ -40,10 +49,11 @@ public class Model {
         try (var result = FileParser.readFile(filename)) {
             bounds = result.bounds().read().getRect();
             loadPolygons(result.polygons());
+            nearestNeighbor = result.nearestNeighbor().read();
             addresses = result.addresses().read();
             addresses.buildTries();
         }
-        PointsOfInterest=new ArrayList<>();
+        pointsOfInterest=new ArrayList<>();
     }
 
     private void loadPolygons(PolygonsReader reader) {
@@ -159,6 +169,19 @@ public class Model {
         return indexCount;
     }
 
+    public StringProperty nearestRoadProperty() {
+        return nearestRoad;
+    }
+
+    public String getNearestRoad() {
+        return nearestRoad.get();
+    }
+
+    public void setQueryPoint(Point query) {
+        var road = nearestNeighbor.nearestTo(query);
+        nearestRoadProperty().set(road);
+    }
+
     enum VBOType {
         INDEX,
         VERTEX,
@@ -175,6 +198,6 @@ public class Model {
     }
 
     public List<PointOfInterest> getPointsOfInterest() {
-        return PointsOfInterest;
+        return pointsOfInterest;
     }
 }

@@ -80,7 +80,7 @@ public class OSMReader {
 
         var bounds =
                 new Rect(
-                        getDouble("minlat"), getDouble("minlon"), getDouble("maxlat"), getDouble("maxlon"));
+                        (float)getDouble("minlat"), (float)getDouble("minlon"), (float)getDouble("maxlat"), (float)getDouble("maxlon"));
         advance();
 
         for (var observer : observers) {

@@ -8,7 +8,11 @@ import drawing.Drawable;
 import drawing.Drawing;
 import geometry.Point;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import geometry.Vector2D;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -26,11 +30,19 @@ import pointsOfInterest.PointsOfInterestHBox;
 import pointsOfInterest.PointsOfInterestVBox;
 
 public class Controller implements MouseListener {
-    public Menu categories;
+    private Model model;
     private Point2D lastMouse;
-    Model model;
+
+    private Timer queryPointTimer;
+
+    private boolean pointOfInterestMode = false;
+    private Tooltip addPointOfInterestText;
+
+    private Drawing lastDrawnAddress;
 
     @FXML private MapCanvas canvas;
+
+    @FXML private Menu categories;
 
     @FXML private SearchTextField searchTextField;
 
@@ -64,14 +76,15 @@ public class Controller implements MouseListener {
 
     @FXML private VBox rightVBox;
 
+    @FXML private Label nearestRoadLabel;
+
+    @FXML private CheckMenuItem nearestRoadDelayItem;
+
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
-    boolean pointOfInterestMode = false;
-    Tooltip addPointOfInterestText;
-
-    Drawing lastDrawnAddress;
-
     public void init(Model model) {
+        this.model = model;
+
         canvas.init(model);
         canvas.addMouseListener(this);
         searchTextField.init(model.getAddresses());
@@ -81,11 +94,9 @@ public class Controller implements MouseListener {
         radioButtonDefaultMode.setSelected(true);
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
+
+        nearestRoadLabel.textProperty().bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
         pointsOfInterestVBox.init(model.getPointsOfInterest());
-        this.model=model;
-
-
-
 
         // FIXME: yuck
         categories
@@ -181,7 +192,6 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
-
       if (pointOfInterestMode){
           Point point = canvas.canvasToMap(new Point((float)mouseEvent.getX(),(float)mouseEvent.getY()));
           var cm = new ContextMenu();
@@ -220,6 +230,28 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
+        Runnable queryRunnable = () -> {
+            var mousePoint = new Point(mouseEvent.getX(), mouseEvent.getY());
+            var queryPoint = canvas.canvasToMap(mousePoint);
+            model.setQueryPoint(queryPoint);
+        };
+
+        if (nearestRoadDelayItem.isSelected()) {
+            if (queryPointTimer != null) {
+                queryPointTimer.cancel();
+            }
+
+            queryPointTimer = new Timer();
+            queryPointTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Platform.runLater(queryRunnable);
+                }
+            }, 50);
+        } else {
+            queryRunnable.run();
+        }
+
         if (pointOfInterestMode){
             var bounds =canvas.getBoundsInLocal();
             var screenBounds=canvas.localToScreen(bounds);
@@ -233,7 +265,6 @@ public class Controller implements MouseListener {
                 (float) (mouseEvent.getX() - lastMouse.getX()),
                 (float) (mouseEvent.getY() - lastMouse.getY()));
         lastMouse = new Point2D(mouseEvent.getX(), mouseEvent.getY());
-
     }
 
     @Override
@@ -287,12 +318,12 @@ public class Controller implements MouseListener {
 
     @FXML
     public void enterPointOfInterestMode(ActionEvent actionEvent) {
-
         if (addPointOfInterestText==null){
             addPointOfInterestText=new Tooltip("Place point of interest on map");
             addPointOfInterestText.requestFocus();
             canvas.giveFocus();
         }
+
         var bounds =rightVBox.getBoundsInLocal();
         var screenBounds=rightVBox.localToScreen(bounds);
         addPointOfInterestText.show(rightVBox,screenBounds.getMinX(),screenBounds.getMinY()+230);
