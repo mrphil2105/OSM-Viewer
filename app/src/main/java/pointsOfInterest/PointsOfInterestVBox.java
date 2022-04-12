@@ -17,19 +17,28 @@ public class PointsOfInterestVBox extends VBox {
     }
 
     public void update(){
+        removeDeletedPoints();
+        addNewPointsOfInterest();
+    }
+
+    private void addNewPointsOfInterest(){
         for (PointOfInterest point : pointsOfInterest){
             if (!contains(point)){
                 addPointOfInterest(point);
             }
         }
+    }
+
+    private void removeDeletedPoints(){
+        var toToBeRemoved = new ArrayList<PointsOfInterestHBox>();
         for (Node n :getChildren()){
             if (!pointsOfInterest.contains(((PointsOfInterestHBox)n).getPointOfInterest())){
-                removePointOfInterest(((PointsOfInterestHBox) n).getPointOfInterest());
+                toToBeRemoved.add((PointsOfInterestHBox)n);
             }
         }
-
-
-
+        for (PointsOfInterestHBox point : toToBeRemoved){
+            removePointOfInterest(point.getPointOfInterest());
+        }
     }
 
     public void addPointOfInterest(PointOfInterest point){
