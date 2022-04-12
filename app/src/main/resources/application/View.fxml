@@ -86,5 +86,21 @@
             </MapCanvas>
 
         </center>
+        <bottom>
+            <HBox>
+                <padding>
+                    <Insets topRightBottomLeft="4" />
+                </padding>
+                <Label id="nearestRoadLabel" fx:id="nearestRoadLabel">
+                    <contextMenu>
+                        <ContextMenu>
+                            <items>
+                                <CheckMenuItem fx:id="nearestRoadDelayItem" text="Enable delay" selected="true" />
+                            </items>
+                        </ContextMenu>
+                    </contextMenu>
+                </Label>
+            </HBox>
+        </bottom>
     </BorderPane>
 </Scene>
