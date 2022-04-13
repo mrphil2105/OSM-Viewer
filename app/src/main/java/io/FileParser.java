@@ -6,6 +6,7 @@ import java.util.zip.ZipFile;
 import javafx.util.Pair;
 import javax.xml.stream.XMLStreamException;
 import navigation.Dijkstra;
+import navigation.NearestNeighbor;
 import org.anarres.parallelgzip.ParallelGZIPInputStream;
 import org.anarres.parallelgzip.ParallelGZIPOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -18,6 +19,7 @@ import osm.elements.OSMBounds;
 public class FileParser implements IOConstants {
     private static final String EXT = ".gz.tar";
     private static final String POLYGONS = "polygons";
+    private static final String NEAREST_NEIGHBOR = "nearest-neighbor";
     private static final String DIJKSTRA = "dijkstra";
     private static final String ADDRESSES = "addresses";
     private static final String BOUNDS = "bounds";
@@ -39,10 +41,11 @@ public class FileParser implements IOConstants {
     private static String createMapFromOsm(String infile) throws IOException, XMLStreamException {
         var reader = new OSMReader();
         var polygonsWriter = new PolygonsWriter();
+        var nearestNeighborWriter = new ObjectWriter<>(new NearestNeighbor());
         var dijkstraWriter = new ObjectWriter<>(new Dijkstra());
         var addressWriter = new ObjectWriter<>(new AddressDatabase());
         var boundsWriter = new ObjectWriter<>(new OSMBounds());
-        reader.addObservers(polygonsWriter, dijkstraWriter, addressWriter, boundsWriter);
+        reader.addObservers(polygonsWriter, nearestNeighborWriter, dijkstraWriter, addressWriter, boundsWriter);
 
         reader.parse(getInputStream(infile));
 
@@ -50,6 +53,7 @@ public class FileParser implements IOConstants {
         createMapFromWriters(
                 outfile,
                 new Pair<>(POLYGONS, polygonsWriter),
+                new Pair<>(NEAREST_NEIGHBOR, nearestNeighborWriter),
                 new Pair<>(DIJKSTRA, dijkstraWriter),
                 new Pair<>(ADDRESSES, addressWriter),
                 new Pair<>(BOUNDS, boundsWriter));
@@ -87,6 +91,7 @@ public class FileParser implements IOConstants {
         var tarFile = new TarFile(new File(filename));
         return new ReadResult(
                 new PolygonsReader(getEntryStream(POLYGONS, tarFile)),
+                new ObjectReader<>(getEntryStream(NEAREST_NEIGHBOR, tarFile)),
                 new ObjectReader<>(getEntryStream(DIJKSTRA, tarFile)),
                 new ObjectReader<>(getEntryStream(ADDRESSES, tarFile)),
                 new ObjectReader<>(getEntryStream(BOUNDS, tarFile)));
