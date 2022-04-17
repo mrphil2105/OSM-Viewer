@@ -178,7 +178,7 @@ public class Model {
     }
 
     public void setQueryPoint(Point query) {
-        var road = nearestNeighbor.nearestTo(query);
+        var road = nearestNeighbor.nearestRoad(query);
         nearestRoadProperty().set(road);
     }
 
