@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import collections.enumflags.EnumFlags;
-import javafx.util.Pair;
+import geometry.Point;
 import osm.OSMObserver;
 import osm.elements.*;
 
@@ -82,30 +82,33 @@ public class Dijkstra implements OSMObserver, Serializable {
         }
     }
 
-    public static long coordinatesToLong(float lon, float lat) {
+    private static long coordinatesToLong(float lon, float lat) {
         var lonBits = Float.floatToIntBits(lon);
         var latBits = Float.floatToIntBits(lat);
 
         return (((long)lonBits) << 32) | (latBits & 0xFFFFFFFFL);
     }
 
-    public static Pair<Float, Float> longToCoordinates(long value) {
+    private static Point longToCoordinates(long value) {
         var lonBits = (int)(value >>> 32);
         var latBits = (int)(value & 0xFFFFFFFFL);
 
         var lon = Float.intBitsToFloat(lonBits);
         var lat = Float.intBitsToFloat(latBits);
 
-        return new Pair<>(lon, lat);
+        return new Point(lon, lat);
     }
 
-    public List<Long> shortestPath(long sourceVertex, long targetVertex, EdgeRole mode) {
+    public List<Point> shortestPath(Point from, Point to, EdgeRole mode) {
         this.mode = mode;
 
         distTo.clear();
         edgeTo.clear();
         settled.clear();
         queue.clear();
+
+        var sourceVertex = Dijkstra.coordinatesToLong(from.x(), from.y());
+        var targetVertex = Dijkstra.coordinatesToLong(to.x(), to.y());
 
         queue.add(new Node(sourceVertex, 0));
         distTo.put(sourceVertex, 0f);
@@ -118,8 +121,6 @@ public class Dijkstra implements OSMObserver, Serializable {
                 break;
             }
 
-            // TODO: Check if a settled set is really necessary.
-            //  It probably is when we have cycles or loops in the graph.
             if (settled.contains(vertex)) {
                 continue;
             }
@@ -129,7 +130,13 @@ public class Dijkstra implements OSMObserver, Serializable {
             relax(vertex, targetVertex);
         }
 
-        return extractPath(sourceVertex, targetVertex, edgeTo);
+        var vertices = extractPath(sourceVertex, targetVertex, edgeTo);
+
+        if (vertices == null) {
+            return null;
+        }
+
+        return vertices.stream().map(Dijkstra::longToCoordinates).toList();
     }
 
     private void relax(long vertex, long target) {
@@ -169,10 +176,10 @@ public class Dijkstra implements OSMObserver, Serializable {
         var fromCoordinates = longToCoordinates(from);
         var toCoordinates = longToCoordinates(to);
 
-        var x1 = fromCoordinates.getKey();
-        var y1 = fromCoordinates.getValue();
-        var x2 = toCoordinates.getKey();
-        var y2 = toCoordinates.getValue();
+        var x1 = fromCoordinates.x();
+        var y1 = fromCoordinates.y();
+        var x2 = toCoordinates.x();
+        var y2 = toCoordinates.y();
 
         return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
