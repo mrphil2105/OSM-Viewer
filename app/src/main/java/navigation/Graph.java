@@ -20,8 +20,6 @@ class Graph implements Serializable {
         return edgeCount;
     }
 
-    // TODO: If we are adding the same edge twice, because there is an identical path for different transport types,
-    //  we simply add an additional role to the edge(s).
     public void addEdge(Edge edge) {
         var edges = adjacentEdges.computeIfAbsent(edge.from(), v -> new ArrayList<>());
         edges.add(edge);
