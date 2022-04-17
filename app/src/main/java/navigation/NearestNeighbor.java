@@ -20,6 +20,7 @@ public class NearestNeighbor implements OSMObserver, Serializable {
 
     @Override
     public void onBounds(Rect bounds) {
+        // Top and bottom are swapped here to be in accordance with the map.
         twoDTree = new TwoDTree<>((float)Point.geoToMapX(bounds.left()),
             (float)Point.geoToMapY(bounds.bottom()),
             (float)Point.geoToMapX(bounds.right()),
