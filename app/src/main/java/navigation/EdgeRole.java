@@ -1,6 +1,6 @@
 package navigation;
 
-enum EdgeRole {
+public enum EdgeRole {
     CAR,
     BIKE,
     WALK
