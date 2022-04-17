@@ -171,8 +171,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         return weight;
     }
 
-    // TODO: Include max speed in heuristic if mode is 'CAR'.
-    private static float heuristic(long from, long to) {
+    private float heuristic(long from, long to) {
         var fromCoordinates = longToCoordinates(from);
         var toCoordinates = longToCoordinates(to);
 
@@ -181,7 +180,14 @@ public class Dijkstra implements OSMObserver, Serializable {
         var x2 = toCoordinates.x();
         var y2 = toCoordinates.y();
 
-        return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+        var heuristic = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+
+        if (mode == EdgeRole.CAR) {
+            // Divide by the highest possible speed on a highway.
+            heuristic /= 130;
+        }
+
+        return (float)heuristic;
     }
 
     private static List<Long> extractPath(long sourceVertex, long targetVertex, Map<Long, Edge> edgeTo) {
