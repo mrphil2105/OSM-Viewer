@@ -33,7 +33,8 @@ public class Controller implements MouseListener {
     private Model model;
     private Point2D lastMouse;
 
-    private Timer queryPointTimer;
+    private final Timer queryPointTimer = new Timer();
+    private TimerTask queryPointTimerTask;
 
     private boolean pointOfInterestMode = false;
     private Tooltip addPointOfInterestText;
@@ -133,6 +134,7 @@ public class Controller implements MouseListener {
 
     public void dispose() {
         canvas.dispose();
+        queryPointTimer.cancel();
     }
 
     @FXML
@@ -237,17 +239,17 @@ public class Controller implements MouseListener {
         };
 
         if (nearestRoadDelayItem.isSelected()) {
-            if (queryPointTimer != null) {
-                queryPointTimer.cancel();
+            if (queryPointTimerTask != null) {
+                queryPointTimerTask.cancel();
             }
 
-            queryPointTimer = new Timer();
-            queryPointTimer.schedule(new TimerTask() {
+            queryPointTimerTask = new TimerTask() {
                 @Override
                 public void run() {
                     Platform.runLater(queryRunnable);
                 }
-            }, 50);
+            };
+            queryPointTimer.schedule(queryPointTimerTask, 50);
         } else {
             queryRunnable.run();
         }
