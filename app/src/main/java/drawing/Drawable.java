@@ -56,6 +56,7 @@ public enum Drawable {
     MOTORWAY(Shape.POLYLINE, Color.web("#e892a2"), 1.0, Category.ROAD),
     NATURE_RESERVE(Shape.POLYLINE, Color.rgb(0, 180, 30, 0.2), 0.6, Category.MISC),
     MILITARY(Shape.FILL, Color.rgb(255, 0, 0, 0.2), 0, Category.MISC),
+    ROUTE(Shape.POLYLINE, Color.web("#1967d2"), 0.6, Category.ROAD),
     BOUNDS(Shape.POLYLINE, Color.rgb(255, 0, 150, 0.5), 5.0, Category.MISC),
     ADDRESS(Shape.FILL, Color.web("#D22B2B"), 0.4, Category.MISC),
     POI(Shape.FILL, Color.web("#6495ED"), 0.4, Category.MISC),
