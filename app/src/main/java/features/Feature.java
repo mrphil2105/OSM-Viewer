@@ -2,44 +2,40 @@ package features;
 
 import Search.AddressDatabase;
 import io.*;
-import java.io.ObjectInputStream;
-import java.util.function.Function;
 import navigation.Dijkstra;
 import navigation.NearestNeighbor;
-import util.ThrowingFunction;
+
+import java.io.ObjectInputStream;
+import java.util.function.Function;
 
 public enum Feature {
-    DRAWING("Visuals", (o) -> new PolygonsWriter(), PolygonsReader::new),
+    DRAWING("Visuals", PolygonsReader::new),
     NEAREST_NEIGHBOR(
             "Nearest Neighbor",
-            (o) -> new ObjectWriter<>((NearestNeighbor) o),
             ObjectReader<NearestNeighbor>::new),
-    PATHFINDING("Pathfinding", (o) -> new ObjectWriter<>((Dijkstra) o), ObjectReader<Dijkstra>::new),
+    PATHFINDING("Pathfinding", ObjectReader<Dijkstra>::new),
     ADDRESS_SEARCH(
             "Address Search",
-            (o) -> new ObjectWriter<>((AddressDatabase) o),
             ObjectReader<AddressDatabase>::new);
 
     private final String displayName;
-    private final ThrowingFunction<Object, Writer> writer;
     private final Function<ObjectInputStream, Reader> reader;
 
     Feature(
             String displayName,
-            ThrowingFunction<Object, Writer> writer,
             Function<ObjectInputStream, Reader> reader) {
         this.displayName = displayName;
-        this.writer = writer;
         this.reader = reader;
     }
 
     public Writer createWriter() {
-        return createWriter(null);
-    }
-
-    public Writer createWriter(Object arg) {
         try {
-            return writer.apply(arg);
+            return switch (this) {
+                case DRAWING -> new PolygonsWriter();
+                case NEAREST_NEIGHBOR -> new ObjectWriter<>(new NearestNeighbor());
+                case PATHFINDING -> new ObjectWriter<>(new Dijkstra());
+                case ADDRESS_SEARCH -> new ObjectWriter<>(new AddressDatabase());
+            };
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
