@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.collections.ListChangeListener;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import geometry.Vector2D;
@@ -34,6 +35,9 @@ public class Controller implements MouseListener {
     private Point2D lastMouse;
 
     private Timer queryPointTimer;
+
+    private Point fromPoint, toPoint;
+    private Drawing routeDrawing;
 
     private boolean pointOfInterestMode = false;
     private Tooltip addPointOfInterestText;
@@ -94,6 +98,22 @@ public class Controller implements MouseListener {
         radioButtonDefaultMode.setSelected(true);
         radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
+
+        model.getRoutePoints().addListener((ListChangeListener<? super Point>)listener-> {
+            while (listener.next()) {
+                if (!listener.wasAdded()) {
+                    continue;
+                }
+
+                var renderer = canvas.getRenderer();
+                if (routeDrawing != null) renderer.clear(routeDrawing);
+
+                var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
+                routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
+
+                renderer.draw(routeDrawing);
+            }
+        });
 
         nearestRoadLabel.textProperty().bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
         pointsOfInterestVBox.init(model.getPointsOfInterest());
@@ -192,6 +212,26 @@ public class Controller implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() == MouseEvent.BUTTON2) {
+            var point = new Point(mouseEvent.getX(), mouseEvent.getY());
+            point = canvas.canvasToMap(point);
+            point = model.getNearestPoint(point);
+
+            if (fromPoint == null) {
+                fromPoint = point;
+            }
+            else if (toPoint == null) {
+                toPoint = point;
+                model.calculateBestRoute(fromPoint, toPoint);
+            }
+            else {
+                fromPoint = point;
+                toPoint = null;
+            }
+
+            return;
+        }
+
       if (pointOfInterestMode){
           Point point = canvas.canvasToMap(new Point((float)mouseEvent.getX(),(float)mouseEvent.getY()));
           var cm = new ContextMenu();
