@@ -4,8 +4,6 @@ import collections.enumflags.ObservableEnumFlags;
 import com.jogamp.nativewindow.javafx.JFXAccessor;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
-import com.jogamp.newt.event.WindowAdapter;
-import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
@@ -14,6 +12,7 @@ import geometry.Point;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
@@ -25,6 +24,11 @@ public class MapCanvas extends Region implements MouseListener {
     private GLWindow window;
     private Renderer renderer;
     private Point2D lastMouse;
+    private CanvasFocusListener canvasFocusListener;
+
+    private final ChangeListener<Number> HEIGHT_LISTENER = (observable, oldValue, newValue) -> window.setSize(window.getWidth(), Math.max(1, newValue.intValue()));
+    private final ChangeListener<Number> WIDTH_LISTENER = (observable, oldValue, newValue) -> window.setSize(Math.max(1, newValue.intValue()), window.getHeight());
+
 
     // TODO: Add all if necessary
     public final ObjectProperty<EventHandler<MouseEvent>> mapMouseClickedProperty =
@@ -44,14 +48,8 @@ public class MapCanvas extends Region implements MouseListener {
 
         // Ugly hack to fix focus
         // https://forum.jogamp.org/NewtCanvasJFX-not-giving-up-focus-td4040705.html
-        window.addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowGainedFocus(WindowEvent e) {
-                        // when heavyweight window gains focus, also tell javafx to give focus to glCanvas
-                        canvas.requestFocus();
-                    }
-                });
+        canvasFocusListener = new CanvasFocusListener(canvas);
+        window.addWindowListener(canvasFocusListener);
 
         canvas
                 .focusedProperty()
@@ -63,14 +61,8 @@ public class MapCanvas extends Region implements MouseListener {
                         });
 
         // Resize window when region resizes
-        widthProperty()
-                .addListener(
-                        (observable, oldValue, newValue) ->
-                                window.setSize(Math.max(1, newValue.intValue()), window.getHeight()));
-        heightProperty()
-                .addListener(
-                        (observable, oldValue, newValue) ->
-                                window.setSize(window.getWidth(), Math.max(1, newValue.intValue())));
+        heightProperty().addListener(HEIGHT_LISTENER);
+        widthProperty().addListener(WIDTH_LISTENER);
 
         canvas.setWidth(getPrefWidth());
         canvas.setHeight(getPrefHeight());
