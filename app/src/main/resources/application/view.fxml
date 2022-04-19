@@ -37,7 +37,7 @@
                         <fx:define>
                             <ToggleGroup fx:id="groupRoute"/>
                         </fx:define>
-                        <RadioButton fx:id="radioButtonCar" text="Car" toggleGroup="$groupRoute"/>
+                        <RadioButton fx:id="radioButtonCar" text="Car" toggleGroup="$groupRoute" selected="true"/>
                         <RadioButton fx:id="radioButtonBikeOrWalk" text="Bike or walk" toggleGroup="$groupRoute"/>
                     </HBox>
                 </GridPane>
@@ -51,9 +51,9 @@
                 <GridPane alignment="center" hgap="10" vgap="10">
                     <Label text="Select what to show" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
                     <CheckBox fx:id="checkBoxBuildings" text="Buildings" GridPane.columnIndex="0"
-                              GridPane.rowIndex="1"/>
-                    <CheckBox fx:id="checkBoxHighways" text="Highways" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <CheckBox fx:id="checkBoxWater" text="Water" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                              GridPane.rowIndex="1" selected="true"/>
+                    <CheckBox fx:id="checkBoxHighways" text="Highways" GridPane.columnIndex="0" GridPane.rowIndex="2" selected="true"/>
+                    <CheckBox fx:id="checkBoxWater" text="Water" GridPane.columnIndex="0" GridPane.rowIndex="3" selected="true"/>
                     <Label text="Select mode" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
                     <fx:define>
                         <ToggleGroup fx:id="groupMode"/>
@@ -61,7 +61,7 @@
                     <RadioButton fx:id="radioButtonColorBlind" text="Colorblind mode" GridPane.columnIndex="0"
                                  GridPane.rowIndex="6" toggleGroup="$groupMode" onAction="#handleColorblind"/>
                     <RadioButton fx:id="radioButtonDefaultMode" text="Default mode" GridPane.columnIndex="0"
-                                 GridPane.rowIndex="7" toggleGroup="$groupMode" onAction="#handleDefaultMode"/>
+                                 GridPane.rowIndex="7" toggleGroup="$groupMode" onAction="#handleDefaultMode" selected="true"/>
                     <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0"
                                  GridPane.rowIndex="8" toggleGroup="$groupMode" onAction="#handlePartyMode"/>
                     <HBox fx:id="pointsOfInterestHeader" GridPane.columnIndex="0" GridPane.rowIndex="9">
@@ -77,6 +77,10 @@
         </right>
         <top>
             <MenuBar>
+                <Menu text="File">
+                    <MenuItem text="Open map file" onAction="#openMap"/>
+                    <MenuItem text="Create and open map file" onAction="#createMap"/>
+                </Menu>
                 <Menu text="Appearance">
                     <Menu fx:id="categories" text="Toggle categories"/>
                 </Menu>
