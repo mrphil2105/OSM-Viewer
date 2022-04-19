@@ -38,7 +38,9 @@ public class MapCanvas extends Region implements MouseListener {
 
     public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
 
-    public void init(Model model) {
+    public void setModel(Model model) {
+        dispose();
+
         // Boilerplate to let us use OpenGL from a JavaFX node hierarchy
         Platform.setImplicitExit(true);
         window = GLWindow.create(model.getCaps());
@@ -81,7 +83,17 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
     public void dispose() {
-        animator.stop();
+        if (window != null) {
+            window.removeMouseListener(this);
+
+            if (renderer != null) window.removeGLEventListener(renderer);
+            if (canvasFocusListener != null) window.removeWindowListener(canvasFocusListener);
+        }
+
+        if (animator != null) animator.stop();
+
+        heightProperty().removeListener(HEIGHT_LISTENER);
+        widthProperty().removeListener(WIDTH_LISTENER);
     }
 
     public Point canvasToMap(Point point) {

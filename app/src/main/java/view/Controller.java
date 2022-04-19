@@ -83,23 +83,9 @@ public class Controller {
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
     public void init(Model model) {
-        this.model = model;
+        setModel(model);
 
-        canvas.init(model.canvasModel);
-
-        searchTextField.init(model.getAddresses());
-
-        checkBoxBuildings.setSelected(true);
-        checkBoxHighways.setSelected(true);
-        checkBoxWater.setSelected(true);
-        radioButtonDefaultMode.setSelected(true);
-        radioButtonCar.setSelected(true);
         setStyleSheets("style.css");
-
-        nearestRoadLabel
-                .textProperty()
-                .bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
-        pointsOfInterestVBox.init(model.getPointsOfInterest());
 
         canvas.mapMouseClickedProperty.set(
                 e -> {
@@ -137,7 +123,7 @@ public class Controller {
                             () -> {
                                 var mousePoint = new Point(e.getX(), e.getY());
                                 var queryPoint = canvas.canvasToMap(mousePoint);
-                                model.setQueryPoint(queryPoint);
+                                this.model.setQueryPoint(queryPoint);
                             };
 
                     if (nearestRoadDelayItem.isSelected()) {
@@ -199,6 +185,20 @@ public class Controller {
                                             return m;
                                         })
                                 .toList());
+    }
+
+    private void setModel(Model model) {
+        this.model = model;
+
+        canvas.setModel(model.canvasModel);
+
+        searchTextField.init(model.getAddresses());
+
+        nearestRoadLabel
+                .textProperty()
+                .bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
+
+        pointsOfInterestVBox.init(model.getPointsOfInterest());
     }
 
     public void dispose() {
@@ -313,5 +313,12 @@ public class Controller {
         addPointOfInterestText.show(rightVBox, screenBounds.getMinX(), screenBounds.getMinY() + 230);
 
         pointOfInterestMode = true;
+    }
+
+    public void openMap(ActionEvent actionEvent) {
+
+    }
+
+    public void createMap(ActionEvent actionEvent) {
     }
 }
