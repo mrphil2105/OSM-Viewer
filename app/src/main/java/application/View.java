@@ -1,15 +1,15 @@
 package application;
 
-import canvas.Controller;
-import canvas.Model;
 import geometry.Point;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
+import view.Controller;
+import view.Model;
 
 public class View {
     public View(Model model, Stage stage) throws IOException {
-        var loader = new FXMLLoader(View.class.getResource("View.fxml"));
+        var loader = new FXMLLoader(View.class.getResource("view.fxml"));
 
         stage.setScene(loader.load());
         Controller controller = loader.getController();

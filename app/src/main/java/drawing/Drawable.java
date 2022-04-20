@@ -59,6 +59,9 @@ public enum Drawable {
     BOUNDS(Shape.POLYLINE, Color.rgb(255, 0, 150, 0.5), 5.0, Category.MISC),
     ADDRESS(Shape.FILL, Color.web("#D22B2B"), 0.4, Category.MISC),
     POI(Shape.FILL, Color.web("#6495ED"), 0.4, Category.MISC),
+    PARTITION_HORIZONTAL(Shape.POLYLINE, Color.BLUE, 1, Category.DEBUG),
+    PARTITION_VERTICAL(Shape.POLYLINE, Color.RED, 1, Category.DEBUG),
+    POINT(Shape.POLYLINE, Color.BLACK, 2, Category.DEBUG),
     UNKNOWN(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG),
     IGNORED(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG);
 
