@@ -4,13 +4,11 @@ import Search.AddressDatabase;
 import features.Feature;
 import geometry.Point;
 import geometry.Rect;
-
+import io.PolygonsReader;
+import io.ReadResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import io.PolygonsReader;
-import io.ReadResult;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import navigation.NearestNeighbor;

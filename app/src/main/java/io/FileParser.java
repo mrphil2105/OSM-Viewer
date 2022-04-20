@@ -1,14 +1,12 @@
 package io;
 
+import features.Feature;
+import features.FeatureSet;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipFile;
-
-import features.Feature;
-import features.FeatureSet;
 import javafx.util.Pair;
 import javax.xml.stream.XMLStreamException;
 import org.anarres.parallelgzip.ParallelGZIPInputStream;
@@ -26,7 +24,8 @@ public class FileParser implements IOConstants {
     private static final String FEATURES = "FEATURES";
     private static final String BOUNDS = "BOUNDS";
 
-    public static File createMapFromOsm(File infile, FeatureSet features, OSMObserver... observers) throws IOException, XMLStreamException {
+    public static File createMapFromOsm(File infile, FeatureSet features, OSMObserver... observers)
+            throws IOException, XMLStreamException {
         var reader = new OSMReader();
         var writers = new ArrayList<Pair<String, Writer>>();
 
@@ -45,7 +44,11 @@ public class FileParser implements IOConstants {
 
         reader.parse(getInputStream(infile));
 
-        var outfile = new File( infile.getPath().substring(0, infile.getPath().length() - infile.getName().length()) + infile.getName().split("\\.")[0] + EXT);
+        var outfile =
+                new File(
+                        infile.getPath().substring(0, infile.getPath().length() - infile.getName().length())
+                                + infile.getName().split("\\.")[0]
+                                + EXT);
         createMapFromWriters(outfile, writers);
 
         System.gc();
@@ -85,7 +88,8 @@ public class FileParser implements IOConstants {
         for (var feature : features) {
             readers.put(feature, feature.createReader(getEntryStream(feature.name(), tarFile)));
         }
-        return new ReadResult(readers, new ObjectReader<OSMBounds>(getEntryStream(BOUNDS, tarFile)).read());
+        return new ReadResult(
+                readers, new ObjectReader<OSMBounds>(getEntryStream(BOUNDS, tarFile)).read());
     }
 
     private static ObjectInputStream getEntryStream(String name, TarFile tarFile) throws IOException {

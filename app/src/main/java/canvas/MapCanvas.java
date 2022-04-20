@@ -26,9 +26,12 @@ public class MapCanvas extends Region implements MouseListener {
     private Point2D lastMouse;
     private CanvasFocusListener canvasFocusListener;
 
-    private final ChangeListener<Number> HEIGHT_LISTENER = (observable, oldValue, newValue) -> window.setSize(window.getWidth(), Math.max(1, newValue.intValue()));
-    private final ChangeListener<Number> WIDTH_LISTENER = (observable, oldValue, newValue) -> window.setSize(Math.max(1, newValue.intValue()), window.getHeight());
-
+    private final ChangeListener<Number> HEIGHT_LISTENER =
+            (observable, oldValue, newValue) ->
+                    window.setSize(window.getWidth(), Math.max(1, newValue.intValue()));
+    private final ChangeListener<Number> WIDTH_LISTENER =
+            (observable, oldValue, newValue) ->
+                    window.setSize(Math.max(1, newValue.intValue()), window.getHeight());
 
     // TODO: Add all if necessary
     public final ObjectProperty<EventHandler<MouseEvent>> mapMouseClickedProperty =

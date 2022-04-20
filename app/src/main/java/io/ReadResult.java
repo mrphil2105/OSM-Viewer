@@ -1,10 +1,7 @@
 package io;
 
 import features.Feature;
-
 import java.util.Map;
-import java.util.Set;
-
 import osm.elements.OSMBounds;
 
 /** Object to manage multiple readers read from a file */

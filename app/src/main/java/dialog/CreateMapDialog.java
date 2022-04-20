@@ -3,31 +3,21 @@ package dialog;
 import features.Feature;
 import features.FeatureSet;
 import io.FileParser;
+import java.io.File;
+import java.io.IOException;
+import java.util.EnumSet;
+import java.util.Set;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import osm.OSMObserver;
-import osm.ReaderStats;
-
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
+import osm.ReaderStats;
 
 public class CreateMapDialog extends Dialog {
     private Set<Feature> set;
@@ -52,10 +42,12 @@ public class CreateMapDialog extends Dialog {
         for (var e : set) {
             var cb = new CheckBox(e.toString());
             cb.setSelected(true);
-            cb.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue) this.set.add(e);
-                else this.set.remove(e);
-            });
+            cb.selectedProperty()
+                    .addListener(
+                            (observable, oldValue, newValue) -> {
+                                if (newValue) this.set.add(e);
+                                else this.set.remove(e);
+                            });
 
             checkboxes.getChildren().add(cb);
         }
@@ -72,7 +64,8 @@ public class CreateMapDialog extends Dialog {
         return diag.file;
     }
 
-    @FXML private void next(ActionEvent actionEvent) {
+    @FXML
+    private void next(ActionEvent actionEvent) {
         header.textProperty().set("Creating map...");
         checkboxes.setDisable(true);
         statsGrid.setVisible(true);
@@ -87,30 +80,36 @@ public class CreateMapDialog extends Dialog {
         relationTotal.textProperty().bind(Bindings.concat(stats.relationTotal));
         nodeThroughput.textProperty().bind(Bindings.concat(stats.nodeThroughput, " per second"));
         wayThroughput.textProperty().bind(Bindings.concat(stats.wayThroughput, " per second"));
-        relationThroughput.textProperty().bind(Bindings.concat(stats.relationThroughput, " per second"));
+        relationThroughput
+                .textProperty()
+                .bind(Bindings.concat(stats.relationThroughput, " per second"));
 
         var featureSet = new FeatureSet(set);
 
-        var thread = new Thread(() -> {
-            try {
-                file = FileParser.createMapFromOsm(file, featureSet, stats);
-                Platform.runLater(() -> {
-                    next.setDisable(false);
-                    cancel.setDisable(false);
-                    nodeThroughput.textProperty().set("0 per second");
-                    wayThroughput.textProperty().set("0 per second");
-                    relationThroughput.textProperty().set("0 per second");
-                });
-            } catch (IOException | XMLStreamException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        var thread =
+                new Thread(
+                        () -> {
+                            try {
+                                file = FileParser.createMapFromOsm(file, featureSet, stats);
+                                Platform.runLater(
+                                        () -> {
+                                            next.setDisable(false);
+                                            cancel.setDisable(false);
+                                            nodeThroughput.textProperty().set("0 per second");
+                                            wayThroughput.textProperty().set("0 per second");
+                                            relationThroughput.textProperty().set("0 per second");
+                                        });
+                            } catch (IOException | XMLStreamException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
 
         thread.setDaemon(true);
         thread.start();
     }
 
-    @FXML private void cancel(ActionEvent actionEvent) {
+    @FXML
+    private void cancel(ActionEvent actionEvent) {
         file = null;
         close();
     }

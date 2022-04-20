@@ -8,16 +8,13 @@ import drawing.Category;
 import drawing.Drawable;
 import drawing.Drawing;
 import features.Feature;
-import features.FeatureSet;
 import geometry.Point;
 import geometry.Vector2D;
-
+import io.FileParser;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import io.FileParser;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
@@ -146,7 +143,8 @@ public class Controller {
                             queryPointTimerTask.cancel();
                         }
 
-                        queryPointTimerTask = new TimerTask() {
+                        queryPointTimerTask =
+                                new TimerTask() {
                                     @Override
                                     public void run() {
                                         Platform.runLater(queryRunnable);
@@ -352,7 +350,8 @@ public class Controller {
     public void openMap(ActionEvent actionEvent) throws Exception {
         var diag = new FileChooser();
         diag.setTitle("Open map file");
-        diag.getExtensionFilters().add(new FileChooser.ExtensionFilter("Map file", "*" + FileParser.EXT));
+        diag.getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("Map file", "*" + FileParser.EXT));
         var file = diag.showOpenDialog(scene.getWindow());
 
         if (file == null) return;
@@ -364,7 +363,10 @@ public class Controller {
         var diag = new FileChooser();
         diag.setTitle("Open OSM data file");
         // *.zip is here because *.osm.zip doesn't work on Linux
-        diag.getExtensionFilters().add(new FileChooser.ExtensionFilter("OSM data file", "*.osm", " *.xml", " *.osm.zip", " *.xml.zip", "*.zip"));
+        diag.getExtensionFilters()
+                .add(
+                        new FileChooser.ExtensionFilter(
+                                "OSM data file", "*.osm", " *.xml", " *.osm.zip", " *.xml.zip", "*.zip"));
         var file = diag.showOpenDialog(scene.getWindow());
         if (file == null) return;
 
