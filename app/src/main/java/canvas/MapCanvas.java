@@ -69,8 +69,8 @@ public class MapCanvas extends Region implements MouseListener {
         heightProperty().addListener(HEIGHT_LISTENER);
         widthProperty().addListener(WIDTH_LISTENER);
 
-        canvas.setWidth(getPrefWidth());
-        canvas.setHeight(getPrefHeight());
+        canvas.setHeight(heightProperty().get() > 0.0 ? heightProperty().get() : getPrefHeight());
+        canvas.setWidth(widthProperty().get() > 0.0 ? widthProperty().get() : getPrefWidth());
 
         window.addMouseListener(this);
 
@@ -94,6 +94,12 @@ public class MapCanvas extends Region implements MouseListener {
         }
 
         if (animator != null) animator.stop();
+
+        if (getChildren().size() > 0) {
+            var newt = (NewtCanvasJFX) getChildren().get(0);
+            newt.destroy();
+            getChildren().remove(newt);
+        }
     }
 
     public Point canvasToMap(Point point) {
