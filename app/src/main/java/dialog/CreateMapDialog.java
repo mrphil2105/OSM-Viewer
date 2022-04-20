@@ -89,8 +89,7 @@ public class CreateMapDialog extends Dialog {
         wayThroughput.textProperty().bind(Bindings.concat(stats.wayThroughput, " per second"));
         relationThroughput.textProperty().bind(Bindings.concat(stats.relationThroughput, " per second"));
 
-        var featureSet = new FeatureSet();
-        featureSet.addAll(set);
+        var featureSet = new FeatureSet(set);
 
         var thread = new Thread(() -> {
             try {

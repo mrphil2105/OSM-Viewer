@@ -14,7 +14,7 @@ public class App extends Application {
 
         // TODO: Exchange below lines before we submit (examiner, if you're reading this, I'm sorry)
         // var model = new Model(FileParser.readMap(new File("data/bornholm.map")));
-        var model = new Model(FileParser.readMap(FileParser.createMapFromOsm(new File("data/bornholm.xml.zip"), new FeatureSet())));
+        var model = new Model(FileParser.readMap(FileParser.createMapFromOsm(new File("data/bornholm.xml.zip"), FeatureSet.ALL)));
 
         new View(model, primaryStage);
     }
