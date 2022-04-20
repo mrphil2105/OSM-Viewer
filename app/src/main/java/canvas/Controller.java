@@ -32,7 +32,6 @@ import pointsOfInterest.PointsOfInterestVBox;
 public class Controller implements MouseListener {
     public Menu categories;
     private Point2D lastMouse;
-    private ScaleBar scaleBar = new ScaleBar();
     private float currentScale;
     private float zoomLevel = 0;
     Model model;
@@ -144,14 +143,12 @@ public class Controller implements MouseListener {
     @FXML void handleZoomInButton(){
         canvas.zoomChange(true);
         updateZoom();
-        canvas.center(canvas.canvasToMap(new Point(1280/2, 720/2)));
         
     }
 
     @FXML void handleZoomOutButton(){
         canvas.zoomChange(false);
         updateZoom();
-        canvas.center(canvas.canvasToMap(new Point(1280/2, 720/2)));
     }
 
     @FXML
@@ -289,11 +286,7 @@ public class Controller implements MouseListener {
     }
 
     public void initScaleBar(){
-        currentScale = (float) (scaleBar.getScaleBarDistance(
-            model.bounds.getBottomLeft().x(), 
-            model.bounds.getBottomLeft().y(), 
-            model.bounds.getBottomRight().x(), 
-            model.bounds.getBottomRight().y()) * (100/canvas.getPrefWidth()));
+        currentScale = (float) (model.getScaleBarDistance() * (100/canvas.getPrefWidth()));
         handleScaleBar();
     }
 
@@ -314,7 +307,6 @@ public class Controller implements MouseListener {
     }
 
     public void center(Point point) {
-        System.out.println(point);
         canvas.center(point);
     }
     public void zoomOn(Point point) {
