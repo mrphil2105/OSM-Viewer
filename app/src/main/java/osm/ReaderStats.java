@@ -77,6 +77,9 @@ public class ReaderStats implements OSMObserver {
 
     @Override
     public void onFinish() {
+        prevNodeCount = curNodeCount;
+        prevWayCount = curWayCount;
+        prevRelationCount = curRelationCount;
         update();
     }
 }
