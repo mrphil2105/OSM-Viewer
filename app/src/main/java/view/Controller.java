@@ -3,14 +3,21 @@ package view;
 import Search.SearchTextField;
 import canvas.MapCanvas;
 import canvas.Renderer;
+import dialog.CreateMapDialog;
 import drawing.Category;
 import drawing.Drawable;
 import drawing.Drawing;
+import features.Feature;
+import features.FeatureSet;
 import geometry.Point;
 import geometry.Vector2D;
+
+import java.io.File;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import io.FileParser;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
@@ -19,8 +26,13 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
 import pointsOfInterest.PointsOfInterestVBox;
@@ -123,7 +135,9 @@ public class Controller {
                             () -> {
                                 var mousePoint = new Point(e.getX(), e.getY());
                                 var queryPoint = canvas.canvasToMap(mousePoint);
-                                this.model.setQueryPoint(queryPoint);
+                                if (this.model.supports(Feature.NEAREST_NEIGHBOR)) {
+                                    this.model.setQueryPoint(queryPoint);
+                                }
                             };
 
                     if (nearestRoadDelayItem.isSelected()) {
@@ -190,15 +204,35 @@ public class Controller {
     private void setModel(Model model) {
         this.model = model;
 
-        canvas.setModel(model.canvasModel);
+        if (model.supports(Feature.DRAWING)) {
+            canvas.setModel(model.canvasModel);
+            canvas.setVisible(true);
 
-        searchTextField.init(model.getAddresses());
+            pointsOfInterestVBox.init(model.getPointsOfInterest());
+            rightVBox.setDisable(false);
+            categories.setDisable(false);
+        } else {
+            canvas.dispose();
+            canvas.setVisible(false);
+            rightVBox.setDisable(true);
+            categories.setDisable(true);
+        }
 
-        nearestRoadLabel
-                .textProperty()
-                .bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
+        if (model.supports(Feature.ADDRESS_SEARCH)) {
+            searchTextField.init(model.getAddresses());
+            searchTextField.setDisable(false);
+        } else {
+            searchTextField.setDisable(true);
+        }
 
-        pointsOfInterestVBox.init(model.getPointsOfInterest());
+        if (model.supports(Feature.NEAREST_NEIGHBOR)) {
+            nearestRoadLabel
+                    .textProperty()
+                    .bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
+            nearestRoadLabel.setVisible(true);
+        } else {
+            nearestRoadLabel.setVisible(false);
+        }
     }
 
     public void dispose() {
@@ -315,10 +349,34 @@ public class Controller {
         pointOfInterestMode = true;
     }
 
-    public void openMap(ActionEvent actionEvent) {
+    public void openMap(ActionEvent actionEvent) throws Exception {
+        var diag = new FileChooser();
+        diag.setTitle("Open map file");
+        diag.getExtensionFilters().add(new FileChooser.ExtensionFilter("Map file", "*" + FileParser.EXT));
+        var file = diag.showOpenDialog(scene.getWindow());
 
+        if (file == null) return;
+
+        loadFile(file);
     }
 
-    public void createMap(ActionEvent actionEvent) {
+    public void createMap(ActionEvent actionEvent) throws Exception {
+        var diag = new FileChooser();
+        diag.setTitle("Open OSM data file");
+        // *.zip is here because *.osm.zip doesn't work on Linux
+        diag.getExtensionFilters().add(new FileChooser.ExtensionFilter("OSM data file", "*.osm", " *.xml", " *.osm.zip", " *.xml.zip", "*.zip"));
+        var file = diag.showOpenDialog(scene.getWindow());
+        if (file == null) return;
+
+        file = CreateMapDialog.showDialog(file);
+        if (file == null) return;
+
+        loadFile(file);
+    }
+
+    private void loadFile(File file) throws Exception {
+        try (var res = FileParser.readMap(file)) {
+            setModel(new Model(res));
+        }
     }
 }

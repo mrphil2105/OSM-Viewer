@@ -91,9 +91,6 @@ public class MapCanvas extends Region implements MouseListener {
         }
 
         if (animator != null) animator.stop();
-
-        heightProperty().removeListener(HEIGHT_LISTENER);
-        widthProperty().removeListener(WIDTH_LISTENER);
     }
 
     public Point canvasToMap(Point point) {
