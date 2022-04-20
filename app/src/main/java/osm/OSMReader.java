@@ -38,7 +38,7 @@ public class OSMReader {
     private boolean advanceAfter;
 
     public OSMReader() {
-        addObservers(nodes, ways, relations, new ReaderStats());
+        addObservers(nodes, ways, relations);
     }
 
     public void parse(InputStream stream) throws XMLStreamException {

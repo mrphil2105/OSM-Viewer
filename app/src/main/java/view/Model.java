@@ -1,11 +1,16 @@
 package view;
 
 import Search.AddressDatabase;
+import features.Feature;
 import geometry.Point;
 import geometry.Rect;
-import io.FileParser;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import io.PolygonsReader;
+import io.ReadResult;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import navigation.NearestNeighbor;
@@ -13,22 +18,37 @@ import pointsOfInterest.PointOfInterest;
 
 public class Model {
     public final Rect bounds;
-    private final AddressDatabase addresses;
+    private AddressDatabase addresses;
     private final List<PointOfInterest> pointsOfInterest;
-    private final NearestNeighbor nearestNeighbor;
+    private NearestNeighbor nearestNeighbor;
     private final StringProperty nearestRoad = new SimpleStringProperty("none");
+    private final Set<Feature> features;
 
-    public final canvas.Model canvasModel;
+    public canvas.Model canvasModel;
 
-    public Model(String filename) throws Exception {
-        try (var result = FileParser.readFile(filename)) {
-            bounds = result.bounds().read().getRect();
-            canvasModel = new canvas.Model(result.polygons());
-            nearestNeighbor = result.nearestNeighbor().read();
-            addresses = result.addresses().read();
-            addresses.buildTries();
+    public Model(ReadResult result) {
+        bounds = result.bounds().getRect();
+
+        features = result.readers().keySet();
+
+        for (var entry : result.readers().entrySet()) {
+            switch (entry.getKey()) {
+                case DRAWING -> canvasModel = new canvas.Model((PolygonsReader) entry.getValue());
+                case NEAREST_NEIGHBOR -> nearestNeighbor = (NearestNeighbor) entry.getValue().read();
+                case PATHFINDING -> {}
+                case ADDRESS_SEARCH -> {
+                    addresses = (AddressDatabase) entry.getValue().read();
+                    // FIXME: Why are the tries not built at the .map file creation step?
+                    addresses.buildTries();
+                }
+            }
         }
+
         pointsOfInterest = new ArrayList<>();
+    }
+
+    public boolean supports(Feature feature) {
+        return features.contains(feature);
     }
 
     public StringProperty nearestRoadProperty() {
