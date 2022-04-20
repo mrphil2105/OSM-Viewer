@@ -49,6 +49,10 @@ public class Model {
         return features.contains(feature);
     }
 
+    public void dispose() {
+        if (canvasModel != null) canvasModel.dispose();
+    }
+
     public StringProperty nearestRoadProperty() {
         return nearestRoad;
     }
