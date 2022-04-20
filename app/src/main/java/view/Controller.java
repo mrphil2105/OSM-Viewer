@@ -199,6 +199,8 @@ public class Controller {
     }
 
     private void setModel(Model model) {
+        if (this.model != null) this.model.dispose();
+
         this.model = model;
 
         if (model.supports(Feature.DRAWING)) {
@@ -233,6 +235,7 @@ public class Controller {
     }
 
     public void dispose() {
+        model.dispose();
         canvas.dispose();
         queryPointTimer.cancel();
     }
