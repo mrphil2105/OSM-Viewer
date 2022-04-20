@@ -22,6 +22,7 @@ public class MapCanvas extends Region implements MouseListener {
     final Affine transform = new Affine();
     private Animator animator;
     private GLWindow window;
+    private Model model;
     private Renderer renderer;
     private Point2D lastMouse;
     private CanvasFocusListener canvasFocusListener;
@@ -43,6 +44,8 @@ public class MapCanvas extends Region implements MouseListener {
 
     public void setModel(Model model) {
         dispose();
+
+        this.model = model;
 
         // Boilerplate to let us use OpenGL from a JavaFX node hierarchy
         Platform.setImplicitExit(true);
@@ -100,6 +103,8 @@ public class MapCanvas extends Region implements MouseListener {
             newt.destroy();
             getChildren().remove(newt);
         }
+
+        if (model != null) model.dispose();
     }
 
     public Point canvasToMap(Point point) {
