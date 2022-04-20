@@ -1,27 +1,11 @@
 package canvas;
 
-import Search.AddressDatabase;
 import com.jogamp.opengl.*;
 import drawing.Drawable;
-import geometry.Point;
-import geometry.Rect;
-import io.FileParser;
 import io.PolygonsReader;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import navigation.Dijkstra;
-import navigation.EdgeRole;
-import pointsOfInterest.PointOfInterest;
-
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.geometry.Point2D;
-import navigation.NearestNeighbor;
 
 public class Model {
 
@@ -29,18 +13,9 @@ public class Model {
     private final GLAutoDrawable sharedDrawable;
     private VBOWrapper[] vbo;
     private final IntBuffer tex = IntBuffer.allocate(TexType.values().length);
-    public final Rect bounds;
     private int indexCount;
-    AddressDatabase addresses;
-    private List<PointOfInterest> pointsOfInterest;
 
-    private final NearestNeighbor nearestNeighbor;
-    private final StringProperty nearestRoad = new SimpleStringProperty("none");
-
-    private final Dijkstra dijkstra;
-    private final ObservableList<Point> routePoints = FXCollections.observableArrayList();
-
-    public Model(String filename) throws Exception {
+    public Model(PolygonsReader reader) {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
         // 8x anti-aliasing
         caps.setSampleBuffers(true);
@@ -52,15 +27,7 @@ public class Model {
                         .createDummyAutoDrawable(null, true, caps, null);
         sharedDrawable.display();
 
-        try (var result = FileParser.readFile(filename)) {
-            bounds = result.bounds().read().getRect();
-            loadPolygons(result.polygons());
-            nearestNeighbor = result.nearestNeighbor().read();
-            dijkstra = result.dijkstra().read();
-            addresses = result.addresses().read();
-            addresses.buildTries();
-        }
-        pointsOfInterest=new ArrayList<>();
+        loadPolygons(reader);
     }
 
     private void loadPolygons(PolygonsReader reader) {
@@ -176,44 +143,6 @@ public class Model {
         return indexCount;
     }
 
-    public StringProperty nearestRoadProperty() {
-        return nearestRoad;
-    }
-
-    public String getNearestRoad() {
-        return nearestRoad.get();
-    }
-
-    public Point getNearestPoint(Point query) {
-        return nearestNeighbor.nearestTo(query);
-    }
-
-    public void setQueryPoint(Point query) {
-        var road = nearestNeighbor.nearestRoad(query);
-        nearestRoadProperty().set(road);
-    }
-
-    public ObservableList<Point> getRoutePoints() {
-        return routePoints;
-    }
-
-    public void calculateBestRoute(Point from, Point to) {
-        // TODO: Allow user to set edge role.
-        var shortestPath = dijkstra.shortestPath(from, to, EdgeRole.CAR);
-
-        if (shortestPath == null) {
-            routePoints.clear();
-            System.out.println("No path between " + from + " and " + to + ".");
-
-            return;
-        }
-
-        var routePoints = shortestPath.stream()
-            .map(Point::geoToMap)
-            .toList();
-        this.routePoints.setAll(routePoints);
-    }
-
     enum VBOType {
         INDEX,
         VERTEX,
@@ -223,13 +152,5 @@ public class Model {
     enum TexType {
         COLOR_MAP,
         MAP,
-    }
-
-    public AddressDatabase getAddresses() {
-        return addresses;
-    }
-
-    public List<PointOfInterest> getPointsOfInterest() {
-        return pointsOfInterest;
     }
 }
