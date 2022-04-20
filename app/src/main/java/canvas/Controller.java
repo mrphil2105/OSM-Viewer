@@ -216,6 +216,7 @@ public class Controller implements MouseListener {
         if (mouseEvent.getButton() == MouseEvent.BUTTON2) {
             var point = new Point(mouseEvent.getX(), mouseEvent.getY());
             point = canvas.canvasToMap(point);
+            point = Point.mapToGeo(point);
             point = model.getNearestPoint(point);
 
             if (fromPoint == null) {
@@ -274,6 +275,7 @@ public class Controller implements MouseListener {
         Runnable queryRunnable = () -> {
             var mousePoint = new Point(mouseEvent.getX(), mouseEvent.getY());
             var queryPoint = canvas.canvasToMap(mousePoint);
+            queryPoint = Point.mapToGeo(queryPoint);
             model.setQueryPoint(queryPoint);
         };
 
