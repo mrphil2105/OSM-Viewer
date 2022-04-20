@@ -101,18 +101,19 @@ public class Controller implements MouseListener {
 
         model.getRoutePoints().addListener((ListChangeListener<? super Point>)listener-> {
             while (listener.next()) {
-                if (!listener.wasAdded()) {
-                    continue;
-                }
-
-                var renderer = canvas.getRenderer();
-                if (routeDrawing != null) renderer.clear(routeDrawing);
-
-                var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
-                routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
-
-                renderer.draw(routeDrawing);
             }
+
+            if (!listener.wasAdded()) {
+                return;
+            }
+
+            var renderer = canvas.getRenderer();
+            if (routeDrawing != null) renderer.clear(routeDrawing);
+
+            var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
+            routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
+
+            renderer.draw(routeDrawing);
         });
 
         nearestRoadLabel.textProperty().bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
