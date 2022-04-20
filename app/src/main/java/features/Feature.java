@@ -2,28 +2,21 @@ package features;
 
 import Search.AddressDatabase;
 import io.*;
+import java.io.ObjectInputStream;
+import java.util.function.Function;
 import navigation.Dijkstra;
 import navigation.NearestNeighbor;
 
-import java.io.ObjectInputStream;
-import java.util.function.Function;
-
 public enum Feature {
     DRAWING("Visuals", PolygonsReader::new),
-    NEAREST_NEIGHBOR(
-            "Nearest Neighbor",
-            ObjectReader<NearestNeighbor>::new),
+    NEAREST_NEIGHBOR("Nearest Neighbor", ObjectReader<NearestNeighbor>::new),
     PATHFINDING("Pathfinding", ObjectReader<Dijkstra>::new),
-    ADDRESS_SEARCH(
-            "Address Search",
-            ObjectReader<AddressDatabase>::new);
+    ADDRESS_SEARCH("Address Search", ObjectReader<AddressDatabase>::new);
 
     private final String displayName;
     private final Function<ObjectInputStream, Reader> reader;
 
-    Feature(
-            String displayName,
-            Function<ObjectInputStream, Reader> reader) {
+    Feature(String displayName, Function<ObjectInputStream, Reader> reader) {
         this.displayName = displayName;
         this.reader = reader;
     }

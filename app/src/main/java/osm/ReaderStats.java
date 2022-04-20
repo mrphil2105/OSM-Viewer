@@ -21,7 +21,7 @@ public class ReaderStats implements OSMObserver {
     public final LongProperty relationTotal = new SimpleLongProperty();
     public final LongProperty nodeThroughput = new SimpleLongProperty();
     public final LongProperty wayThroughput = new SimpleLongProperty();
-    public final LongProperty relationThroughput  = new SimpleLongProperty();
+    public final LongProperty relationThroughput = new SimpleLongProperty();
 
     private final long updateInterval;
     private long lastUpdate = System.nanoTime();
@@ -42,14 +42,15 @@ public class ReaderStats implements OSMObserver {
         long wayTP = curWayCount - prevWayCount;
         long relationTP = curRelationCount - prevRelationCount;
 
-        Platform.runLater(() -> {
-            nodeTotal.set(curNodeCount);
-            wayTotal.set(curWayCount);
-            relationTotal.set(curRelationCount);
-            nodeThroughput.set(nodeTP);
-            wayThroughput.set(wayTP);
-            relationThroughput.set(relationTP);
-        });
+        Platform.runLater(
+                () -> {
+                    nodeTotal.set(curNodeCount);
+                    wayTotal.set(curWayCount);
+                    relationTotal.set(curRelationCount);
+                    nodeThroughput.set(nodeTP);
+                    wayThroughput.set(wayTP);
+                    relationThroughput.set(relationTP);
+                });
 
         prevNodeCount = curNodeCount;
         prevWayCount = curWayCount;
