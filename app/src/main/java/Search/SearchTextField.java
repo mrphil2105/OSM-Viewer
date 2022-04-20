@@ -2,12 +2,19 @@ package Search;
 
 import canvas.Model;
 import java.util.List;
+
+import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.TextField;
 
 public class SearchTextField extends TextField {
     AutofillContextMenu popupEntries;
+    Address currentSearch;
     AddressDatabase addressDatabase;
+
+    public AddressDatabase getAddressDatabase(){ //TODO: FJERN
+        return addressDatabase;
+    }
 
     public void init(Model model) {
         var addressDatabase = model.getAddresses();
@@ -31,36 +38,34 @@ public class SearchTextField extends TextField {
         }
     }
 
-    public static void handleSearchChange(SearchTextField textField) {
-        if (textField.getText().length() == 0) {
-            textField.showHistory();
+    public void showMenuItems(ObservableList<Address> itemsToShow){
+        if (getText().length() == 0) {
+            showHistory();
         } else {
-            textField.popupEntries.hide();
-            List<Address> results;
+            popupEntries.hide();
 
-            var searchedAddress = textField.parseAddress();
-            if (searchedAddress == null) return;
+            boolean showStreet = (currentSearch.street() != null);
+            boolean showHouse = (currentSearch.houseNumber() != null);
+            boolean showCity = (currentSearch.city() != null);
+            boolean showPostcode = (currentSearch.postcode() != null);
+            if (currentSearch.street() != null) showCity = true;
 
-            results = textField.addressDatabase.possibleAddresses(searchedAddress, 5);
+            popupEntries.getItems().clear();
 
-            boolean showStreet = (searchedAddress.street() != null);
-            boolean showHouse = (searchedAddress.houseNumber() != null);
-            boolean showCity = (searchedAddress.city() != null);
-            boolean showPostcode = (searchedAddress.postcode() != null);
-            if (searchedAddress.street() != null) showCity = true;
-
-            textField.popupEntries.getItems().clear();
-
-            for (Address a : results) {
+            for (Address a : itemsToShow) {
                 if (a == null) continue;
                 var item = new AddressMenuItem(a, showStreet, showHouse, showCity, showPostcode);
-                item.setOnAction(textField.popupEntries::onMenuClick);
-                textField.popupEntries.getItems().add(item);
+                item.setOnAction(popupEntries::onMenuClick);
+                popupEntries.getItems().add(item);
             }
-            if (!textField.popupEntries.isShowing()) {
-                textField.popupEntries.show(textField, Side.BOTTOM, 0, 0);
+            if (!popupEntries.isShowing()) {
+                popupEntries.show(this, Side.BOTTOM, 0, 0);
             }
         }
+    }
+
+    public void setCurrentSearch(Address currentSearch) {
+        this.currentSearch = currentSearch;
     }
 
     private String reformat(String string) {
@@ -81,13 +86,13 @@ public class SearchTextField extends TextField {
         return stringBuilder.toString().trim();
     }
 
-    private Address parseAddress() {
+    public Address parseAddress() {
         var searchedAddressBuilder = AddressDatabase.parse(getText());
 
         if (searchedAddressBuilder == null) {
             return null;
         }
-        ;
+
         searchedAddressBuilder.street(reformat(searchedAddressBuilder.getStreet()));
         searchedAddressBuilder.city(reformat(searchedAddressBuilder.getCity()));
 
