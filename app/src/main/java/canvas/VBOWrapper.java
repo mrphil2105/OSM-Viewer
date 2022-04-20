@@ -55,7 +55,7 @@ public class VBOWrapper {
     }
 
     public void dispose() {
-        gl.glDeleteBuffers(1, new int[] { vbo }, 0);
+        gl.glDeleteBuffers(1, new int[] {vbo}, 0);
     }
 
     // private void grow(long newSize) {
