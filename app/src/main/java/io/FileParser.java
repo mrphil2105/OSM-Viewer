@@ -16,6 +16,7 @@ import org.anarres.parallelgzip.ParallelGZIPOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarFile;
 import org.apache.commons.compress.utils.IOUtils;
+import osm.OSMObserver;
 import osm.OSMReader;
 import osm.elements.OSMBounds;
 
@@ -25,7 +26,7 @@ public class FileParser implements IOConstants {
     private static final String FEATURES = "FEATURES";
     private static final String BOUNDS = "BOUNDS";
 
-    public static File createMapFromOsm(File infile, FeatureSet features) throws IOException, XMLStreamException {
+    public static File createMapFromOsm(File infile, FeatureSet features, OSMObserver... observers) throws IOException, XMLStreamException {
         var reader = new OSMReader();
         var writers = new ArrayList<Pair<String, Writer>>();
 
@@ -39,6 +40,8 @@ public class FileParser implements IOConstants {
         for (var writer : writers) {
             reader.addObservers(writer.getValue());
         }
+
+        reader.addObservers(observers);
 
         reader.parse(getInputStream(infile));
 
