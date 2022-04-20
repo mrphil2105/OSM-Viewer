@@ -198,8 +198,6 @@ public class Model {
     }
 
     public void calculateBestRoute(Point from, Point to) {
-        from = Point.mapToGeo(from);
-        to = Point.mapToGeo(to);
         // TODO: Allow user to set edge role.
         var shortestPath = dijkstra.shortestPath(from, to, EdgeRole.CAR);
 

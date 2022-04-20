@@ -20,11 +20,10 @@ public class NearestNeighbor implements OSMObserver, Serializable {
 
     @Override
     public void onBounds(Rect bounds) {
-        // Top and bottom are swapped here to be in accordance with the map.
-        twoDTree = new TwoDTree<>((float)Point.geoToMapX(bounds.left()),
-            (float)Point.geoToMapY(bounds.bottom()),
-            (float)Point.geoToMapX(bounds.right()),
-            (float)Point.geoToMapY(bounds.top()));
+        twoDTree = new TwoDTree<>(bounds.left(),
+            bounds.top(),
+            bounds.right(),
+            bounds.bottom());
     }
 
     @Override
@@ -44,7 +43,7 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         }
 
         for (var node : way.nodes()) {
-            var point = new Point((float)Point.geoToMapX(node.lon()), (float)Point.geoToMapY(node.lat()));
+            var point = new Point((float)node.lon(), (float)node.lat());
             var pair = new Pair<>(point, name);
             nodeCache.add(pair);
         }
