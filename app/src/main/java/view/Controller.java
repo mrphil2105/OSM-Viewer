@@ -39,7 +39,8 @@ import pointsOfInterest.PointsOfInterestVBox;
 
 public class Controller {
     private Model model;
-    private Timer queryPointTimer;
+    private final Timer queryPointTimer = new Timer();
+    private TimerTask queryPointTimerTask;
     private boolean pointOfInterestMode = false;
     private Tooltip addPointOfInterestText;
     private Drawing lastDrawnAddress;
@@ -141,19 +142,17 @@ public class Controller {
                             };
 
                     if (nearestRoadDelayItem.isSelected()) {
-                        if (queryPointTimer != null) {
-                            queryPointTimer.cancel();
+                        if (queryPointTimerTask != null) {
+                            queryPointTimerTask.cancel();
                         }
 
-                        queryPointTimer = new Timer();
-                        queryPointTimer.schedule(
-                                new TimerTask() {
+                        queryPointTimerTask = new TimerTask() {
                                     @Override
                                     public void run() {
                                         Platform.runLater(queryRunnable);
                                     }
-                                },
-                                50);
+                                };
+                        queryPointTimer.schedule(queryPointTimerTask, 50);
                     } else {
                         queryRunnable.run();
                     }
@@ -237,6 +236,7 @@ public class Controller {
 
     public void dispose() {
         canvas.dispose();
+        queryPointTimer.cancel();
     }
 
     @FXML
