@@ -25,8 +25,7 @@ public class Model {
     public final Rect bounds;
     private int indexCount;
     private final AddressDatabase addresses;
-    private final ObservableList<Address> results = FXCollections.observableArrayList();
-    private final ObservableList<Address> suggestions = FXCollections.observableArrayList();
+    private final ObservableList<Address> searchSuggestions = FXCollections.observableArrayList();
     private List<PointOfInterest> PointsOfInterest;
 
     public Model(String filename) throws Exception {
@@ -198,12 +197,11 @@ public class Model {
         return addresses;
     }
 
-    public ObservableList<Address> getObservableResults() {
-        return results;
+    public ObservableList<Address> getObservableSearchSuggestions() {
+        return searchSuggestions;
     }
-
-    public ObservableList<Address> getObservableSuggestions() {
-        return suggestions;
+    public void setSearchSuggestions(List<Address> suggestions){
+        this.searchSuggestions.setAll(suggestions);
     }
 
     public List<PointOfInterest> getPointsOfInterest() {

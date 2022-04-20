@@ -8,6 +8,7 @@ import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -70,20 +71,21 @@ public class Controller implements MouseListener {
         canvas.init(model);
         canvas.addMouseListener(this);
         searchTextField.init(model);
+        /*
         model
-                .getObservableResults()
+                .getObservableSearchResults()
                 .addListener(
                         (ListChangeListener<Address>)
                                 c -> {
-                                    // TODO
-
+                                    //TODO: Jfdlksjflsdjf
                                 });
+         */
         model
-                .getObservableSuggestions()
+                .getObservableSearchSuggestions()
                 .addListener(
                         (ListChangeListener<Address>)
                                 c -> {
-                                    // TODO
+                                    searchTextField.showMenuItems((ObservableList<Address>) c.getList());
                                 });
         checkBoxBuildings.setSelected(true);
         checkBoxHighways.setSelected(true);
@@ -133,18 +135,25 @@ public class Controller implements MouseListener {
 
     @FXML
     public void handleKeyTyped(KeyEvent event) {
-        SearchTextField.handleSearchChange((SearchTextField) event.getSource());
+        var textField = (SearchTextField) event.getSource();
+        var searchedAddress = textField.parseAddress();
+        if (searchedAddress == null) return;
+        textField.setCurrentSearch(searchedAddress);
+
+        var result = textField.getAddressDatabase().possibleAddresses(searchedAddress, 5);
+        model.setSearchSuggestions(result);
     }
 
     @FXML
-    public void handleSearchClick() {
+    public void handleSearchClick(ActionEvent event) {
+        var textField = (SearchTextField) event.getSource();
         Address address;
-        var results = searchTextField.handleSearch();
+        var results = textField.handleSearch();
 
         if (results.size() == 1) {
             address = results.get(0);
         } else {
-            // TODO: give user ability to clarify which address they mean
+            // TODO: give users ability to clarify which address they mean
             return;
         }
 
@@ -152,7 +161,7 @@ public class Controller implements MouseListener {
         Point point =
                 Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
         zoomOn(point);
-        searchTextField.clear();
+        textField.clear();
     }
 
     @FXML
