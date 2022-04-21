@@ -3,6 +3,7 @@ package view;
 import Search.SearchTextField;
 import canvas.MapCanvas;
 import canvas.Renderer;
+import canvas.ZoomHandler;
 import dialog.CreateMapDialog;
 import drawing.Category;
 import drawing.Drawable;
@@ -29,6 +30,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
@@ -86,11 +88,19 @@ public class Controller {
 
     @FXML private VBox rightVBox;
 
+    @FXML private VBox middleVBox;
+
     @FXML private Label nearestRoadLabel;
 
     @FXML private CheckMenuItem nearestRoadDelayItem;
 
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
+
+    @FXML private Label scaleBarText;
+
+    @FXML private Rectangle scaleBarRectangle;
+
+    @FXML private Label zoomLevelText;
 
     public void init(Model model) {
         setModel(model);
@@ -164,7 +174,13 @@ public class Controller {
                                 e.getY() + screenBounds.getMinY() - 30);
                     }
                 });
-
+        canvas.mapMouseWheelProperty.set(
+            e -> {
+                setZoomAndScale();
+            }
+        );
+        canvas.setZoomHandler(new canvas.ZoomHandler(model.bounds, canvas));
+        setZoomAndScale();
         // FIXME: yuck
         categories
                 .getItems()
@@ -297,6 +313,8 @@ public class Controller {
         leftVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
         rightVBox.getStylesheets().clear();
         rightVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
+        middleVBox.getStylesheets().clear();
+        middleVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
     }
 
     public void center(Point point) {
@@ -380,5 +398,20 @@ public class Controller {
         try (var res = FileParser.readMap(file)) {
             setModel(new Model(res));
         }
+    }   
+
+    @FXML void handleZoomOutButton(){
+        canvas.zoomChange(false);
+        setZoomAndScale();
     }
+    @FXML void handleZoomInButton(){
+        canvas.zoomChange(true);
+        setZoomAndScale();
+    }
+
+    private void setZoomAndScale(){
+        zoomLevelText.setText(canvas.updateZoom());
+        scaleBarText.setText(canvas.updateScalebar());
+    }
+
 }
