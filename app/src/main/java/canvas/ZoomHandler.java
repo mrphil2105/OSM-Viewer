@@ -44,6 +44,10 @@ public class ZoomHandler {
         zoomLevelText = Float.toString((float) (Math.round(zoomToPercentage*10.0)/10.0)) + "%";
         return zoomLevelText;
     }
+
+    public float getMaxZoom(){
+        return 720/max;
+    }
         
    public String getScaleString(){
         var newScale = (float) (currentScale *  (1/canvas.getZoom()));
