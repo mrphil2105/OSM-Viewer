@@ -3,7 +3,6 @@ package view;
 import Search.SearchTextField;
 import canvas.MapCanvas;
 import canvas.Renderer;
-import canvas.ZoomHandler;
 import dialog.CreateMapDialog;
 import drawing.Category;
 import drawing.Drawable;
@@ -179,7 +178,7 @@ public class Controller {
                 setZoomAndScale();
             }
         );
-        canvas.setZoomHandler(new canvas.ZoomHandler(model.bounds, canvas));
+        canvas.setZoomHandler(model.bounds);
         setZoomAndScale();
         // FIXME: yuck
         categories
