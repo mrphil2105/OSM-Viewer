@@ -7,7 +7,6 @@ public class ZoomHandler {
     private Rect bounds;
     private float startZoom;
     private float startZoomPercentage;
-    private float zoomLevel;
     private MapCanvas canvas;
     private float currentScale;
     private final float R = 6371; //Earth radius in km
@@ -35,14 +34,14 @@ public class ZoomHandler {
             }
             first = false;
         }
-        float testZoom;
+        float zoom;
         if (isX){
-            testZoom = ((canvas.canvasToMap(new Point(1280, 0)).x() - canvas.canvasToMap(new Point(0, 0)).x())/max);
+            zoom = (Point.mapToGeo(canvas.canvasToMap(new Point(1280, 0))).x() - canvas.canvasToMap(new Point(0, 0)).x())/max;
         }else {
-            testZoom = ((canvas.canvasToMap(new Point(0, 720)).y() - canvas.canvasToMap(new Point(0, 0)).y())/max);
+            zoom = ((canvas.canvasToMap(new Point(0, 720)).y() - canvas.canvasToMap(new Point(0, 0)).y())/max);
         }
-        float testIgen = ((1/testZoom)-1)*100;
-        zoomLevelText = Float.toString((float) (Math.round(testIgen*10.0)/10.0)) + "%";
+        float zoomToPercentage = ((1/zoom)-1)*100;
+        zoomLevelText = Float.toString((float) (Math.round(zoomToPercentage*10.0)/10.0)) + "%";
         return zoomLevelText;
     }
         
