@@ -111,30 +111,8 @@ public class Controller {
     @FXML private Label zoomLevelText;
 
     public void init(Model model) {
-        searchTextField.init(model);
-        toRouteTextField.init(model);
-        fromRouteTextField.init(model);
-        model
-                .getObservableSearchSuggestions()
-                .addListener(
-                        (ListChangeListener<Address>)
-                                c -> {
-                                    searchTextField.showMenuItems((ObservableList<Address>) c.getList());
-                                });
-        model
-                .getObservableToSuggestions()
-                .addListener(
-                        (ListChangeListener<Address>)
-                                c -> {
-                                    toRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
-                                });
-        model
-                .getObservableFromSuggestions()
-                .addListener(
-                        (ListChangeListener<Address>)
-                                c -> {
-                                    fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
-                                });
+
+
         setModel(model);
 
         setStyleSheets("style.css");
@@ -301,6 +279,38 @@ public class Controller {
         if (model.supports(Feature.ADDRESS_SEARCH)) {
             searchTextField.init(model);
             searchTextField.setDisable(false);
+            model
+                    .getObservableSearchSuggestions()
+                    .addListener(
+                            (ListChangeListener<Address>)
+                                    c -> {
+                                        searchTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                    });
+
+        } else {
+            searchTextField.setDisable(true);
+        }
+
+
+        if (model.supports(Feature.PATHFINDING)) {
+            toRouteTextField.init(model);
+            fromRouteTextField.init(model);
+            toRouteTextField.setDisable(false);
+            fromRouteTextField.setDisable(false);
+            model
+                    .getObservableToSuggestions()
+                    .addListener(
+                            (ListChangeListener<Address>)
+                                    c -> {
+                                        toRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                    });
+            model
+                    .getObservableFromSuggestions()
+                    .addListener(
+                            (ListChangeListener<Address>)
+                                    c -> {
+                                        fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                    });
         } else {
             searchTextField.setDisable(true);
         }
