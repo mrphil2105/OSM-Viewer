@@ -36,11 +36,11 @@ public class ZoomHandler {
         }
         float zoom;
         if (isX){
-            zoom = (Point.mapToGeo(canvas.canvasToMap(new Point(1280, 0))).x() - canvas.canvasToMap(new Point(0, 0)).x())/max;
+            zoom = max/(canvas.canvasToMap(new Point(1280, 0)).x() - canvas.canvasToMap(new Point(0, 0)).x());
         }else {
-            zoom = ((canvas.canvasToMap(new Point(0, 720)).y() - canvas.canvasToMap(new Point(0, 0)).y())/max);
+            zoom = max/(canvas.canvasToMap(new Point(0, 720)).y() - canvas.canvasToMap(new Point(0, 0)).y());
         }
-        float zoomToPercentage = ((1/zoom)-1)*100;
+        float zoomToPercentage = (zoom-1)*100;
         zoomLevelText = Float.toString((float) (Math.round(zoomToPercentage*10.0)/10.0)) + "%";
         return zoomLevelText;
     }
@@ -63,7 +63,7 @@ public class ZoomHandler {
             return 1;
         }
     } 
-    public float getScaleBarDistance(){
+    private float getScaleBarDistance(){
         float lon1 = bounds.getBottomLeft().x();
         float lat1 = bounds.getBottomLeft().y();
         float lon2 = bounds.getBottomRight().x();

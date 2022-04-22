@@ -172,7 +172,6 @@ public class MapCanvas extends Region implements MouseListener {
             }
         }   
         transform.prependTranslation(point.x(), point.y());  
-        
     }
 
     public float getZoom(){
