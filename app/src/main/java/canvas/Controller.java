@@ -7,6 +7,8 @@ import com.jogamp.newt.event.MouseListener;
 import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
+import java.util.List;
+
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -71,15 +73,8 @@ public class Controller implements MouseListener {
         canvas.init(model);
         canvas.addMouseListener(this);
         searchTextField.init(model);
-        /*
-        model
-                .getObservableSearchResults()
-                .addListener(
-                        (ListChangeListener<Address>)
-                                c -> {
-                                    //TODO: Jfdlksjflsdjf
-                                });
-         */
+        toRouteTextField.init(model);
+        fromRouteTextField.init(model);
         model
                 .getObservableSearchSuggestions()
                 .addListener(
@@ -87,6 +82,18 @@ public class Controller implements MouseListener {
                                 c -> {
                                     searchTextField.showMenuItems((ObservableList<Address>) c.getList());
                                 });
+        model.getObservableToSuggestions().addListener(
+                (ListChangeListener<Address>)
+                    c -> {
+                        toRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                    }
+        );
+        model.getObservableFromSuggestions().addListener(
+                (ListChangeListener<Address>)
+                        c -> {
+                            fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                        }
+        );
         checkBoxBuildings.setSelected(true);
         checkBoxHighways.setSelected(true);
         checkBoxWater.setSelected(true);
@@ -133,15 +140,29 @@ public class Controller implements MouseListener {
         canvas.dispose();
     }
 
+    public void handleFromKeyTyped(KeyEvent event){
+        var result = handleKeyTyped(event);
+        if(result == null) return;
+        model.setFromSuggestions(result);
+    }
+    public void handleToKeyTyped(KeyEvent event){
+        var result = handleKeyTyped(event);
+        if(result == null) return;
+        model.setToSuggestions(result);
+    }
+    public void handleSearchKeyTyped(KeyEvent event){
+        var result = handleKeyTyped(event);
+        if(result == null) return;
+        model.setSearchSuggestions(result);
+    }
     @FXML
-    public void handleKeyTyped(KeyEvent event) {
+    public List<Address> handleKeyTyped(KeyEvent event) {
         var textField = (SearchTextField) event.getSource();
         var searchedAddress = textField.parseAddress();
-        if (searchedAddress == null) return;
+        if (searchedAddress == null) return null;
         textField.setCurrentSearch(searchedAddress);
 
-        var result = textField.getAddressDatabase().possibleAddresses(searchedAddress, 5);
-        model.setSearchSuggestions(result);
+        return model.getAddresses().possibleAddresses(searchedAddress, 5);
     }
 
     @FXML
