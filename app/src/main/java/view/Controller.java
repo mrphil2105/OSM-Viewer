@@ -52,7 +52,7 @@ public class Controller {
 
     @FXML private HBox pointsOfInterestHeader;
 
-    @FXML private Menu categories;
+    @FXML private VBox categories;
 
     @FXML private SearchTextField searchTextField;
 
@@ -167,13 +167,12 @@ public class Controller {
 
         // FIXME: yuck
         categories
-                .getItems()
+                .getChildren()
                 .addAll(
                         Arrays.stream(Category.values())
                                 .map(
                                         c -> {
                                             var cb = new CheckBox(c.toString());
-                                            cb.setStyle("-fx-text-fill: #222222");
                                             cb.selectedProperty().set(canvas.categories.isSet(c));
 
                                             canvas.categories.addObserver(
@@ -190,10 +189,7 @@ public class Controller {
                                                                 else canvas.categories.unset(c);
                                                             }));
 
-                                            var m = new CustomMenuItem(cb);
-                                            m.setHideOnClick(false);
-
-                                            return m;
+                                            return cb;
                                         })
                                 .toList());
     }
@@ -209,12 +205,10 @@ public class Controller {
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
-            categories.setDisable(false);
         } else {
             canvas.dispose();
             canvas.setVisible(false);
             rightVBox.setDisable(true);
-            categories.setDisable(true);
         }
 
         if (model.supports(Feature.ADDRESS_SEARCH)) {
