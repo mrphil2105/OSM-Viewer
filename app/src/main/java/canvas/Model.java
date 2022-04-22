@@ -202,22 +202,26 @@ public class Model {
     public ObservableList<Address> getObservableSearchSuggestions() {
         return searchSuggestions;
     }
-    public void setSearchSuggestions(List<Address> suggestions){
+
+    public void setSearchSuggestions(List<Address> suggestions) {
         this.searchSuggestions.setAll(suggestions);
     }
+
     public ObservableList<Address> getObservableToSuggestions() {
         return toSuggestions;
     }
-    public void setToSuggestions(List<Address> suggestions){
+
+    public void setToSuggestions(List<Address> suggestions) {
         this.toSuggestions.setAll(suggestions);
     }
+
     public ObservableList<Address> getObservableFromSuggestions() {
         return fromSuggestions;
     }
-    public void setFromSuggestions(List<Address> suggestions){
+
+    public void setFromSuggestions(List<Address> suggestions) {
         this.fromSuggestions.setAll(suggestions);
     }
-
 
     public List<PointOfInterest> getPointsOfInterest() {
         return PointsOfInterest;

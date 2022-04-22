@@ -8,7 +8,6 @@ import drawing.Category;
 import geometry.Point;
 import java.util.Arrays;
 import java.util.List;
-
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -17,7 +16,6 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -82,18 +80,20 @@ public class Controller implements MouseListener {
                                 c -> {
                                     searchTextField.showMenuItems((ObservableList<Address>) c.getList());
                                 });
-        model.getObservableToSuggestions().addListener(
-                (ListChangeListener<Address>)
-                    c -> {
-                        toRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
-                    }
-        );
-        model.getObservableFromSuggestions().addListener(
-                (ListChangeListener<Address>)
-                        c -> {
-                            fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
-                        }
-        );
+        model
+                .getObservableToSuggestions()
+                .addListener(
+                        (ListChangeListener<Address>)
+                                c -> {
+                                    toRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                });
+        model
+                .getObservableFromSuggestions()
+                .addListener(
+                        (ListChangeListener<Address>)
+                                c -> {
+                                    fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                });
         checkBoxBuildings.setSelected(true);
         checkBoxHighways.setSelected(true);
         checkBoxWater.setSelected(true);
@@ -140,21 +140,24 @@ public class Controller implements MouseListener {
         canvas.dispose();
     }
 
-    public void handleFromKeyTyped(KeyEvent event){
+    public void handleFromKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
-        if(result == null) return;
+        if (result == null) return;
         model.setFromSuggestions(result);
     }
-    public void handleToKeyTyped(KeyEvent event){
+
+    public void handleToKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
-        if(result == null) return;
+        if (result == null) return;
         model.setToSuggestions(result);
     }
-    public void handleSearchKeyTyped(KeyEvent event){
+
+    public void handleSearchKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
-        if(result == null) return;
+        if (result == null) return;
         model.setSearchSuggestions(result);
     }
+
     @FXML
     public List<Address> handleKeyTyped(KeyEvent event) {
         var textField = (SearchTextField) event.getSource();
