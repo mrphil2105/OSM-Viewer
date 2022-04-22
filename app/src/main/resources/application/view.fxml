@@ -5,6 +5,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.shape.Rectangle?>
 <?import pointsOfInterest.PointsOfInterestVBox?>
 <?import Search.SearchTextField?>
 <?import canvas.MapCanvas?>
@@ -66,9 +71,7 @@
                         <Button text="+" fx:id="addPointOfInterest" onAction="#enterPointOfInterestMode"/>
 
                     </HBox>
-
                     <PointsOfInterestVBox id="allVBox" fx:id="pointsOfInterestVBox" GridPane.rowIndex="10"/>
-
                 </GridPane>
             </VBox>
         </right>
@@ -81,7 +84,33 @@
             </MenuBar>
         </top>
         <center>
-            <MapCanvas fx:id="canvas" prefWidth="1280" prefHeight="720"/>
+            <VBox id="allVBox" fx:id="middleVBox">
+                <MapCanvas fx:id="canvas" prefWidth="1280" prefHeight="720" />
+                <HBox alignment="center" fx:id="middleHBox">
+                    <padding>
+                    <Insets left="20" right="10" />
+                    </padding>
+                    <VBox alignment="top_center">
+                        <HBox>
+                            <Rectangle id="scaleBarRectangle1" fx:id="scaleBarRectangle1" height="10.0" width="25"/> 
+                            <Rectangle id="scaleBarRectangle2" fx:id="scaleBarRectangle2" height="10.0" width="25"/> 
+                            <Rectangle id="scaleBarRectangle1" fx:id="scaleBarRectangle3" height="10.0" width="25"/> 
+                            <Rectangle id="scaleBarRectangle2" fx:id="scaleBarRectangle4" height="10.0" width="25"/> 
+                        </HBox>
+                        <Label id="rectangleLabel" fx:id="scaleBarText" text="1 km"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <HBox alignment="center_right" spacing="5">
+                        <padding>
+                            <Insets top="20" bottom="20" left="10" right="10"/>
+                        </padding>
+                        
+                        <Button fx:id="zoomDecreaseButton" text="-" onAction="#handleZoomOutButton"/>
+                        <Label fx:id="zoomLevelText" alignment="center" />
+                        <Button fx:id="zoomIncreaseButton" text="+" onAction="#handleZoomInButton"/>
+                    </HBox>
+                </HBox>
+            </VBox>
         </center>
         <bottom>
             <HBox>

@@ -8,7 +8,11 @@ import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
 import drawing.Category;
+import drawing.Drawable;
+import drawing.Drawing;
 import geometry.Point;
+import geometry.Rect;
+import geometry.Vector2D;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -17,6 +21,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
+import javafx.scene.transform.Scale;
 
 public class MapCanvas extends Region implements MouseListener {
     final Affine transform = new Affine();
@@ -24,8 +29,10 @@ public class MapCanvas extends Region implements MouseListener {
     private GLWindow window;
     private Model model;
     private Renderer renderer;
+    private float startZoom;
     private Point2D lastMouse;
     private CanvasFocusListener canvasFocusListener;
+    private ZoomHandler zoomHandler;
 
     private final ChangeListener<Number> HEIGHT_LISTENER =
             (observable, oldValue, newValue) ->
@@ -38,6 +45,8 @@ public class MapCanvas extends Region implements MouseListener {
     public final ObjectProperty<EventHandler<MouseEvent>> mapMouseClickedProperty =
             new SimpleObjectProperty<>();
     public final ObjectProperty<EventHandler<MouseEvent>> mapMouseMovedProperty =
+            new SimpleObjectProperty<>();
+    public final ObjectProperty<EventHandler<MouseEvent>> mapMouseWheelProperty =
             new SimpleObjectProperty<>();
 
     public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
@@ -82,6 +91,8 @@ public class MapCanvas extends Region implements MouseListener {
         window.addGLEventListener(renderer);
         animator = new Animator(window);
         animator.start();
+
+
     }
 
     public void setShader(Renderer.Shader shader) {
@@ -145,6 +156,43 @@ public class MapCanvas extends Region implements MouseListener {
         transform.setMyy(zoom);
     }
 
+    public void zoomChange(boolean positive){
+        Point point = new Point(1280/2, 720/2);
+        transform.prependTranslation(-point.x(), -point.y());
+        Scale scale = new Scale(1.2, 1.2);
+        if (positive){
+            transform.prepend(scale);
+        } else {
+            try{
+                transform.prepend(scale.createInverse());
+            }
+            catch (NonInvertibleTransformException e){
+                e.printStackTrace();
+                return;
+            }
+        }   
+        transform.prependTranslation(point.x(), point.y());  
+        
+    }
+
+    public float getZoom(){
+        return (float) (transform.getMxx() / startZoom);
+    }
+
+    public void setZoomHandler(Rect bounds){
+        this.zoomHandler = new ZoomHandler(bounds, this);
+        startZoom = zoomHandler.getStartZoom();
+        setZoom(startZoom);
+    }
+
+    public String updateZoom(){
+        return zoomHandler.getZoomString();
+    }
+
+    public String updateScalebar(){
+        return zoomHandler.getScaleString();
+    }
+
     public void giveFocus() {
         if (window.isVisible()) {
             window.setVisible(false);
@@ -201,6 +249,8 @@ public class MapCanvas extends Region implements MouseListener {
                     mouseEvent.getX(),
                     mouseEvent.getY());
         }
+        handle(mapMouseWheelProperty, mouseEvent);
+        
     }
 
     private <T> void handle(ObjectProperty<EventHandler<T>> prop, T event) {
