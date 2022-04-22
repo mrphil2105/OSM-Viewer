@@ -95,6 +95,7 @@ public class CreateMapDialog extends Dialog {
                                         () -> {
                                             next.setDisable(false);
                                             cancel.setDisable(false);
+                                            header.textProperty().set(file.getName() + " created");
                                         });
                             } catch (IOException | XMLStreamException e) {
                                 throw new RuntimeException(e);
