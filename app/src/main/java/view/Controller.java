@@ -3,6 +3,7 @@ package view;
 import Search.SearchTextField;
 import canvas.MapCanvas;
 import canvas.Renderer;
+import com.jogamp.newt.event.MouseEvent;
 import dialog.CreateMapDialog;
 import drawing.Category;
 import drawing.Drawable;
@@ -17,6 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
@@ -39,6 +41,8 @@ public class Controller {
     private Model model;
     private final Timer queryPointTimer = new Timer();
     private TimerTask queryPointTimerTask;
+    private Point fromPoint, toPoint;
+    private Drawing routeDrawing;
     private boolean pointOfInterestMode = false;
     private Tooltip addPointOfInterestText;
     private Drawing lastDrawnAddress;
@@ -53,7 +57,7 @@ public class Controller {
 
     @FXML private HBox pointsOfInterestHeader;
 
-    @FXML private Menu categories;
+    @FXML private VBox categories;
 
     @FXML private SearchTextField searchTextField;
 
@@ -106,8 +110,46 @@ public class Controller {
 
         setStyleSheets("style.css");
 
+        model.getRoutePoints().addListener((ListChangeListener<? super Point>)listener-> {
+            while (listener.next()) {
+            }
+
+            if (!listener.wasAdded()) {
+                return;
+            }
+
+            var renderer = canvas.getRenderer();
+            if (routeDrawing != null) renderer.clear(routeDrawing);
+
+            var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
+            routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
+
+            renderer.draw(routeDrawing);
+        });
+
         canvas.mapMouseClickedProperty.set(
                 e -> {
+                    if (e.getButton() == MouseEvent.BUTTON2) {
+                        var point = new Point(e.getX(), e.getY());
+                        point = canvas.canvasToMap(point);
+                        point = Point.mapToGeo(point);
+                        point = model.getNearestPoint(point);
+
+                        if (fromPoint == null) {
+                            fromPoint = point;
+                        }
+                        else if (toPoint == null) {
+                            toPoint = point;
+                            model.calculateBestRoute(fromPoint, toPoint);
+                        }
+                        else {
+                            fromPoint = point;
+                            toPoint = null;
+                        }
+
+                        return;
+                    }
+
                     if (pointOfInterestMode) {
                         Point point = canvas.canvasToMap(new Point((float) e.getX(), (float) e.getY()));
                         var cm = new ContextMenu();
@@ -142,6 +184,7 @@ public class Controller {
                             () -> {
                                 var mousePoint = new Point(e.getX(), e.getY());
                                 var queryPoint = canvas.canvasToMap(mousePoint);
+                                queryPoint = Point.mapToGeo(queryPoint);
                                 if (this.model.supports(Feature.NEAREST_NEIGHBOR)) {
                                     this.model.setQueryPoint(queryPoint);
                                 }
@@ -182,13 +225,12 @@ public class Controller {
         setZoomAndScale();
         // FIXME: yuck
         categories
-                .getItems()
+                .getChildren()
                 .addAll(
                         Arrays.stream(Category.values())
                                 .map(
                                         c -> {
                                             var cb = new CheckBox(c.toString());
-                                            cb.setStyle("-fx-text-fill: #222222");
                                             cb.selectedProperty().set(canvas.categories.isSet(c));
 
                                             canvas.categories.addObserver(
@@ -205,15 +247,14 @@ public class Controller {
                                                                 else canvas.categories.unset(c);
                                                             }));
 
-                                            var m = new CustomMenuItem(cb);
-                                            m.setHideOnClick(false);
-
-                                            return m;
+                                            return cb;
                                         })
                                 .toList());
     }
 
     private void setModel(Model model) {
+        if (this.model != null) this.model.dispose();
+
         this.model = model;
 
         if (model.supports(Feature.DRAWING)) {
@@ -222,12 +263,10 @@ public class Controller {
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
-            categories.setDisable(false);
         } else {
             canvas.dispose();
             canvas.setVisible(false);
             rightVBox.setDisable(true);
-            categories.setDisable(true);
         }
 
         if (model.supports(Feature.ADDRESS_SEARCH)) {
@@ -248,6 +287,7 @@ public class Controller {
     }
 
     public void dispose() {
+        model.dispose();
         canvas.dispose();
         queryPointTimer.cancel();
     }

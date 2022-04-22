@@ -95,9 +95,7 @@ public class CreateMapDialog extends Dialog {
                                         () -> {
                                             next.setDisable(false);
                                             cancel.setDisable(false);
-                                            nodeThroughput.textProperty().set("0 per second");
-                                            wayThroughput.textProperty().set("0 per second");
-                                            relationThroughput.textProperty().set("0 per second");
+                                            header.textProperty().set(file.getName() + " created");
                                         });
                             } catch (IOException | XMLStreamException e) {
                                 throw new RuntimeException(e);

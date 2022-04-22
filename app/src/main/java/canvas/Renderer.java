@@ -196,6 +196,9 @@ public class Renderer implements GLEventListener {
         for (var shaderProgram : shaderPrograms) {
             shaderProgram.dispose(gl);
         }
+        indexVBO.dispose();
+        vertexVBO.dispose();
+        drawableVBO.dispose();
     }
 
     @Override

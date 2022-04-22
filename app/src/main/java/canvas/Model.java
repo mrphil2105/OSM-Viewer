@@ -14,6 +14,9 @@ public class Model {
     private VBOWrapper[] vbo;
     private final IntBuffer tex = IntBuffer.allocate(TexType.values().length);
     private int indexCount;
+    private VBOWrapper indexVBO;
+    private VBOWrapper vertexVBO;
+    private VBOWrapper drawableVBO;
 
     public Model(PolygonsReader reader) {
         caps = new GLCapabilities(GLProfile.getMaxFixedFunc(true));
@@ -42,12 +45,12 @@ public class Model {
                     var drawableCount = reader.getDrawableCount();
 
                     // Pre-allocate buffers with correct size
-                    var indexVBO =
+                    indexVBO =
                             new VBOWrapper(
                                     glAutoDrawable, GL3.GL_ELEMENT_ARRAY_BUFFER, (long) indexCount * Integer.BYTES);
-                    var vertexVBO =
+                    vertexVBO =
                             new VBOWrapper(glAutoDrawable, GL3.GL_ARRAY_BUFFER, (long) vertexCount * Float.BYTES);
-                    var drawableVBO =
+                    drawableVBO =
                             new VBOWrapper(
                                     glAutoDrawable, GL3.GL_ARRAY_BUFFER, (long) drawableCount * Byte.BYTES);
                     vbo = new VBOWrapper[] {indexVBO, vertexVBO, drawableVBO};
@@ -141,6 +144,15 @@ public class Model {
      */
     public int getCount() {
         return indexCount;
+    }
+
+    public void dispose() {
+        for (int i = 0; i < sharedDrawable.getGLEventListenerCount(); i++) {
+            sharedDrawable.disposeGLEventListener(sharedDrawable.getGLEventListener(i), false);
+        }
+        indexVBO.dispose();
+        vertexVBO.dispose();
+        drawableVBO.dispose();
     }
 
     enum VBOType {
