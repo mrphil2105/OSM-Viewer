@@ -11,6 +11,7 @@ import drawing.Category;
 import drawing.Drawable;
 import drawing.Drawing;
 import geometry.Point;
+import geometry.Rect;
 import geometry.Vector2D;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -150,8 +151,6 @@ public class MapCanvas extends Region implements MouseListener {
         Scale scale = new Scale(1.2, 1.2);
         if (positive){
             transform.prepend(scale);
-            //transform.setMxx(transform.getMxx() + (0.1 * startZoom));
-            //transform.setMyy(transform.getMyy() + (0.1 * startZoom));
         } else {
             try{
                 transform.prepend(scale.createInverse());
@@ -169,8 +168,8 @@ public class MapCanvas extends Region implements MouseListener {
         return (float) (transform.getMxx() / startZoom);
     }
 
-    public void setZoomHandler(ZoomHandler zoomHandler){
-        this.zoomHandler = zoomHandler;
+    public void setZoomHandler(Rect bounds){
+        this.zoomHandler = new ZoomHandler(bounds, this);
         startZoom = zoomHandler.getStartZoom();
         setZoom(startZoom);
     }
