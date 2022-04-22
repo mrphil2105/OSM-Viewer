@@ -46,7 +46,11 @@ public class ZoomHandler {
     }
 
     public float getMaxZoom(){
-        return 720/max;
+        if (isX){
+            return 1280/max;
+        } else {
+            return 720/max;
+        }
     }
         
    public String getScaleString(){
