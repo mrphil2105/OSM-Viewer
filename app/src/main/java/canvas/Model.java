@@ -26,6 +26,8 @@ public class Model {
     private int indexCount;
     private final AddressDatabase addresses;
     private final ObservableList<Address> searchSuggestions = FXCollections.observableArrayList();
+    private final ObservableList<Address> toSuggestions = FXCollections.observableArrayList();
+    private final ObservableList<Address> fromSuggestions = FXCollections.observableArrayList();
     private List<PointOfInterest> PointsOfInterest;
 
     public Model(String filename) throws Exception {
@@ -203,6 +205,19 @@ public class Model {
     public void setSearchSuggestions(List<Address> suggestions){
         this.searchSuggestions.setAll(suggestions);
     }
+    public ObservableList<Address> getObservableToSuggestions() {
+        return toSuggestions;
+    }
+    public void setToSuggestions(List<Address> suggestions){
+        this.toSuggestions.setAll(suggestions);
+    }
+    public ObservableList<Address> getObservableFromSuggestions() {
+        return fromSuggestions;
+    }
+    public void setFromSuggestions(List<Address> suggestions){
+        this.fromSuggestions.setAll(suggestions);
+    }
+
 
     public List<PointOfInterest> getPointsOfInterest() {
         return PointsOfInterest;
