@@ -20,20 +20,17 @@ public class ZoomHandler {
         currentScale = (float) (getScaleBarDistance() * (100/canvas.getPrefWidth()));
         startZoom = (float) (1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x()));
         startZoomPercentage = (float) ((720/(Point.geoToMap(bounds.getTopLeft()).y()- Point.geoToMap(bounds.getBottomRight()).y()))/startZoom);
+
+        if (Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x() < Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y()){
+            max = Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y();
+            isX = false;
+        }else {
+            max = Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x();
+            isX = true;
+        } 
     }
-    private boolean first = true;
     private boolean isX = true;
     public String getZoomString(){
-        if (first){
-            if (Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x() < Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y()){
-                max = Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y();
-                isX = false;
-            }else {
-                max = Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x();
-                isX = true;
-            }
-            first = false;
-        }
         float zoom;
         if (isX){
             zoom = max/(canvas.canvasToMap(new Point(1280, 0)).x() - canvas.canvasToMap(new Point(0, 0)).x());
@@ -64,13 +61,17 @@ public class ZoomHandler {
    }
 
 
-    public float getStartZoom(){
-        if (startZoomPercentage < 1) {
-            return startZoomPercentage;
-        } else {
-            return 1;
+   public float getStartZoom(){
+        if (isX){
+            startZoomPercentage = (float) (1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x()))/
+                                    (720/(Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y()));
+        }else{
+            startZoomPercentage = (float) ((720/(Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y()))/
+                                            (1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x())));
         }
+        return startZoomPercentage;
     } 
+
     private float getScaleBarDistance(){
         float lon1 = bounds.getBottomLeft().x();
         float lat1 = bounds.getBottomLeft().y();
