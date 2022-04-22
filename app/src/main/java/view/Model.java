@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Set;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import navigation.Dijkstra;
+import navigation.EdgeRole;
 import navigation.NearestNeighbor;
 import pointsOfInterest.PointOfInterest;
 
@@ -20,6 +24,8 @@ public class Model {
     private final List<PointOfInterest> pointsOfInterest;
     private NearestNeighbor nearestNeighbor;
     private final StringProperty nearestRoad = new SimpleStringProperty("none");
+    private Dijkstra dijkstra;
+    private final ObservableList<Point> routePoints = FXCollections.observableArrayList();
     private final Set<Feature> features;
 
     public canvas.Model canvasModel;
@@ -33,7 +39,7 @@ public class Model {
             switch (entry.getKey()) {
                 case DRAWING -> canvasModel = new canvas.Model((PolygonsReader) entry.getValue());
                 case NEAREST_NEIGHBOR -> nearestNeighbor = (NearestNeighbor) entry.getValue().read();
-                case PATHFINDING -> {}
+                case PATHFINDING -> dijkstra = (Dijkstra) entry.getValue().read();
                 case ADDRESS_SEARCH -> {
                     addresses = (AddressDatabase) entry.getValue().read();
                     // FIXME: Why are the tries not built at the .map file creation step?
@@ -61,9 +67,34 @@ public class Model {
         return nearestRoad.get();
     }
 
+    public Point getNearestPoint(Point query) {
+        return nearestNeighbor.nearestTo(query);
+    }
+
     public void setQueryPoint(Point query) {
-        var road = nearestNeighbor.nearestTo(query);
+        var road = nearestNeighbor.nearestRoad(query);
         nearestRoadProperty().set(road);
+    }
+
+    public ObservableList<Point> getRoutePoints() {
+        return routePoints;
+    }
+
+    public void calculateBestRoute(Point from, Point to) {
+        // TODO: Allow user to set edge role.
+        var shortestPath = dijkstra.shortestPath(from, to, EdgeRole.CAR);
+
+        if (shortestPath == null) {
+            routePoints.clear();
+            System.out.println("No path between " + from + " and " + to + ".");
+
+            return;
+        }
+
+        var routePoints = shortestPath.stream()
+            .map(Point::geoToMap)
+            .toList();
+        this.routePoints.setAll(routePoints);
     }
 
     public AddressDatabase getAddresses() {
