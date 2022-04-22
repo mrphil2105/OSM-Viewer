@@ -52,7 +52,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
     public void addAddress(AddressBuilder a) {
         addToTrie(streetTrieBuilder, a.getStreet(), a);
-        if (a.getPostcode() != null) {
+        if (a.getCity() != null) {
             addToTrie(cityTrieBuilder, a.getCity(), a);
         }
         if (a.getPostcode() != null) {

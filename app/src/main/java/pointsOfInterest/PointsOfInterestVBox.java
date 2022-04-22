@@ -1,5 +1,6 @@
 package pointsOfInterest;
 
+import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
@@ -12,16 +13,29 @@ public class PointsOfInterestVBox extends VBox {
         pointsOfInterest = points;
     }
 
-    public void update() {
-        for (PointOfInterest point : pointsOfInterest) {
-            if (!contains(point)) {
+
+    public void update(){
+        removeDeletedPoints();
+        addNewPointsOfInterest();
+    }
+
+    private void addNewPointsOfInterest(){
+        for (PointOfInterest point : pointsOfInterest){
+            if (!contains(point)){
                 addPointOfInterest(point);
             }
         }
-        for (Node n : getChildren()) {
-            if (!pointsOfInterest.contains(((PointsOfInterestHBox) n).getPointOfInterest())) {
-                removePointOfInterest(((PointsOfInterestHBox) n).getPointOfInterest());
+    }
+
+    private void removeDeletedPoints(){
+        var toToBeRemoved = new ArrayList<PointsOfInterestHBox>();
+        for (Node n :getChildren()){
+            if (!pointsOfInterest.contains(((PointsOfInterestHBox)n).getPointOfInterest())){
+                toToBeRemoved.add((PointsOfInterestHBox)n);
             }
+        }
+        for (PointsOfInterestHBox point : toToBeRemoved){
+            removePointOfInterest(point.getPointOfInterest());
         }
     }
 

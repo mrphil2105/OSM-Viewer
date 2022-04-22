@@ -1,6 +1,6 @@
 package Search;
 
-import canvas.Model;
+import view.Model;
 import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;

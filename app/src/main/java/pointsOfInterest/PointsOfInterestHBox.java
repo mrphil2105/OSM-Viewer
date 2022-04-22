@@ -28,8 +28,7 @@ public class PointsOfInterestHBox extends HBox {
         remove.setPrefSize(buttonWidth, 10);
         find.setFont(new Font(buttonFontSize));
         remove.setFont(new Font(buttonFontSize));
-        remove.setStyle("-fx-background-color: #db6e60; ");
-
+        remove.setId("removeButton");
         getChildren().add(text);
         getChildren().add(find);
         getChildren().add(remove);
