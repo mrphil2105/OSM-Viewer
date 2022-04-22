@@ -50,10 +50,7 @@
                 </padding>
                 <GridPane alignment="center" hgap="10" vgap="10">
                     <Label text="Select what to show" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <CheckBox fx:id="checkBoxBuildings" text="Buildings" GridPane.columnIndex="0"
-                              GridPane.rowIndex="1" selected="true"/>
-                    <CheckBox fx:id="checkBoxHighways" text="Highways" GridPane.columnIndex="0" GridPane.rowIndex="2" selected="true"/>
-                    <CheckBox fx:id="checkBoxWater" text="Water" GridPane.columnIndex="0" GridPane.rowIndex="3" selected="true"/>
+                    <VBox fx:id="categories" spacing="8.0" GridPane.rowIndex="1"/>
                     <Label text="Select mode" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
                     <fx:define>
                         <ToggleGroup fx:id="groupMode"/>
@@ -80,9 +77,6 @@
                 <Menu text="File">
                     <MenuItem text="Open map file" onAction="#openMap"/>
                     <MenuItem text="Create and open map file" onAction="#createMap"/>
-                </Menu>
-                <Menu text="Appearance">
-                    <Menu fx:id="categories" text="Toggle categories"/>
                 </Menu>
             </MenuBar>
         </top>
