@@ -1,5 +1,6 @@
 package view;
 
+import Search.Address;
 import Search.AddressDatabase;
 import features.Feature;
 import geometry.Point;
@@ -29,6 +30,10 @@ public class Model {
     private final Set<Feature> features;
 
     public canvas.Model canvasModel;
+
+    private final ObservableList<Address> searchSuggestions = FXCollections.observableArrayList();
+    private final ObservableList<Address> toSuggestions = FXCollections.observableArrayList();
+    private final ObservableList<Address> fromSuggestions = FXCollections.observableArrayList();
 
     public Model(ReadResult result) {
         bounds = result.bounds().getRect();
@@ -104,4 +109,29 @@ public class Model {
     public List<PointOfInterest> getPointsOfInterest() {
         return pointsOfInterest;
     }
+
+    public ObservableList<Address> getObservableSearchSuggestions() {
+        return searchSuggestions;
+    }
+
+    public void setSearchSuggestions(List<Address> suggestions) {
+        this.searchSuggestions.setAll(suggestions);
+    }
+
+    public ObservableList<Address> getObservableToSuggestions() {
+        return toSuggestions;
+    }
+
+    public void setToSuggestions(List<Address> suggestions) {
+        this.toSuggestions.setAll(suggestions);
+    }
+
+    public ObservableList<Address> getObservableFromSuggestions() {
+        return fromSuggestions;
+    }
+
+    public void setFromSuggestions(List<Address> suggestions) {
+        this.fromSuggestions.setAll(suggestions);
+    }
+
 }

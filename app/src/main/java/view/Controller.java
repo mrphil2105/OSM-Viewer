@@ -1,5 +1,6 @@
 package view;
 
+import Search.Address;
 import Search.SearchTextField;
 import canvas.MapCanvas;
 import canvas.Renderer;
@@ -14,11 +15,13 @@ import geometry.Vector2D;
 import io.FileParser;
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
@@ -29,10 +32,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
+import navigation.EdgeRole;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
 import pointsOfInterest.PointsOfInterestVBox;
@@ -61,9 +66,9 @@ public class Controller {
 
     @FXML private SearchTextField searchTextField;
 
-    @FXML private TextField fromRouteTextField;
+    @FXML private SearchTextField fromRouteTextField;
 
-    @FXML private TextField toRouteTextField;
+    @FXML private SearchTextField toRouteTextField;
 
     @FXML private Button routeButton;
 
@@ -106,6 +111,30 @@ public class Controller {
     @FXML private Label zoomLevelText;
 
     public void init(Model model) {
+        searchTextField.init(model);
+        toRouteTextField.init(model);
+        fromRouteTextField.init(model);
+        model
+                .getObservableSearchSuggestions()
+                .addListener(
+                        (ListChangeListener<Address>)
+                                c -> {
+                                    searchTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                });
+        model
+                .getObservableToSuggestions()
+                .addListener(
+                        (ListChangeListener<Address>)
+                                c -> {
+                                    toRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                });
+        model
+                .getObservableFromSuggestions()
+                .addListener(
+                        (ListChangeListener<Address>)
+                                c -> {
+                                    fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                });
         setModel(model);
 
         setStyleSheets("style.css");
@@ -270,7 +299,7 @@ public class Controller {
         }
 
         if (model.supports(Feature.ADDRESS_SEARCH)) {
-            searchTextField.init(model.getAddresses());
+            searchTextField.init(model);
             searchTextField.setDisable(false);
         } else {
             searchTextField.setDisable(true);
@@ -293,14 +322,16 @@ public class Controller {
     }
 
     @FXML
-    public void handleKeyTyped() {
-        searchTextField.handleSearchChange();
-    }
-
-    @FXML
     public void handleSearchClick() {
-        var address = searchTextField.handleSearch();
-        if (address == null) return; // TODO: handle exception and show message?
+        var result = searchTextField.handleSearch();
+        if (result == null) return; // TODO: handle exception and show message?
+        if(result.size() > 1){
+           //TODO: popup message
+        } else if(result.size() < 1){
+
+        }
+        var address = result.get(0);
+
         Point point =
                 Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
         zoomOn(point);
@@ -310,7 +341,10 @@ public class Controller {
             canvas.getRenderer().clear(lastDrawnAddress);
         }
         lastDrawnAddress = drawing;
+
+        searchTextField.clear(); //TODO: find ud af om den skal bruges
     }
+
 
     @FXML
     public void handleInFocus() {
@@ -319,8 +353,13 @@ public class Controller {
 
     @FXML
     public void handleRouteClick() {
-        fromRouteTextField.clear();
-        toRouteTextField.clear();
+
+        if(fromRouteTextField.handleSearch()==null || toRouteTextField.handleSearch()==null){
+            return;
+        }
+        routeBetweenAddresses(fromRouteTextField.handleSearch().get(0),toRouteTextField.handleSearch().get(0),EdgeRole.CAR);
+
+
     }
 
     @FXML
@@ -448,9 +487,53 @@ public class Controller {
         setZoomAndScale();
     }
 
+
+    @FXML
+    public void handleFromKeyTyped(KeyEvent event) {
+        var result = handleKeyTyped(event);
+        if (result == null) return;
+        model.setFromSuggestions(result);
+    }
+
+    @FXML
+    public void handleToKeyTyped(KeyEvent event) {
+        var result = handleKeyTyped(event);
+        if (result == null) return;
+        model.setToSuggestions(result);
+    }
+
+    @FXML
+    public void handleSearchKeyTyped(KeyEvent event) {
+        var result = handleKeyTyped(event);
+        if (result == null) return;
+        model.setSearchSuggestions(result);
+    }
+
+    public List<Address> handleKeyTyped(KeyEvent event) {
+        var textField = (SearchTextField) event.getSource();
+        var searchedAddress = textField.parseAddress();
+        if (searchedAddress == null) return null;
+        textField.setCurrentSearch(searchedAddress);
+
+        return model.getAddresses().possibleAddresses(searchedAddress, 5);
+    }
+
+    private void routeBetweenAddresses(Address addressFrom, Address addressTo, EdgeRole mode){
+        Point from = new Point((float)addressFrom.node().lon(),(float)addressFrom.node().lat());
+        Point to = new Point((float)addressTo.node().lon(),(float)addressTo.node().lat());
+
+        Point dijkstraFrom = model.getNearestPoint(from);
+        Point dijkstraTo = model.getNearestPoint(to);
+
+        model.calculateBestRoute(dijkstraFrom,dijkstraTo);
+    }
+
+
+
     private void setZoomAndScale(){
         zoomLevelText.setText(canvas.updateZoom());
         scaleBarText.setText(canvas.updateScalebar());
     }
+
 
 }
