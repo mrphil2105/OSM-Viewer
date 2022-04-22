@@ -100,27 +100,27 @@ public class Controller {
 
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
+    private final ListChangeListener<? super Point> routeRedrawListener = listener -> {
+        while (listener.next()) {
+        }
+
+        if (!listener.wasAdded()) {
+            return;
+        }
+
+        var renderer = canvas.getRenderer();
+        if (routeDrawing != null) renderer.clear(routeDrawing);
+
+        var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
+        routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
+
+        renderer.draw(routeDrawing);
+    };
+
     public void init(Model model) {
         setModel(model);
 
         setStyleSheets("style.css");
-
-        model.getRoutePoints().addListener((ListChangeListener<? super Point>)listener-> {
-            while (listener.next()) {
-            }
-
-            if (!listener.wasAdded()) {
-                return;
-            }
-
-            var renderer = canvas.getRenderer();
-            if (routeDrawing != null) renderer.clear(routeDrawing);
-
-            var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
-            routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
-
-            renderer.draw(routeDrawing);
-        });
 
         canvas.mapMouseClickedProperty.set(
                 e -> {
@@ -128,7 +128,7 @@ public class Controller {
                         var point = new Point(e.getX(), e.getY());
                         point = canvas.canvasToMap(point);
                         point = Point.mapToGeo(point);
-                        point = model.getNearestPoint(point);
+                        point = this.model.getNearestPoint(point);
 
                         if (fromPoint == null) {
                             fromPoint = point;
@@ -136,7 +136,7 @@ public class Controller {
                         else if (toPoint == null) {
                             toPoint = point;
                             var mode = navigationModeBox.getValue();
-                            model.calculateBestRoute(fromPoint, toPoint, mode);
+                            this.model.calculateBestRoute(fromPoint, toPoint, mode);
                         }
                         else {
                             fromPoint = point;
@@ -250,7 +250,12 @@ public class Controller {
     }
 
     private void setModel(Model model) {
+        if (this.model != null) {
+            this.model.getRoutePoints().removeListener(routeRedrawListener);
+        }
+
         this.model = model;
+        model.getRoutePoints().addListener(routeRedrawListener);
 
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
