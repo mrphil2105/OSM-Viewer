@@ -2,7 +2,6 @@ package Search;
 
 import canvas.Model;
 import java.util.List;
-
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.TextField;
@@ -12,7 +11,7 @@ public class SearchTextField extends TextField {
     Address currentSearch;
     AddressDatabase addressDatabase;
 
-    public AddressDatabase getAddressDatabase(){ //TODO: FJERN
+    public AddressDatabase getAddressDatabase() { // TODO: FJERN
         return addressDatabase;
     }
 
@@ -38,7 +37,7 @@ public class SearchTextField extends TextField {
         }
     }
 
-    public void showMenuItems(ObservableList<Address> itemsToShow){
+    public void showMenuItems(ObservableList<Address> itemsToShow) {
         if (getText().length() == 0) {
             showHistory();
         } else {
