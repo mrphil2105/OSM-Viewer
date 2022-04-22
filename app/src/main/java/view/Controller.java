@@ -36,6 +36,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import navigation.EdgeRole;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
 import pointsOfInterest.PointsOfInterestVBox;
@@ -337,8 +338,13 @@ public class Controller {
 
     @FXML
     public void handleRouteClick() {
-        fromRouteTextField.clear();
-        toRouteTextField.clear();
+
+        if(fromRouteTextField.handleSearch()==null || toRouteTextField.handleSearch()==null){
+            return;
+        }
+        routeBetweenAddresses(fromRouteTextField.handleSearch().get(0),toRouteTextField.handleSearch().get(0),EdgeRole.CAR);
+
+
     }
 
     @FXML
@@ -485,7 +491,15 @@ public class Controller {
         return model.getAddresses().possibleAddresses(searchedAddress, 5);
     }
 
+    private void routeBetweenAddresses(Address addressFrom, Address addressTo, EdgeRole mode){
+        Point from = new Point((float)addressFrom.node().lon(),(float)addressFrom.node().lat());
+        Point to = new Point((float)addressTo.node().lon(),(float)addressTo.node().lat());
 
+        Point dijkstraFrom = model.getNearestPoint(from);
+        Point dijkstraTo = model.getNearestPoint(to);
+
+        model.calculateBestRoute(dijkstraFrom,dijkstraTo);
+    }
 
 
 }
