@@ -35,6 +35,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import navigation.EdgeRole;
 import pointsOfInterest.PointOfInterest;
@@ -95,11 +96,19 @@ public class Controller {
 
     @FXML private VBox rightVBox;
 
+    @FXML private VBox middleVBox;
+
     @FXML private Label nearestRoadLabel;
 
     @FXML private CheckMenuItem nearestRoadDelayItem;
 
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
+
+    @FXML private Label scaleBarText;
+
+    @FXML private Rectangle scaleBarRectangle;
+
+    @FXML private Label zoomLevelText;
 
     public void init(Model model) {
         searchTextField.init(model);
@@ -236,7 +245,13 @@ public class Controller {
                                 e.getY() + screenBounds.getMinY() - 30);
                     }
                 });
-
+        canvas.mapMouseWheelProperty.set(
+            e -> {
+                setZoomAndScale();
+            }
+        );
+        canvas.setZoomHandler(model.bounds);
+        setZoomAndScale();
         // FIXME: yuck
         categories
                 .getChildren()
@@ -376,6 +391,8 @@ public class Controller {
         leftVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
         rightVBox.getStylesheets().clear();
         rightVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
+        middleVBox.getStylesheets().clear();
+        middleVBox.getStylesheets().add(getClass().getResource(stylesheet).toExternalForm());
     }
 
     public void center(Point point) {
@@ -459,7 +476,17 @@ public class Controller {
         try (var res = FileParser.readMap(file)) {
             setModel(new Model(res));
         }
+    }   
+
+    @FXML void handleZoomOutButton(){
+        canvas.zoomChange(false);
+        setZoomAndScale();
     }
+    @FXML void handleZoomInButton(){
+        canvas.zoomChange(true);
+        setZoomAndScale();
+    }
+
 
     @FXML
     public void handleFromKeyTyped(KeyEvent event) {
@@ -499,6 +526,13 @@ public class Controller {
         Point dijkstraTo = model.getNearestPoint(to);
 
         model.calculateBestRoute(dijkstraFrom,dijkstraTo);
+    }
+
+
+
+    private void setZoomAndScale(){
+        zoomLevelText.setText(canvas.updateZoom());
+        scaleBarText.setText(canvas.updateScalebar());
     }
 
 
