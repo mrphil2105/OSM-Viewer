@@ -76,9 +76,8 @@ public class Model {
         return routePoints;
     }
 
-    public void calculateBestRoute(Point from, Point to) {
-        // TODO: Allow user to set edge role.
-        var shortestPath = dijkstra.shortestPath(from, to, EdgeRole.CAR);
+    public void calculateBestRoute(Point from, Point to, EdgeRole mode) {
+        var shortestPath = dijkstra.shortestPath(from, to, mode);
 
         if (shortestPath == null) {
             routePoints.clear();

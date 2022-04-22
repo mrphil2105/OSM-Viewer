@@ -18,6 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,6 +33,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import navigation.EdgeRole;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
 import pointsOfInterest.PointsOfInterestVBox;
@@ -65,6 +67,8 @@ public class Controller {
     @FXML private TextField toRouteTextField;
 
     @FXML private Button routeButton;
+
+    @FXML private ComboBox<EdgeRole> navigationModeBox;
 
     @FXML private RadioButton radioButtonCar;
 
@@ -131,7 +135,8 @@ public class Controller {
                         }
                         else if (toPoint == null) {
                             toPoint = point;
-                            model.calculateBestRoute(fromPoint, toPoint);
+                            var mode = navigationModeBox.getValue();
+                            model.calculateBestRoute(fromPoint, toPoint, mode);
                         }
                         else {
                             fromPoint = point;
@@ -207,6 +212,9 @@ public class Controller {
                                 e.getY() + screenBounds.getMinY() - 30);
                     }
                 });
+
+        navigationModeBox.setItems(FXCollections.observableArrayList(EdgeRole.values()));
+        navigationModeBox.getSelectionModel().select(0);
 
         // FIXME: yuck
         categories
