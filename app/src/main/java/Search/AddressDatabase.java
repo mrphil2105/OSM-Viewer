@@ -14,12 +14,12 @@ import osm.elements.OSMTag;
 import util.Predicates;
 
 public class AddressDatabase implements OSMObserver, Serializable {
-    private Trie<Set<AddressBuilder>> streetToAddress;
-    private Trie<Set<AddressBuilder>> cityToAddress;
-    private Trie<Set<AddressBuilder>> postcodeToAddress;
-    private TrieBuilder<Set<AddressBuilder>> streetTrieBuilder;
-    private TrieBuilder<Set<AddressBuilder>> cityTrieBuilder;
-    private TrieBuilder<Set<AddressBuilder>> postcodeTrieBuilder;
+    private Trie<List<AddressBuilder>> streetToAddress;
+    private Trie<List<AddressBuilder>> cityToAddress;
+    private Trie<List<AddressBuilder>> postcodeToAddress;
+    private TrieBuilder<List<AddressBuilder>> streetTrieBuilder;
+    private TrieBuilder<List<AddressBuilder>> cityTrieBuilder;
+    private TrieBuilder<List<AddressBuilder>> postcodeTrieBuilder;
     private List<Address> history;
 
     public AddressDatabase() {
@@ -60,10 +60,10 @@ public class AddressDatabase implements OSMObserver, Serializable {
         }
     }
 
-    private void addToTrie(TrieBuilder<Set<AddressBuilder>> trie, String key, AddressBuilder value) {
+    private void addToTrie(TrieBuilder<List<AddressBuilder>> trie, String key, AddressBuilder value) {
         var set = trie.get(key);
         if (set == null) {
-            set = new HashSet<>();
+            set = new ArrayList<>();
         }
         set.add(value);
         trie.put(key, set);
@@ -190,7 +190,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
     // test method
     public void display() {
-        for (Iterator<Entry<String, Set<AddressBuilder>>> it = streetToAddress.withPrefix("");
+        for (Iterator<Entry<String, List<AddressBuilder>>> it = streetToAddress.withPrefix("");
                 it.hasNext(); ) {
             it.next().getValue().forEach(e -> System.out.println(e.getStreet()));
         }
