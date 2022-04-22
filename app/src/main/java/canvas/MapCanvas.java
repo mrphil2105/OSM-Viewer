@@ -127,9 +127,16 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
     public void zoom(float zoom, float x, float y) {
-        transform.prependTranslation(-x, -y);
-        transform.prependScale(zoom, zoom);
-        transform.prependTranslation(x, y);
+        if (transform.getMxx()*zoom < zoomHandler.getMaxZoom()){
+            transform.prependTranslation(-x, -y);
+            transform.prependScale(zoomHandler.getMaxZoom()/transform.getMxx(), zoomHandler.getMaxZoom()/transform.getMxx());
+            transform.prependTranslation(x, y);
+            
+        } else {
+            transform.prependTranslation(-x, -y);
+            transform.prependScale(zoom, zoom);
+            transform.prependTranslation(x, y);
+        } 
     }
 
     public void pan(float dx, float dy) {
