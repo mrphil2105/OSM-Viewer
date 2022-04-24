@@ -20,10 +20,7 @@ public class NearestNeighbor implements OSMObserver, Serializable {
 
     @Override
     public void onBounds(Rect bounds) {
-        twoDTree = new TwoDTree<>(bounds.left(),
-            bounds.top(),
-            bounds.right(),
-            bounds.bottom());
+        twoDTree = new TwoDTree<>(bounds);
     }
 
     @Override

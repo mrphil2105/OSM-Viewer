@@ -12,21 +12,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TwoDTree<E> implements SpatialTree<E>, Serializable {
-    private final float left, top, right, bottom;
+    private final Rect bounds;
 
     private Node<E> root;
     private int size;
     private int height;
 
     public TwoDTree() {
-        this(0, 0, 1, 1);
+        this(new Rect(0, 0, 1, 1));
     }
 
-    public TwoDTree(float left, float top, float right, float bottom) {
-        this.left = left;
-        this.top = top;
-        this.right = right;
-        this.bottom = bottom;
+    public TwoDTree(Rect bounds) {
+        this.bounds = bounds;
     }
 
     @Override
@@ -46,7 +43,7 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
 
         if (isEmpty()) {
             root = insert(point, value, root, 0);
-            root.rect = new Rect(top, left, bottom, right);
+            root.rect = bounds;
         } else {
             root = insert(point, value, root, 1);
         }

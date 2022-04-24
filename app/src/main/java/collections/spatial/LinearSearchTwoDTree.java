@@ -9,21 +9,18 @@ import java.util.List;
 
 public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
     private final int maxHeight;
-    private final float left, top, right, bottom;
+    private final Rect bounds;
 
     private Node<E> root;
     private int size;
 
     public LinearSearchTwoDTree(int maxHeight) {
-        this(maxHeight, 0, 0, 1, 1);
+        this(maxHeight, new Rect(0, 0, 1, 1));
     }
 
-    public LinearSearchTwoDTree(int maxHeight, float left, float top, float right, float bottom) {
+    public LinearSearchTwoDTree(int maxHeight, Rect bounds) {
         this.maxHeight = maxHeight;
-        this.left = left;
-        this.top = top;
-        this.right = right;
-        this.bottom = bottom;
+        this.bounds = bounds;
     }
 
     @Override
@@ -39,7 +36,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
 
         if (isEmpty()) {
             root = insert(point, value, root, 0);
-            root.rect = new Rect(top, left, bottom, right);
+            root.rect = bounds;
         } else {
             root = insert(point, value, root, 1);
         }
