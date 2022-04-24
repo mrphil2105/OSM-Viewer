@@ -4,6 +4,7 @@ import static osm.elements.OSMTag.Key.HIGHWAY;
 import static osm.elements.OSMTag.Key.NAME;
 
 import collections.spatial.TwoDTree;
+import collections.spatial.SpatialTree;
 import geometry.Point;
 import geometry.Rect;
 import java.io.Serializable;
@@ -16,16 +17,16 @@ import osm.elements.OSMWay;
 
 public class NearestNeighbor implements OSMObserver, Serializable {
     private transient List<Pair<Point, String>> nodeCache = new ArrayList<>();
-    private TwoDTree<String> twoDTree;
+    private SpatialTree<String> tree;
 
     @Override
     public void onBounds(Rect bounds) {
-        twoDTree = new TwoDTree<>(bounds);
+        tree = new TwoDTree<>(bounds);
     }
 
     @Override
     public void onWay(OSMWay way) {
-        assert twoDTree != null;
+        assert tree != null;
 
         var tags = way.tags();
 
@@ -54,13 +55,13 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     }
 
     public Point nearestTo(Point query) {
-        var nearestResult = twoDTree.nearest(query);
+        var nearestResult = tree.nearest(query);
 
         return nearestResult.point();
     }
 
     public String nearestRoad(Point query) {
-        var nearestResult = twoDTree.nearest(query);
+        var nearestResult = tree.nearest(query);
 
         return nearestResult.value();
     }
@@ -75,7 +76,7 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         var point = median.getKey();
         var name = median.getValue();
 
-        twoDTree.insert(point, name);
+        tree.insert(point, name);
 
         if (nodes.size() == 1) {
             return;
