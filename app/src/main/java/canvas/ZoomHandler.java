@@ -5,7 +5,6 @@ import geometry.Rect;
 
 public class ZoomHandler {
     private Rect bounds;
-    private float startZoom;
     private float startZoomPercentage;
     private MapCanvas canvas;
     private float currentScale;
@@ -13,40 +12,45 @@ public class ZoomHandler {
     private String zoomLevelText;
     private String scaleBarText;
     private float max;
+    private boolean isX;
 
     public ZoomHandler(Rect bounds, MapCanvas canvas){
         this.bounds = bounds;
         this.canvas = canvas;
         currentScale = (float) (getScaleBarDistance() * (100/canvas.getPrefWidth()));
-        startZoom = (float) (1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x()));
-        startZoomPercentage = (float) ((720/(Point.geoToMap(bounds.getTopLeft()).y()- Point.geoToMap(bounds.getBottomRight()).y()))/startZoom);
-
-        if (Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x() < Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y()){
-            max = Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y();
+        if (1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x()) > 720/(Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y())){
+            max = (Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y());
             isX = false;
         }else {
-            max = Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x();
+            max = (Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x());
             isX = true;
         } 
     }
-    private boolean isX = true;
+    
     public String getZoomString(){
         float zoom;
         if (isX){
-            zoom = max/(canvas.canvasToMap(new Point(1280, 0)).x() - canvas.canvasToMap(new Point(0, 0)).x());
+            zoom = (20/max + 1 - ((canvas.canvasToMap(new Point(1280, 0)).x() - canvas.canvasToMap(new Point(0, 0)).x())/max))*100;
         }else {
-            zoom = max/(canvas.canvasToMap(new Point(0, 720)).y() - canvas.canvasToMap(new Point(0, 0)).y());
+            zoom = (20/max + 1 - ((canvas.canvasToMap(new Point(0, 720)).y() - canvas.canvasToMap(new Point(0, 0)).y())/max))*100;
         }
-        float zoomToPercentage = (zoom-1)*100;
-        zoomLevelText = Float.toString((float) (Math.round(zoomToPercentage*10.0)/10.0)) + "%";
+        zoomLevelText = Float.toString((float) (Math.round((zoom)*10.0)/10.0)) + "%";
         return zoomLevelText;
     }
 
     public float getMaxZoom(){
         if (isX){
-            return 1280/max;
+            return 1280/(max + 20);
         } else {
-            return 720/max;
+            return 720/(max + 20);
+        }
+    }
+
+    public float getMinZoom(){
+        if (isX){
+            return 1280/20;
+        } else {
+            return 720/20;
         }
     }
         
@@ -60,15 +64,8 @@ public class ZoomHandler {
         return scaleBarText;
    }
 
-
    public float getStartZoom(){
-        if (isX){
-            startZoomPercentage = (float) (1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x()))/
-                                    (720/(Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y()));
-        }else{
-            startZoomPercentage = (float) ((720/(Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y()))/
-                                            (1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x())));
-        }
+        startZoomPercentage = (float) ((1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x())));
         return startZoomPercentage;
     } 
 
