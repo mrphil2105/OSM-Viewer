@@ -56,7 +56,7 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
             // The base case, insert a new node by returning it to the parent.
             size++;
 
-            return new Node<>(point, value, null);
+            return new Node<>(point, value);
         }
 
         if (node.point.equals(point)) {
@@ -300,10 +300,9 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
         private Node<E> left;
         private Node<E> right;
 
-        public Node(Point point, E value, Rect rect) {
+        public Node(Point point, E value) {
             this.point = point;
             this.value = value;
-            this.rect = rect;
         }
 
         public float x() {
