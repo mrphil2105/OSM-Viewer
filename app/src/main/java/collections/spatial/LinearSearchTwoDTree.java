@@ -5,21 +5,23 @@ import geometry.Rect;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
-    private final int maxHeight;
+    private final int maxCount;
     private final Rect bounds;
 
     private Node<E> root;
     private int size;
 
-    public LinearSearchTwoDTree(int maxHeight) {
-        this(maxHeight, new Rect(0, 0, 1, 1));
+    public LinearSearchTwoDTree(int maxCount) {
+        this(maxCount, new Rect(0, 0, 1, 1));
     }
 
     public LinearSearchTwoDTree(int maxHeight, Rect bounds) {
-        this.maxHeight = maxHeight;
+        this.maxCount = maxHeight;
         this.bounds = bounds;
     }
 
@@ -46,11 +48,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         if (node == null) {
             size++;
 
-            if (level + 1 == maxHeight) {
-                return new LeafNode<>(point, value, null);
-            }
-
-            return new AncestorNode<>(point, value, null);
+            return new LeafNode<>(point, value);
         }
 
         if (node.contains(point)) {
@@ -59,8 +57,20 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         if (node instanceof LeafNode<E> leafNode) {
-            // The node is a leaf node, add the point and value to the lists.
+            if (leafNode.size() >= maxCount) {
+                // The leaf node has reached the max count, so we need to split it into an ancestor node.
+                var ancestorNode = splitLeafNode(point, value, leafNode, level);
+
+                // Null means the ancestor node would have contained a child with no points (not valid).
+                if (ancestorNode != null) {
+                    size++;
+
+                    return ancestorNode;
+                }
+            }
+
             leafNode.add(point, value);
+            size++;
 
             return node;
         }
@@ -114,6 +124,45 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         return node;
     }
 
+    private AncestorNode<E> splitLeafNode(Point point, E value, LeafNode<E> node, int level) {
+        // We need to split the list into two parts, at the index where the new point should be.
+        // This allows the new point to be a parent node for the two leaf nodes.
+        // First we need to sort the list, so we split correctly and use binary search.
+        Comparator<Point> comparator = (first, second) -> (level & 1) == 0 ?
+            Float.compare(first.y(), second.y()) :
+            Float.compare(first.x(), second.x());
+        Sorting.multiSort(node.points, comparator, node.points, node.values);
+        var splitIndex = Collections.binarySearch(node.points, point, comparator);
+
+        if (splitIndex < 0) {
+            splitIndex = ~splitIndex;
+        }
+
+        if (splitIndex == 0 || splitIndex == node.size()) {
+            // We would need to create a child node with no points, which is not supported, so we wait for a new point.
+            return null;
+        }
+
+        var leftPoints = new ArrayList<>(node.points.subList(0, splitIndex));
+        var leftValues = new ArrayList<>(node.values.subList(0, splitIndex));
+        var rightPoints = new ArrayList<>(node.points.subList(splitIndex, node.size()));
+        var rightValues = new ArrayList<>(node.values.subList(splitIndex, node.size()));
+
+        var ancestorNode = new AncestorNode<>(point, value, node.rect);
+        ancestorNode.left = new LeafNode<>(leftPoints, leftValues, new Rect(
+            node.rect.top(),
+            node.rect.left(),
+            (level & 1) == 0 ? point.y() : node.rect.bottom(),
+            (level & 1) != 0 ? point.x() : node.rect.right()));
+        ancestorNode.right = new LeafNode<>(rightPoints, rightValues, new Rect(
+            (level & 1) == 0 ? point.y() : node.rect.top(),
+            (level & 1) != 0 ? point.x() : node.rect.left(),
+            node.rect.bottom(),
+            node.rect.right()));
+
+        return ancestorNode;
+    }
+
     @Override
     public boolean contains(Point point) {
         return contains(point, root, 1);
@@ -129,7 +178,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         if (node instanceof LeafNode<E>) {
-            // The above contains call did not return true, so the point does not exist.
+            // The above 'contains' call did not return true, so the point does not exist.
             return false;
         }
 
@@ -340,13 +389,24 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         private final List<Point> points;
         private final List<E> values;
 
-        public LeafNode(Point firstPoint, E firstValue, Rect rect) {
-            super(rect);
+        public LeafNode(Point firstPoint, E firstValue) {
+            super(null);
 
             points = new ArrayList<>();
             values = new ArrayList<>();
 
             add(firstPoint, firstValue);
+        }
+
+        public LeafNode(List<Point> points, List<E> values, Rect rect) {
+            super(rect);
+
+            this.points = points;
+            this.values = values;
+        }
+
+        public int size() {
+            return points.size();
         }
 
         public void add(Point point, E value) {
