@@ -5,12 +5,9 @@ import geometry.Rect;
 
 public class ZoomHandler {
     private Rect bounds;
-    private float startZoomPercentage;
     private MapCanvas canvas;
     private float currentScale;
     private final float R = 6371; //Earth radius in km
-    private String zoomLevelText;
-    private String scaleBarText;
     private float max;
     private boolean isX;
 
@@ -34,8 +31,7 @@ public class ZoomHandler {
         }else {
             zoom = (20/max + 1 - ((canvas.canvasToMap(new Point(0, 720)).y() - canvas.canvasToMap(new Point(0, 0)).y())/max))*100;
         }
-        zoomLevelText = Float.toString((float) (Math.round((zoom)*10.0)/10.0)) + "%";
-        return zoomLevelText;
+        return Float.toString((float) (Math.round((zoom)*10.0)/10.0)) + "%";
     }
 
     public float getMaxZoom(){
@@ -57,16 +53,14 @@ public class ZoomHandler {
    public String getScaleString(){
         var newScale = (float) (currentScale *  (1/canvas.getZoom()));
         if (newScale < 1000){
-            scaleBarText = Float.toString((float) (Math.round(newScale*100.0)/100.0)) + "m";
+            return Float.toString((float) (Math.round(newScale*100.0)/100.0)) + "m";
         } else {
-            scaleBarText = Float.toString((float) (Math.round((newScale/1000)*100.0)/100.0)) + "km";
+            return Float.toString((float) (Math.round((newScale/1000)*100.0)/100.0)) + "km";
         } 
-        return scaleBarText;
    }
 
    public float getStartZoom(){
-        startZoomPercentage = (float) ((1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x())));
-        return startZoomPercentage;
+        return (float) ((1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x())));
     } 
 
     private float getScaleBarDistance(){
