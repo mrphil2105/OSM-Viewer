@@ -75,7 +75,7 @@ public class PolygonsWriter extends TempFileWriter {
                         .map(n -> new Vector2D(Point.geoToMapX(n.lon()), Point.geoToMapY(n.lat())))
                         .toList();
 
-        manager.drawOrdered(points, drawable, vertexCount / 2);
+        manager.draw(points, drawable, vertexCount / 2);
 
         if (manager.byteSize() >= BUFFER_SIZE) writeDrawing();
     }
@@ -99,7 +99,7 @@ public class PolygonsWriter extends TempFileWriter {
 
         // Draw all the segments
         for (var segment : joiner) {
-            manager.drawOrdered(
+            manager.draw(
                     segment.stream()
                             .map(n -> new Vector2D(Point.geoToMapX(n.lon()), Point.geoToMapY(n.lat())))
                             .toList(),
