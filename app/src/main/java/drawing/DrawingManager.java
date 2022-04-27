@@ -3,9 +3,7 @@ package drawing;
 import collections.Entity;
 import geometry.Vector2D;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import javafx.util.Pair;
 
 public class DrawingManager {
     public record DrawingInfo(

@@ -11,12 +11,12 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -63,25 +63,23 @@ public class CreateMapDialog extends Dialog {
         }
     }
 
-    public static File showDialog(File file) throws IOException {
+    public static void showDialog(File file, Consumer<DialogResult> callback) throws IOException {
         var diag = (CreateMapDialog) load("CreateMapDialog.fxml");
 
         diag.setSet(EnumSet.allOf(Feature.class));
         diag.file = file;
 
-        diag.showAndWait();
-
-        return diag.file;
+        diag.show(callback);
     }
 
     @FXML
-    private void next(ActionEvent actionEvent) {
+    private void next() {
         header.textProperty().set("Creating map...");
         checkboxes.setDisable(true);
         statsGrid.setVisible(true);
         cancel.setDisable(true);
         next.setDisable(true);
-        next.onActionProperty().set(e -> close());
+        next.onActionProperty().set(e -> close(new CreateMapDialogResult(file)));
         next.textProperty().set("Open");
 
         var start = LocalTime.now();
@@ -133,8 +131,7 @@ public class CreateMapDialog extends Dialog {
     }
 
     @FXML
-    private void cancel(ActionEvent actionEvent) {
-        file = null;
-        close();
+    private void cancel() {
+        close(null);
     }
 }

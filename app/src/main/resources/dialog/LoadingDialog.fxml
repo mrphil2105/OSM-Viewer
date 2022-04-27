@@ -17,7 +17,7 @@
             </font></Label>
             <ProgressBar fx:id="progress" minWidth="200.0" />
             <Label fx:id="timer" text="timer" />
-            <Button fx:id="closeBtn" disable="true" style="-fx-background-color: #3498DB" onAction="#close" text="Finish">
+            <Button fx:id="closeBtn" disable="true" style="-fx-background-color: #3498DB" onAction="#finish" text="Finish">
             <VBox.margin>
                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
             </VBox.margin></Button>

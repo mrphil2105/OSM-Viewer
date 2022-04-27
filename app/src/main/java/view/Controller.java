@@ -6,6 +6,7 @@ import canvas.MapCanvas;
 import canvas.Renderer;
 import com.jogamp.newt.event.MouseEvent;
 import dialog.CreateMapDialog;
+import dialog.CreateMapDialogResult;
 import dialog.LoadingDialog;
 import drawing.Category;
 import drawing.Drawable;
@@ -455,7 +456,7 @@ public class Controller {
         pointOfInterestMode = true;
     }
 
-    public void openMap(ActionEvent actionEvent) throws Exception {
+    public void openMap() throws Exception {
         var diag = new FileChooser();
         diag.setTitle("Open map file");
         diag.getExtensionFilters()
@@ -467,7 +468,7 @@ public class Controller {
         loadFile(file);
     }
 
-    public void createMap(ActionEvent actionEvent) throws Exception {
+    public void createMap() throws Exception {
         var diag = new FileChooser();
         diag.setTitle("Open OSM data file");
         // *.zip is here because *.osm.zip doesn't work on Linux
@@ -478,10 +479,17 @@ public class Controller {
         var file = diag.showOpenDialog(scene.getWindow());
         if (file == null) return;
 
-        file = CreateMapDialog.showDialog(file);
-        if (file == null) return;
-
-        loadFile(file);
+        CreateMapDialog.showDialog(
+                file,
+                r -> {
+                    if (r instanceof CreateMapDialogResult result) {
+                        try {
+                            loadFile(result.file);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
     }
 
     private void loadFile(File file) throws Exception {
