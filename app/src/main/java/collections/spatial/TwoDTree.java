@@ -48,17 +48,17 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
         if (isEmpty()) {
             root = insert(point, value, root, 0);
             root.rect = bounds;
+            height = 1;
         } else {
             root = insert(point, value, root, 1);
         }
     }
 
     private Node<E> insert(Point point, E value, Node<E> node, int level) {
-        height = Math.max(level + 1, height);
-
         if (node == null) {
             // The base case, insert a new node by returning it to the parent.
             size++;
+            height = Math.max(level, height);
 
             return new Node<>(point, value);
         }
