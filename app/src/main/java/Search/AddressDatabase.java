@@ -20,7 +20,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
     private TrieBuilder<List<Address>> streetTrieBuilder;
     private TrieBuilder<List<Address>> cityTrieBuilder;
     private TrieBuilder<List<Address>> postcodeTrieBuilder;
-    private List<Address> history;
+    private final List<Address> history;
 
     public AddressDatabase() {
         streetTrieBuilder = new TrieBuilder<>('\0');
@@ -97,10 +97,6 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
     @Override
     public void onFinish() {
-        //TODO
-    }
-
-    public void buildTries() {
         streetToAddress = streetTrieBuilder.build();
         cityToAddress = cityTrieBuilder.build();
         postcodeToAddress = postcodeTrieBuilder.build();
@@ -177,26 +173,5 @@ public class AddressDatabase implements OSMObserver, Serializable {
                     .toList();
         }
 
-        //        if (input.houseNumber() != null) {
-        //            filteringSet.stream().limit(maxEntries).forEach(e -> results.add(e.build()));
-        //        } else {
-        //            filteringSet.stream()
-        //                    .limit(maxEntries)
-        //                    .forEach(
-        //                            e -> {
-        //                                if (parsedStreetsAndCities.add(e.getStreet() + "|" +
-        // e.getPostcode())) {
-        //                                    results.add(e.build());
-        //                                }
-        //                            });
-        //        }
-    }
-
-    // test method
-    public void display() {
-        for (Iterator<Entry<String, List<Address>>> it = streetToAddress.withPrefix("");
-                it.hasNext(); ) {
-            it.next().getValue().forEach(e -> System.out.println(e.street()));
-        }
     }
 }

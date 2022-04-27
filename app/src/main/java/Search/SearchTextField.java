@@ -11,10 +11,6 @@ public class SearchTextField extends TextField {
     Address currentSearch;
     AddressDatabase addressDatabase;
 
-    public AddressDatabase getAddressDatabase() { // TODO: FJERN
-        return addressDatabase;
-    }
-
     public void init(Model model) {
         var addressDatabase = model.getAddresses();
         this.addressDatabase = addressDatabase;
@@ -29,6 +25,7 @@ public class SearchTextField extends TextField {
     }
 
     public void showHistory() {
+        System.out.println("HISTORY");
         popupEntries.hide();
         popupEntries.getItems().clear();
         addressDatabase.getHistory().forEach(e -> popupEntries.getItems().add(new AddressMenuItem(e)));
@@ -36,8 +33,8 @@ public class SearchTextField extends TextField {
     }
 
     public void showMenuItems(ObservableList<Address> itemsToShow) {
-        if (getText().length() == 0) {
-            showHistory();
+        if (getText().isEmpty()) {
+            popupEntries.hide();
         } else {
             popupEntries.hide();
 

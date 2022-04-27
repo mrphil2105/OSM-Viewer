@@ -48,7 +48,6 @@ public class Model {
                 case ADDRESS_SEARCH -> {
                     addresses = (AddressDatabase) entry.getValue().read();
                     // FIXME: Why are the tries not built at the .map file creation step?
-                    addresses.buildTries();
                 }
             }
         }
