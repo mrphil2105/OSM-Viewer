@@ -10,15 +10,18 @@ import com.jogamp.opengl.util.Animator;
 import drawing.Category;
 import geometry.Point;
 import geometry.Rect;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Scale;
+import javafx.util.Duration;
 
 public class MapCanvas extends Region implements MouseListener {
     final Affine transform = new Affine();
@@ -46,7 +49,10 @@ public class MapCanvas extends Region implements MouseListener {
     public final ObjectProperty<EventHandler<MouseEvent>> mapMouseWheelProperty =
             new SimpleObjectProperty<>();
 
+    public final FloatProperty fpsProperty = new SimpleFloatProperty();
+
     public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
+    private Timeline fpsUpdater;
 
     public void setModel(Model model) {
         dispose();
@@ -87,7 +93,14 @@ public class MapCanvas extends Region implements MouseListener {
         renderer = new Renderer(model, this);
         window.addGLEventListener(renderer);
         animator = new Animator(window);
+        animator.setUpdateFPSFrames(10, null);
         animator.start();
+
+        fpsUpdater =
+                new Timeline(
+                        new KeyFrame(Duration.millis(100), e -> fpsProperty.set(animator.getLastFPS())));
+        fpsUpdater.setCycleCount(Animation.INDEFINITE);
+        fpsUpdater.play();
     }
 
     public void setShader(Renderer.Shader shader) {
@@ -103,6 +116,8 @@ public class MapCanvas extends Region implements MouseListener {
         }
 
         if (animator != null) animator.stop();
+
+        if (fpsUpdater != null) fpsUpdater.stop();
 
         if (getChildren().size() > 0) {
             var newt = (NewtCanvasJFX) getChildren().get(0);
@@ -172,7 +187,6 @@ public class MapCanvas extends Region implements MouseListener {
         Scale scale = new Scale(1.2, 1.2);
         if (positive) {
             zoom((float) scale.getX(), point.x(), point.y());
-
         } else {
             try {
                 zoom((float) scale.createInverse().getX(), point.x(), point.y());
