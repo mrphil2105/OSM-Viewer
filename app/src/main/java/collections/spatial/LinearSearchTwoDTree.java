@@ -47,8 +47,10 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         if (isEmpty()) {
-            root = insert(point, value, root, 0);
+            root = new LeafNode<>(point, value);
             root.rect = bounds;
+
+            size = 1;
             height = 1;
         } else {
             root = insert(point, value, root, 1);
@@ -57,10 +59,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
 
     private Node<E> insert(Point point, E value, Node<E> node, int level) {
         if (node == null) {
-            size++;
-            height = Math.max(level, height);
-
-            return new LeafNode<>(point, value);
+            throw new IllegalArgumentException("The node parameter cannot be null.");
         }
 
         if (node.contains(point)) {
