@@ -42,7 +42,7 @@ public class AddressTest {
 
 
     @Test
-    static void testOnlyLetters(){
+    public void testOnlyLetters(){
         var list = search("t");
 
         var shouldContain=new ArrayList<Address>();
@@ -50,7 +50,7 @@ public class AddressTest {
         shouldContain.add(addresses[1]);
         shouldContain.add(addresses[2]);
         shouldContain.add(addresses[3]);
-        shouldContain.add(addresses[5]);
+        shouldContain.add(addresses[4]);
 
         assertTrue(containsExactly(list,shouldContain));
 
@@ -58,7 +58,7 @@ public class AddressTest {
 
 
    @Test
-   static void testOnlyStreets(){
+   public void testOnlyStreets(){
        var address = AddressDatabase.parse("");
        address.street(SearchTextField.reformat(address.getStreet()));
        address.city(SearchTextField.reformat(address.getCity()));
