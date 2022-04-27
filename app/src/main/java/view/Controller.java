@@ -493,20 +493,21 @@ public class Controller {
     }
 
     private void loadFile(File file) throws Exception {
-        AtomicReference<Model> model = new AtomicReference<>();
+        AtomicReference<Model> modelRef = new AtomicReference<>();
         LoadingDialog.showDialog(
                 "Loading " + file.getName(),
                 () -> {
                     try (var res = FileParser.readMap(file)) {
-                        model.set(new Model(res));
+                        modelRef.set(new Model(res));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 });
 
-        var value = model.get();
-        if (value != null) {
-            setModel(value);
+        var model = modelRef.get();
+        if (model != null) {
+            setModel(model);
+            center(Point.geoToMap(model.bounds.center()));
         }
     }
 
