@@ -111,8 +111,9 @@ public class Controller {
 
     @FXML private Label zoomLevelText;
 
-    public void init(Model model) {
+    @FXML private Label fps;
 
+    public void init(Model model) {
         setModel(model);
 
         setStyleSheets("style.css");
@@ -136,6 +137,8 @@ public class Controller {
 
                                     renderer.draw(routeDrawing);
                                 });
+
+        fps.textProperty().bind(canvas.fpsProperty.asString("FPS: %.1f"));
 
         canvas.mapMouseClickedProperty.set(
                 e -> {
