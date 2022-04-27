@@ -69,7 +69,7 @@ public class SearchTextField extends TextField {
 
     public static String reformat(String string) {
         if (string == null) return null;
-
+        System.out.println("yo");
         string = string.toLowerCase();
 
         var stringBuilder = new StringBuilder();
