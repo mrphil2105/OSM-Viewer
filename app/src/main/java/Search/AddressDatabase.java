@@ -14,12 +14,12 @@ import osm.elements.OSMTag;
 import util.Predicates;
 
 public class AddressDatabase implements OSMObserver, Serializable {
-    private Trie<List<AddressBuilder>> streetToAddress;
-    private Trie<List<AddressBuilder>> cityToAddress;
-    private Trie<List<AddressBuilder>> postcodeToAddress;
-    private TrieBuilder<List<AddressBuilder>> streetTrieBuilder;
-    private TrieBuilder<List<AddressBuilder>> cityTrieBuilder;
-    private TrieBuilder<List<AddressBuilder>> postcodeTrieBuilder;
+    private Trie<List<Address>> streetToAddress;
+    private Trie<List<Address>> cityToAddress;
+    private Trie<List<Address>> postcodeToAddress;
+    private TrieBuilder<List<Address>> streetTrieBuilder;
+    private TrieBuilder<List<Address>> cityTrieBuilder;
+    private TrieBuilder<List<Address>> postcodeTrieBuilder;
     private List<Address> history;
 
     public AddressDatabase() {
@@ -50,17 +50,17 @@ public class AddressDatabase implements OSMObserver, Serializable {
         return history;
     }
 
-    public void addAddress(AddressBuilder a) {
-        addToTrie(streetTrieBuilder, a.getStreet(), a);
-        if (a.getCity() != null) {
-            addToTrie(cityTrieBuilder, a.getCity(), a);
+    public void addAddress(Address a) {
+        addToTrie(streetTrieBuilder, a.street(), a);
+        if (a.city() != null) {
+            addToTrie(cityTrieBuilder, a.city(), a);
         }
-        if (a.getPostcode() != null) {
-            addToTrie(postcodeTrieBuilder, a.getPostcode(), a);
+        if (a.postcode() != null) {
+            addToTrie(postcodeTrieBuilder, a.postcode(), a);
         }
     }
 
-    private void addToTrie(TrieBuilder<List<AddressBuilder>> trie, String key, AddressBuilder value) {
+    private void addToTrie(TrieBuilder<List<Address>> trie, String key, Address value) {
         var set = trie.get(key);
         if (set == null) {
             set = new ArrayList<>();
@@ -92,7 +92,12 @@ public class AddressDatabase implements OSMObserver, Serializable {
         }
 
         builder.SlimOSMNode(node.slim());
-        if (isAddress) addAddress(builder);
+        if (isAddress) addAddress(builder.build());
+    }
+
+    @Override
+    public void onFinish() {
+        //TODO
     }
 
     public void buildTries() {
@@ -116,19 +121,19 @@ public class AddressDatabase implements OSMObserver, Serializable {
         var filterStream = searchedStreets.stream();
 
         if (input.postcode() != null) {
-            filterStream = filterStream.filter(e -> e.getPostcode().equals(input.postcode()));
+            filterStream = filterStream.filter(e -> e.postcode().equals(input.postcode()));
         }
         if (input.city() != null) {
-            filterStream = filterStream.filter(e -> e.getCity().equals(input.city()));
+            filterStream = filterStream.filter(e -> e.city().equals(input.city()));
         }
         if (input.houseNumber() != null) {
-            filterStream = filterStream.filter(e -> e.getHouse().equals(input.houseNumber()));
+            filterStream = filterStream.filter(e -> e.houseNumber().equals(input.houseNumber()));
         }
-        return filterStream.map(AddressBuilder::build).toList();
+        return filterStream.toList();
     }
 
     public List<Address> possibleAddresses(Address input, int maxEntries) {
-        Stream<AddressBuilder> filterStream =
+        Stream<Address> filterStream =
                 StreamSupport.stream(
                                 Spliterators.spliteratorUnknownSize(
                                         streetToAddress.withPrefix(input.street()), Spliterator.ORDERED),
@@ -136,13 +141,13 @@ public class AddressDatabase implements OSMObserver, Serializable {
                         .flatMap(e -> e.getValue().stream());
 
         if (input.houseNumber() != null) {
-            filterStream = filterStream.filter(e -> e.getHouse().startsWith(input.houseNumber()));
+            filterStream = filterStream.filter(e -> e.houseNumber().startsWith(input.houseNumber()));
         }
 
         if (input.postcode() != null) {
             var searchedPostcodes = postcodeToAddress.withPrefix(input.postcode());
 
-            var retain = new HashSet<AddressBuilder>();
+            var retain = new HashSet<Address>();
             while (searchedPostcodes.hasNext()) {
                 var entry = searchedPostcodes.next().getValue();
                 retain.addAll(entry);
@@ -153,7 +158,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
         if (input.city() != null) {
             var searchedCities = cityToAddress.withPrefix(input.city());
-            var retain = new HashSet<AddressBuilder>();
+            var retain = new HashSet<Address>();
             while (searchedCities.hasNext()) {
                 var entry = searchedCities.next().getValue();
                 retain.addAll(entry);
@@ -163,13 +168,12 @@ public class AddressDatabase implements OSMObserver, Serializable {
         }
 
         if (input.houseNumber() != null) {
-            return filterStream.limit(maxEntries).map(AddressBuilder::build).toList();
+            return filterStream.limit(maxEntries).toList();
         } else {
             return filterStream
                     .filter(
-                            Predicates.distinctByKey(e -> e.getStreet().hashCode() * e.getPostcode().hashCode()))
+                            Predicates.distinctByKey(e -> e.street().hashCode() * e.postcode().hashCode()))
                     .limit(maxEntries)
-                    .map(AddressBuilder::build)
                     .toList();
         }
 
@@ -190,9 +194,9 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
     // test method
     public void display() {
-        for (Iterator<Entry<String, List<AddressBuilder>>> it = streetToAddress.withPrefix("");
+        for (Iterator<Entry<String, List<Address>>> it = streetToAddress.withPrefix("");
                 it.hasNext(); ) {
-            it.next().getValue().forEach(e -> System.out.println(e.getStreet()));
+            it.next().getValue().forEach(e -> System.out.println(e.street()));
         }
     }
 }
