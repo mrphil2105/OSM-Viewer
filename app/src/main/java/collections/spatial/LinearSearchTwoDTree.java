@@ -161,26 +161,12 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         var ancestorNode = (AncestorNode<E>)node;
+        var isLower = (level & 1) == 0 ? point.y() < ancestorNode.y() : point.x() < ancestorNode.x();
 
-        // Check if level is even.
-        if ((level & 1) == 0) {
-            // Search by y-coordinate (point with horizontal partition line).
-
-            // We want to check the left side if the point is smaller at the y-axis.
-            if (point.y() < ancestorNode.y()) {
-                return contains(point, ancestorNode.left, level + 1);
-            } else {
-                return contains(point, ancestorNode.right, level + 1);
-            }
+        if (isLower) {
+            return contains(point, ancestorNode.left, level + 1);
         } else {
-            // Search by x-coordinate (point with vertical partition line).
-
-            // We want to check the left side if the point is smaller at the x-axis.
-            if (point.x() < ancestorNode.x()) {
-                return contains(point, ancestorNode.left, level + 1);
-            } else {
-                return contains(point, ancestorNode.right, level + 1);
-            }
+            return contains(point, ancestorNode.right, level + 1);
         }
     }
 
@@ -224,51 +210,26 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         var ancestorNode = (AncestorNode<E>)node;
+        var isLower = (level & 1) == 0 ? query.y() < ancestorNode.y() : query.x() < ancestorNode.x();
 
-        // Check if level is even.
-        if ((level & 1) == 0) {
-            // Search by y-coordinate (point with horizontal partition line).
+        if (isLower) {
+            champ = nearest(query, ancestorNode.left, champ, best, level + 1);
 
-            // We want to check the right side if the query point is greater at the y-axis.
-            if (ancestorNode.y() < query.y()) {
-                // Traverse down the tree to check child nodes.
+            // Decide if we need to go down and check the other child.
+            // Compare the distance from the query point to the nearest point of the ancestorNode rectangle
+            // against the distance from the query point to the current champion point.
+            // If it is smaller, there could potentially be a point that is closer to the query point
+            // than the current champion point.
+            if (ancestorNode.right != null &&
+                ancestorNode.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                 champ = nearest(query, ancestorNode.right, champ, best, level + 1);
-
-                // Decide if we need to go down and check the other child.
-                // Compare the distance from the query point to the nearest point of the ancestorNode rectangle
-                // against the distance from the query point to the current champion point.
-                // If it is smaller, there could potentially be a point that is closer to the query point
-                // than the current champion point.
-                if (ancestorNode.left != null
-                    && ancestorNode.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
-                    champ = nearest(query, ancestorNode.left, champ, best, level + 1);
-                }
-            } else {
-                champ = nearest(query, ancestorNode.left, champ, best, level + 1);
-
-                if (ancestorNode.right != null
-                    && ancestorNode.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
-                    champ = nearest(query, ancestorNode.right, champ, best, level + 1);
-                }
             }
         } else {
-            // Search by x-coordinate (point with vertical partition line).
+            champ = nearest(query, ancestorNode.right, champ, best, level + 1);
 
-            // We want to check the right side if the query point is greater at the x-axis.
-            if (ancestorNode.x() < query.x()) {
-                champ = nearest(query, ancestorNode.right, champ, best, level + 1);
-
-                if (ancestorNode.left != null
-                    && ancestorNode.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
-                    champ = nearest(query, ancestorNode.left, champ, best, level + 1);
-                }
-            } else {
+            if (ancestorNode.left != null &&
+                ancestorNode.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                 champ = nearest(query, ancestorNode.left, champ, best, level + 1);
-
-                if (ancestorNode.right != null
-                    && ancestorNode.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
-                    champ = nearest(query, ancestorNode.right, champ, best, level + 1);
-                }
             }
         }
 
