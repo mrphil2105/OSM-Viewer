@@ -31,6 +31,7 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
         return size;
     }
 
+    @Override
     public int height() {
         return height;
     }
