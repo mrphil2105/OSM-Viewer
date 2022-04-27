@@ -42,7 +42,7 @@ public class AddressTest {
 
 
     @Test
-    static void OnlyLetters(){
+    static void testOnlyLetters(){
         var list = search("t");
 
         var shouldContain=new ArrayList<Address>();
