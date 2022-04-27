@@ -6,6 +6,7 @@ import canvas.MapCanvas;
 import canvas.Renderer;
 import com.jogamp.newt.event.MouseEvent;
 import dialog.CreateMapDialog;
+import dialog.LoadingDialog;
 import drawing.Category;
 import drawing.Drawable;
 import drawing.Drawing;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
@@ -483,8 +485,20 @@ public class Controller {
     }
 
     private void loadFile(File file) throws Exception {
-        try (var res = FileParser.readMap(file)) {
-            setModel(new Model(res));
+        AtomicReference<Model> model = new AtomicReference<>();
+        LoadingDialog.showDialog(
+                "Loading " + file.getName(),
+                () -> {
+                    try (var res = FileParser.readMap(file)) {
+                        model.set(new Model(res));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        var value = model.get();
+        if (value != null) {
+            setModel(value);
         }
     }
 
