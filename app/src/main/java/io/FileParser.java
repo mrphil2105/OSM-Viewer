@@ -26,23 +26,30 @@ public class FileParser implements IOConstants {
 
     public static File createMapFromOsm(File infile, FeatureSet features, OSMObserver... observers)
             throws IOException, XMLStreamException {
-        var reader = new OSMReader();
         var writers = new ArrayList<Pair<String, Writer>>();
 
-        writers.add(new Pair<>(FEATURES, new ObjectWriter<>(features)));
-        writers.add(new Pair<>(BOUNDS, new ObjectWriter<>(new OSMBounds())));
+        { // `reader` gets its own scope so that it'll actually get GC'd at the end.
+            // `reader = null` on its own just got optimized out.
 
-        for (var feature : features) {
-            writers.add(new Pair<>(feature.name(), feature.createWriter()));
+            var reader = new OSMReader();
+
+            writers.add(new Pair<>(FEATURES, new ObjectWriter<>(features)));
+            writers.add(new Pair<>(BOUNDS, new ObjectWriter<>(new OSMBounds())));
+
+            for (var feature : features) {
+                writers.add(new Pair<>(feature.name(), feature.createWriter()));
+            }
+
+            for (var writer : writers) {
+                reader.addObservers(writer.getValue());
+            }
+
+            reader.addObservers(observers);
+
+            reader.parse(getInputStream(infile));
         }
 
-        for (var writer : writers) {
-            reader.addObservers(writer.getValue());
-        }
-
-        reader.addObservers(observers);
-
-        reader.parse(getInputStream(infile));
+        System.gc();
 
         var outfile =
                 new File(
