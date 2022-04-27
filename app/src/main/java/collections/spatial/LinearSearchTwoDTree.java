@@ -15,6 +15,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
 
     private Node<E> root;
     private int size;
+    private int height;
 
     public LinearSearchTwoDTree(int maxCount) {
         this(maxCount, new Rect(0, 0, 1, 1));
@@ -31,6 +32,11 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
     }
 
     @Override
+    public int height() {
+        return height;
+    }
+
+    @Override
     public void insert(Point point, E value) {
         if (point == null) {
             throw new IllegalArgumentException("Parameter 'point' cannot be null.");
@@ -43,6 +49,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         if (isEmpty()) {
             root = insert(point, value, root, 0);
             root.rect = bounds;
+            height = 1;
         } else {
             root = insert(point, value, root, 1);
         }
@@ -51,6 +58,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
     private Node<E> insert(Point point, E value, Node<E> node, int level) {
         if (node == null) {
             size++;
+            height = Math.max(level, height);
 
             return new LeafNode<>(point, value);
         }
@@ -68,6 +76,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
                 // Null means the ancestor node would have contained a child with no points (not valid).
                 if (ancestorNode != null) {
                     size++;
+                    height = Math.max(level + 1, height);
 
                     return ancestorNode;
                 }
