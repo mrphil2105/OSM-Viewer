@@ -57,4 +57,8 @@ public class LoadingDialog extends Dialog {
 
         diag.showAndWait();
     }
+
+    public void finish() {
+        super.close(null);
+    }
 }
