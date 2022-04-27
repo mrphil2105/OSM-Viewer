@@ -98,19 +98,8 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
             if (point.y() < ancestorNode.y()) {
                 // Traverse down the tree. If this is a null child an insert will be performed.
                 ancestorNode.left = insert(point, value, ancestorNode.left, level + 1);
-
-                // If the child ancestorNode has an uninitialized rect we initialize it.
-                if (ancestorNode.left.rect == null) {
-                    ancestorNode.left.rect =
-                        new Rect(ancestorNode.rect.top(), ancestorNode.rect.left(), ancestorNode.y(), ancestorNode.rect.right());
-                }
             } else {
                 ancestorNode.right = insert(point, value, ancestorNode.right, level + 1);
-
-                if (ancestorNode.right.rect == null) {
-                    ancestorNode.right.rect =
-                        new Rect(ancestorNode.y(), ancestorNode.rect.left(), ancestorNode.rect.bottom(), ancestorNode.rect.right());
-                }
             }
         } else {
             // Search by x-coordinate (point with vertical partition line).
@@ -118,18 +107,8 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
             // We want to call insert on the left side if the new point is smaller at the x-axis.
             if (point.x() < ancestorNode.x()) {
                 ancestorNode.left = insert(point, value, ancestorNode.left, level + 1);
-
-                if (ancestorNode.left.rect == null) {
-                    ancestorNode.left.rect =
-                        new Rect(ancestorNode.rect.top(), ancestorNode.rect.left(), ancestorNode.rect.bottom(), ancestorNode.x());
-                }
             } else {
                 ancestorNode.right = insert(point, value, ancestorNode.right, level + 1);
-
-                if (ancestorNode.right.rect == null) {
-                    ancestorNode.right.rect =
-                        new Rect(ancestorNode.rect.top(), ancestorNode.x(), ancestorNode.rect.bottom(), ancestorNode.rect.right());
-                }
             }
         }
 
