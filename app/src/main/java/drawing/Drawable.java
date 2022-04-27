@@ -54,8 +54,6 @@ public enum Drawable {
     SECONDARY(Shape.POLYLINE, Color.web("#f7fabf"), 0.8, Category.ROAD),
     PRIMARY(Shape.POLYLINE, Color.web("#fcd6a4"), 0.9, Category.ROAD),
     MOTORWAY(Shape.POLYLINE, Color.web("#e892a2"), 1.0, Category.ROAD),
-    NATURE_RESERVE(Shape.POLYLINE, Color.rgb(0, 180, 30, 0.2), 0.6, Category.MISC),
-    MILITARY(Shape.FILL, Color.rgb(255, 0, 0, 0.2), 0, Category.MISC),
     ROUTE(Shape.POLYLINE, Color.web("#1967d2"), 0.6, Category.ROAD),
     BOUNDS(Shape.POLYLINE, Color.rgb(255, 0, 150, 0.5), 5.0, Category.MISC),
     ADDRESS(Shape.FILL, Color.web("#D22B2B"), 0.4, Category.MISC),
@@ -128,7 +126,6 @@ public enum Drawable {
                 case "farmyard" -> FARMYARD;
                 case "orchard" -> ORCHARD;
                 case "quarry" -> QUARRY;
-                case "military" -> MILITARY;
                 case "greenfield" -> IGNORED;
                 case "retail" -> RETAIL;
                 case "isolated_dwelling" -> DWELLING;
@@ -169,7 +166,6 @@ public enum Drawable {
                 case "pitch" -> PITCH;
                 case "marina", "swimming_pool" -> WATER;
                 case "garden" -> GRASS;
-                case "nature_reserve" -> NATURE_RESERVE;
                 case "miniature_golf", "golf_course" -> GOLF;
                 default -> _default(tag);
             };
