@@ -30,7 +30,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
@@ -139,22 +138,25 @@ public class Controller {
 
         setStyleSheets("style.css");
 
-        model.getRoutePoints().addListener((ListChangeListener<? super Point>)listener-> {
-            while (listener.next()) {
-            }
+        model
+                .getRoutePoints()
+                .addListener(
+                        (ListChangeListener<? super Point>)
+                                listener -> {
+                                    while (listener.next()) {}
 
-            if (!listener.wasAdded()) {
-                return;
-            }
+                                    if (!listener.wasAdded()) {
+                                        return;
+                                    }
 
-            var renderer = canvas.getRenderer();
-            if (routeDrawing != null) renderer.clear(routeDrawing);
+                                    var renderer = canvas.getRenderer();
+                                    if (routeDrawing != null) renderer.clear(routeDrawing);
 
-            var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
-            routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
+                                    var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
+                                    routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
 
-            renderer.draw(routeDrawing);
-        });
+                                    renderer.draw(routeDrawing);
+                                });
 
         canvas.mapMouseClickedProperty.set(
                 e -> {
@@ -166,12 +168,10 @@ public class Controller {
 
                         if (fromPoint == null) {
                             fromPoint = point;
-                        }
-                        else if (toPoint == null) {
+                        } else if (toPoint == null) {
                             toPoint = point;
                             model.calculateBestRoute(fromPoint, toPoint);
-                        }
-                        else {
+                        } else {
                             fromPoint = point;
                             toPoint = null;
                         }
@@ -246,10 +246,9 @@ public class Controller {
                     }
                 });
         canvas.mapMouseWheelProperty.set(
-            e -> {
-                setZoomAndScale();
-            }
-        );
+                e -> {
+                    setZoomAndScale();
+                });
         canvas.setZoomHandler(model.bounds);
         setZoomAndScale();
         // FIXME: yuck
@@ -325,9 +324,10 @@ public class Controller {
     public void handleSearchClick() {
         var result = searchTextField.handleSearch();
         if (result == null) return; // TODO: handle exception and show message?
-        if(result.size() > 1){
-           //TODO: popup message
-        } else if(result.size() < 1){
+        if (result.size() > 1) {
+            // TODO: popup message
+            return;
+        } else if (result.size() < 1) {
 
         }
         var address = result.get(0);
@@ -342,24 +342,34 @@ public class Controller {
         }
         lastDrawnAddress = drawing;
 
-        searchTextField.clear(); //TODO: find ud af om den skal bruges
+        searchTextField.clear();
     }
 
+    @FXML
+    public void handleSearchInFocus() {
+        searchTextField.showCurrentAddresses();
+    }
 
     @FXML
-    public void handleInFocus() {
-        searchTextField.showHistory();
+    public void handleToInFocus() {
+        toRouteTextField.showCurrentAddresses();
+    }
+
+    @FXML
+    public void handleFromInFocus() {
+        fromRouteTextField.showCurrentAddresses();
     }
 
     @FXML
     public void handleRouteClick() {
 
-        if(fromRouteTextField.handleSearch()==null || toRouteTextField.handleSearch()==null){
+        if (fromRouteTextField.handleSearch() == null || toRouteTextField.handleSearch() == null) {
             return;
         }
-        routeBetweenAddresses(fromRouteTextField.handleSearch().get(0),toRouteTextField.handleSearch().get(0),EdgeRole.CAR);
-
-
+        routeBetweenAddresses(
+                fromRouteTextField.handleSearch().get(0),
+                toRouteTextField.handleSearch().get(0),
+                EdgeRole.CAR);
     }
 
     @FXML
@@ -476,17 +486,19 @@ public class Controller {
         try (var res = FileParser.readMap(file)) {
             setModel(new Model(res));
         }
-    }   
+    }
 
-    @FXML void handleZoomOutButton(){
+    @FXML
+    void handleZoomOutButton() {
         canvas.zoomChange(false);
         setZoomAndScale();
     }
-    @FXML void handleZoomInButton(){
+
+    @FXML
+    void handleZoomInButton() {
         canvas.zoomChange(true);
         setZoomAndScale();
     }
-
 
     @FXML
     public void handleFromKeyTyped(KeyEvent event) {
@@ -518,22 +530,18 @@ public class Controller {
         return model.getAddresses().possibleAddresses(searchedAddress, 5);
     }
 
-    private void routeBetweenAddresses(Address addressFrom, Address addressTo, EdgeRole mode){
-        Point from = new Point((float)addressFrom.node().lon(),(float)addressFrom.node().lat());
-        Point to = new Point((float)addressTo.node().lon(),(float)addressTo.node().lat());
+    private void routeBetweenAddresses(Address addressFrom, Address addressTo, EdgeRole mode) {
+        Point from = new Point((float) addressFrom.node().lon(), (float) addressFrom.node().lat());
+        Point to = new Point((float) addressTo.node().lon(), (float) addressTo.node().lat());
 
         Point dijkstraFrom = model.getNearestPoint(from);
         Point dijkstraTo = model.getNearestPoint(to);
 
-        model.calculateBestRoute(dijkstraFrom,dijkstraTo);
+        model.calculateBestRoute(dijkstraFrom, dijkstraTo);
     }
 
-
-
-    private void setZoomAndScale(){
+    private void setZoomAndScale() {
         zoomLevelText.setText(canvas.updateZoom());
         scaleBarText.setText(canvas.updateScalebar());
     }
-
-
 }

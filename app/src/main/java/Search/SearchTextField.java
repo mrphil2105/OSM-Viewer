@@ -1,10 +1,10 @@
 package Search;
 
-import view.Model;
 import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.TextField;
+import view.Model;
 
 public class SearchTextField extends TextField {
     AutofillContextMenu popupEntries;
@@ -32,9 +32,7 @@ public class SearchTextField extends TextField {
         popupEntries.hide();
         popupEntries.getItems().clear();
         addressDatabase.getHistory().forEach(e -> popupEntries.getItems().add(new AddressMenuItem(e)));
-        if (!popupEntries.isShowing()) {
-            popupEntries.show(this, Side.BOTTOM, 0, 0);
-        }
+        showCurrentAddresses();
     }
 
     public void showMenuItems(ObservableList<Address> itemsToShow) {
@@ -57,9 +55,7 @@ public class SearchTextField extends TextField {
                 item.setOnAction(popupEntries::onMenuClick);
                 popupEntries.getItems().add(item);
             }
-            if (!popupEntries.isShowing()) {
-                popupEntries.show(this, Side.BOTTOM, 0, 0);
-            }
+            showCurrentAddresses();
         }
     }
 
@@ -96,5 +92,11 @@ public class SearchTextField extends TextField {
         searchedAddressBuilder.city(reformat(searchedAddressBuilder.getCity()));
 
         return searchedAddressBuilder.build();
+    }
+
+    public void showCurrentAddresses() {
+        if (!popupEntries.isShowing()) {
+            popupEntries.show(this, Side.BOTTOM, 0, 0);
+        }
     }
 }
