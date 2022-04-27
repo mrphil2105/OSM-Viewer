@@ -89,27 +89,12 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
 
         // The node is an ancestor node, so we traverse the tree normally.
         var ancestorNode = (AncestorNode<E>)node;
+        var isLower = (level & 1) == 0 ? point.y() < ancestorNode.y() : point.x() < ancestorNode.x();
 
-        // Check if level is even.
-        if ((level & 1) == 0) {
-            // Search by y-coordinate (point with horizontal partition line).
-
-            // We want to call insert on the left side if the new point is smaller at the y-axis.
-            if (point.y() < ancestorNode.y()) {
-                // Traverse down the tree. If this is a null child an insert will be performed.
-                ancestorNode.left = insert(point, value, ancestorNode.left, level + 1);
-            } else {
-                ancestorNode.right = insert(point, value, ancestorNode.right, level + 1);
-            }
+        if (isLower) {
+            ancestorNode.left = insert(point, value, ancestorNode.left, level + 1);
         } else {
-            // Search by x-coordinate (point with vertical partition line).
-
-            // We want to call insert on the left side if the new point is smaller at the x-axis.
-            if (point.x() < ancestorNode.x()) {
-                ancestorNode.left = insert(point, value, ancestorNode.left, level + 1);
-            } else {
-                ancestorNode.right = insert(point, value, ancestorNode.right, level + 1);
-            }
+            ancestorNode.right = insert(point, value, ancestorNode.right, level + 1);
         }
 
         return node;
