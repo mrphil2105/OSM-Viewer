@@ -5,8 +5,6 @@ import geometry.Rect;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
@@ -101,28 +99,32 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
     }
 
     private AncestorNode<E> splitLeafNode(Point point, E value, LeafNode<E> node, int level) {
-        // We need to split the list into two parts, at the index where the new point should be.
+        // We split the list into two parts, the left and right having "smaller" and "greater" points respectively.
         // This allows the new point to be a parent node for the two leaf nodes.
-        // First we need to sort the list, so we split correctly and use binary search.
-        Comparator<Point> comparator = (first, second) -> (level & 1) == 0 ?
-            Float.compare(first.y(), second.y()) :
-            Float.compare(first.x(), second.x());
-        Sorting.multiSort(node.points, comparator, node.points, node.values);
-        var splitIndex = Collections.binarySearch(node.points, point, comparator);
+        var leftPoints = new ArrayList<Point>();
+        var leftValues = new ArrayList<E>();
+        var rightPoints = new ArrayList<Point>();
+        var rightValues = new ArrayList<E>();
 
-        if (splitIndex < 0) {
-            splitIndex = ~splitIndex;
+        for (int i = 0; i < node.size(); i++) {
+            var nodePoint = node.points.get(i);
+            var nodeValue = node.values.get(i);
+
+            var isLower = (level & 1) == 0 ? nodePoint.y() < point.y() : nodePoint.x() < point.x();
+
+            if (isLower) {
+                leftPoints.add(nodePoint);
+                leftValues.add(nodeValue);
+            } else {
+                rightPoints.add(nodePoint);
+                rightValues.add(nodeValue);
+            }
         }
 
-        if (splitIndex == 0 || splitIndex == node.size()) {
-            // We would need to create a child node with no points, which is not supported, so we wait for a new point.
+        if (leftPoints.isEmpty() || rightPoints.isEmpty()) {
+            // We would have created a child node with no points, which is not supported, so we wait for a new point.
             return null;
         }
-
-        var leftPoints = new ArrayList<>(node.points.subList(0, splitIndex));
-        var leftValues = new ArrayList<>(node.values.subList(0, splitIndex));
-        var rightPoints = new ArrayList<>(node.points.subList(splitIndex, node.size()));
-        var rightValues = new ArrayList<>(node.values.subList(splitIndex, node.size()));
 
         var ancestorNode = new AncestorNode<>(point, value, node.rect);
         ancestorNode.left = new LeafNode<>(leftPoints, leftValues, new Rect(
