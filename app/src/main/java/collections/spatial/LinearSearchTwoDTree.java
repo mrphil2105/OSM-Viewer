@@ -36,6 +36,10 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
             throw new IllegalArgumentException("Parameter 'point' cannot be null.");
         }
 
+        if (!bounds.contains(point)) {
+            throw new IllegalArgumentException("The specified point is not contained within the bounds of the tree.");
+        }
+
         if (isEmpty()) {
             root = insert(point, value, root, 0);
             root.rect = bounds;
