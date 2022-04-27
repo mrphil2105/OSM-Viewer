@@ -6,6 +6,7 @@ import canvas.MapCanvas;
 import canvas.Renderer;
 import com.jogamp.newt.event.MouseEvent;
 import dialog.CreateMapDialog;
+import dialog.LoadingDialog;
 import drawing.Category;
 import drawing.Drawable;
 import drawing.Drawing;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
@@ -109,31 +111,9 @@ public class Controller {
 
     @FXML private Label zoomLevelText;
 
+    @FXML private Label fps;
+
     public void init(Model model) {
-        searchTextField.init(model);
-        toRouteTextField.init(model);
-        fromRouteTextField.init(model);
-        model
-                .getObservableSearchSuggestions()
-                .addListener(
-                        (ListChangeListener<Address>)
-                                c -> {
-                                    searchTextField.showMenuItems((ObservableList<Address>) c.getList());
-                                });
-        model
-                .getObservableToSuggestions()
-                .addListener(
-                        (ListChangeListener<Address>)
-                                c -> {
-                                    toRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
-                                });
-        model
-                .getObservableFromSuggestions()
-                .addListener(
-                        (ListChangeListener<Address>)
-                                c -> {
-                                    fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
-                                });
         setModel(model);
 
         setStyleSheets("style.css");
@@ -157,6 +137,8 @@ public class Controller {
 
                                     renderer.draw(routeDrawing);
                                 });
+
+        fps.textProperty().bind(canvas.fpsProperty.asString("FPS: %.1f"));
 
         canvas.mapMouseClickedProperty.set(
                 e -> {
@@ -300,6 +282,37 @@ public class Controller {
         if (model.supports(Feature.ADDRESS_SEARCH)) {
             searchTextField.init(model);
             searchTextField.setDisable(false);
+            model
+                    .getObservableSearchSuggestions()
+                    .addListener(
+                            (ListChangeListener<Address>)
+                                    c -> {
+                                        searchTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                    });
+
+        } else {
+            searchTextField.setDisable(true);
+        }
+
+        if (model.supports(Feature.PATHFINDING)) {
+            toRouteTextField.init(model);
+            fromRouteTextField.init(model);
+            toRouteTextField.setDisable(false);
+            fromRouteTextField.setDisable(false);
+            model
+                    .getObservableToSuggestions()
+                    .addListener(
+                            (ListChangeListener<Address>)
+                                    c -> {
+                                        toRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                    });
+            model
+                    .getObservableFromSuggestions()
+                    .addListener(
+                            (ListChangeListener<Address>)
+                                    c -> {
+                                        fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
+                                    });
         } else {
             searchTextField.setDisable(true);
         }
@@ -483,8 +496,20 @@ public class Controller {
     }
 
     private void loadFile(File file) throws Exception {
-        try (var res = FileParser.readMap(file)) {
-            setModel(new Model(res));
+        AtomicReference<Model> model = new AtomicReference<>();
+        LoadingDialog.showDialog(
+                "Loading " + file.getName(),
+                () -> {
+                    try (var res = FileParser.readMap(file)) {
+                        model.set(new Model(res));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        var value = model.get();
+        if (value != null) {
+            setModel(value);
         }
     }
 
