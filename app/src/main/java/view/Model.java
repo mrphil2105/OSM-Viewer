@@ -3,6 +3,7 @@ package view;
 import Search.Address;
 import Search.AddressDatabase;
 import features.Feature;
+import features.FeatureSet;
 import geometry.Point;
 import geometry.Rect;
 import io.PolygonsReader;
@@ -27,7 +28,7 @@ public class Model {
     private final StringProperty nearestRoad = new SimpleStringProperty("none");
     private Dijkstra dijkstra;
     private final ObservableList<Point> routePoints = FXCollections.observableArrayList();
-    private final Set<Feature> features;
+    private final FeatureSet features;
 
     public canvas.Model canvasModel;
 
@@ -38,7 +39,7 @@ public class Model {
     public Model(ReadResult result) {
         bounds = result.bounds().getRect();
 
-        features = result.readers().keySet();
+        features = new FeatureSet(result.readers().keySet());
 
         for (var entry : result.readers().entrySet()) {
             switch (entry.getKey()) {
