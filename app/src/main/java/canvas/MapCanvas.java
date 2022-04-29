@@ -8,20 +8,20 @@ import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
 import drawing.Category;
-import drawing.Drawable;
-import drawing.Drawing;
 import geometry.Point;
 import geometry.Rect;
-import geometry.Vector2D;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Scale;
+import javafx.util.Duration;
 
 public class MapCanvas extends Region implements MouseListener {
     final Affine transform = new Affine();
@@ -49,7 +49,10 @@ public class MapCanvas extends Region implements MouseListener {
     public final ObjectProperty<EventHandler<MouseEvent>> mapMouseWheelProperty =
             new SimpleObjectProperty<>();
 
+    public final FloatProperty fpsProperty = new SimpleFloatProperty();
+
     public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
+    private Timeline fpsUpdater;
 
     public void setModel(Model model) {
         dispose();
@@ -90,9 +93,14 @@ public class MapCanvas extends Region implements MouseListener {
         renderer = new Renderer(model, this);
         window.addGLEventListener(renderer);
         animator = new Animator(window);
+        animator.setUpdateFPSFrames(10, null);
         animator.start();
 
-
+        fpsUpdater =
+                new Timeline(
+                        new KeyFrame(Duration.millis(100), e -> fpsProperty.set(animator.getLastFPS())));
+        fpsUpdater.setCycleCount(Animation.INDEFINITE);
+        fpsUpdater.play();
     }
 
     public void setShader(Renderer.Shader shader) {
@@ -108,6 +116,8 @@ public class MapCanvas extends Region implements MouseListener {
         }
 
         if (animator != null) animator.stop();
+
+        if (fpsUpdater != null) fpsUpdater.stop();
 
         if (getChildren().size() > 0) {
             var newt = (NewtCanvasJFX) getChildren().get(0);
@@ -127,9 +137,25 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
     public void zoom(float zoom, float x, float y) {
-        transform.prependTranslation(-x, -y);
-        transform.prependScale(zoom, zoom);
-        transform.prependTranslation(x, y);
+        if (transform.getMxx() * zoom < zoomHandler.getMaxZoom()) {
+            transform.prependTranslation(-x, -y);
+            transform.prependScale(
+                    zoomHandler.getMaxZoom() / transform.getMxx(),
+                    zoomHandler.getMaxZoom() / transform.getMxx());
+            transform.prependTranslation(x, y);
+
+        } else if (transform.getMxx() * zoom > zoomHandler.getMinZoom()) {
+            transform.prependTranslation(-x, -y);
+            transform.prependScale(
+                    zoomHandler.getMinZoom() / transform.getMxx(),
+                    zoomHandler.getMinZoom() / transform.getMxx());
+            transform.prependTranslation(x, y);
+
+        } else {
+            transform.prependTranslation(-x, -y);
+            transform.prependScale(zoom, zoom);
+            transform.prependTranslation(x, y);
+        }
     }
 
     public void pan(float dx, float dy) {
@@ -156,39 +182,36 @@ public class MapCanvas extends Region implements MouseListener {
         transform.setMyy(zoom);
     }
 
-    public void zoomChange(boolean positive){
-        Point point = new Point(1280/2, 720/2);
-        transform.prependTranslation(-point.x(), -point.y());
+    public void zoomChange(boolean positive) {
+        Point point = new Point(640, 360);
         Scale scale = new Scale(1.2, 1.2);
-        if (positive){
-            transform.prepend(scale);
+        if (positive) {
+            zoom((float) scale.getX(), point.x(), point.y());
         } else {
-            try{
-                transform.prepend(scale.createInverse());
-            }
-            catch (NonInvertibleTransformException e){
+            try {
+                zoom((float) scale.createInverse().getX(), point.x(), point.y());
+            } catch (NonInvertibleTransformException e) {
                 e.printStackTrace();
                 return;
             }
-        }   
-        transform.prependTranslation(point.x(), point.y());  
+        }
     }
 
-    public float getZoom(){
+    public float getZoom() {
         return (float) (transform.getMxx() / startZoom);
     }
 
-    public void setZoomHandler(Rect bounds){
+    public void setZoomHandler(Rect bounds) {
         this.zoomHandler = new ZoomHandler(bounds, this);
         startZoom = zoomHandler.getStartZoom();
         setZoom(startZoom);
     }
 
-    public String updateZoom(){
+    public String updateZoom() {
         return zoomHandler.getZoomString();
     }
 
-    public String updateScalebar(){
+    public String updateScalebar() {
         return zoomHandler.getScaleString();
     }
 
@@ -249,7 +272,6 @@ public class MapCanvas extends Region implements MouseListener {
                     mouseEvent.getY());
         }
         handle(mapMouseWheelProperty, mouseEvent);
-        
     }
 
     private <T> void handle(ObjectProperty<EventHandler<T>> prop, T event) {
