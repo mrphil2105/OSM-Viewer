@@ -91,7 +91,9 @@ public class AddressDatabase implements OSMObserver, Serializable {
             }
         }
 
-        builder.SlimOSMNode(node.slim());
+        builder.lat((float) node.lat());
+        builder.lon((float) node.lon());
+
         if (isAddress) addAddress(builder.build());
     }
 
