@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipFile;
 import javafx.util.Pair;
-import javax.xml.stream.XMLStreamException;
 import org.anarres.parallelgzip.ParallelGZIPInputStream;
 import org.anarres.parallelgzip.ParallelGZIPOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -25,7 +24,7 @@ public class FileParser implements IOConstants {
     private static final String BOUNDS = "BOUNDS";
 
     public static File createMapFromOsm(File infile, FeatureSet features, OSMObserver... observers)
-            throws IOException, XMLStreamException {
+            throws Exception {
         var writers = new ArrayList<Pair<String, Writer>>();
 
         { // `reader` gets its own scope so that it'll actually get GC'd at the end.
