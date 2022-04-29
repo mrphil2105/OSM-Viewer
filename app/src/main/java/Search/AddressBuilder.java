@@ -7,28 +7,12 @@ public class AddressBuilder implements Serializable {
     private String street, house, floor, side, postcode, city;
     private SlimOSMNode node;
 
-    public String getStreet() {
+    public String getStreet(){
         return street;
     }
 
-    public String getPostcode() {
-        return postcode;
-    }
-
-    public String getCity() {
+    public String getCity(){
         return city;
-    }
-
-    public String getHouse() {
-        return house;
-    }
-
-    public String getSide() {
-        return side;
-    }
-
-    public String getFloor() {
-        return floor;
     }
 
     public void street(String street) {
