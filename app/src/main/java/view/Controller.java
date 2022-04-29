@@ -15,10 +15,7 @@ import geometry.Point;
 import geometry.Vector2D;
 import io.FileParser;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -340,8 +337,6 @@ public class Controller {
         if (result.size() > 1) {
             // TODO: popup message
             return;
-        } else if (result.size() < 1) {
-
         }
         var address = result.get(0);
 
@@ -528,21 +523,30 @@ public class Controller {
     @FXML
     public void handleFromKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
-        if (result == null) return;
+        if (result == null){
+            model.setFromSuggestions(Collections.emptyList());
+            return;
+        }
         model.setFromSuggestions(result);
     }
 
     @FXML
     public void handleToKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
-        if (result == null) return;
+        if (result == null){
+            model.setFromSuggestions(Collections.emptyList());
+            return;
+        }
         model.setToSuggestions(result);
     }
 
     @FXML
     public void handleSearchKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
-        if (result == null) return;
+        if (result == null){
+            model.setSearchSuggestions(Collections.emptyList());
+            return;
+        };
         model.setSearchSuggestions(result);
     }
 

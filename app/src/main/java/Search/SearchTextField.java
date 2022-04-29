@@ -33,9 +33,6 @@ public class SearchTextField extends TextField {
     }
 
     public void showMenuItems(ObservableList<Address> itemsToShow) {
-        if (getText().isEmpty()) {
-            popupEntries.hide();
-        } else {
             popupEntries.hide();
 
             boolean showStreet = (currentSearch.street() != null);
@@ -53,7 +50,6 @@ public class SearchTextField extends TextField {
                 popupEntries.getItems().add(item);
             }
             showCurrentAddresses();
-        }
     }
 
     public void setCurrentSearch(Address currentSearch) {
@@ -92,6 +88,10 @@ public class SearchTextField extends TextField {
     }
 
     public void showCurrentAddresses() {
+        if(getText().isBlank()) {
+            popupEntries.hide();
+            return;
+        }
         if (!popupEntries.isShowing()) {
             popupEntries.show(this, Side.BOTTOM, 0, 0);
         }
