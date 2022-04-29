@@ -12,19 +12,15 @@ import osm.elements.*;
 
 public class Dijkstra implements OSMObserver, Serializable {
     private final Graph graph;
-    private final Map<Long, Float> distTo;
-    private final Map<Long, Edge> edgeTo;
-    private final Set<Long> settled;
-    private final PriorityQueue<Node> queue;
+    private transient Map<Long, Float> distTo;
+    private transient Map<Long, Edge> edgeTo;
+    private transient Set<Long> settled;
+    private transient PriorityQueue<Node> queue;
 
-    private EdgeRole mode;
+    private transient EdgeRole mode;
 
     public Dijkstra() {
         graph = new Graph();
-        distTo = new HashMap<>();
-        edgeTo = new HashMap<>();
-        settled = new HashSet<>();
-        queue = new PriorityQueue<>();
 
         mode = EdgeRole.CAR;
     }
@@ -102,10 +98,10 @@ public class Dijkstra implements OSMObserver, Serializable {
     public List<Point> shortestPath(Point from, Point to, EdgeRole mode) {
         this.mode = mode;
 
-        distTo.clear();
-        edgeTo.clear();
-        settled.clear();
-        queue.clear();
+        distTo = new HashMap<>();
+        edgeTo = new HashMap<>();
+        settled = new HashSet<>();
+        queue = new PriorityQueue<>();
 
         var sourceVertex = Dijkstra.coordinatesToLong(from.x(), from.y());
         var targetVertex = Dijkstra.coordinatesToLong(to.x(), to.y());
