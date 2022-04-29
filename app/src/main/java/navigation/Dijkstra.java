@@ -60,9 +60,11 @@ public class Dijkstra implements OSMObserver, Serializable {
         for (int i = 1; i < nodes.length; i++) {
             var secondNode = nodes[i];
 
-            var firstVertex = coordinatesToLong((float)firstNode.lon(), (float)firstNode.lat());
-            var secondVertex = coordinatesToLong((float)secondNode.lon(), (float)secondNode.lat());
-            var distance = calculateDistance(firstNode, secondNode);
+            var firstPoint = new Point((float)firstNode.lon(), (float)firstNode.lat());
+            var secondPoint = new Point((float)secondNode.lon(), (float)secondNode.lat());
+            var firstVertex = coordinatesToLong(firstPoint);
+            var secondVertex = coordinatesToLong(secondPoint);
+            var distance = calculateDistance(firstPoint, secondPoint);
 
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
                 var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles);
@@ -78,9 +80,9 @@ public class Dijkstra implements OSMObserver, Serializable {
         }
     }
 
-    private static long coordinatesToLong(float lon, float lat) {
-        var lonBits = Float.floatToIntBits(lon);
-        var latBits = Float.floatToIntBits(lat);
+    private static long coordinatesToLong(Point point) {
+        var lonBits = Float.floatToIntBits(point.x());
+        var latBits = Float.floatToIntBits(point.y());
 
         return (((long)lonBits) << 32) | (latBits & 0xFFFFFFFFL);
     }
@@ -103,8 +105,8 @@ public class Dijkstra implements OSMObserver, Serializable {
         settled = new HashSet<>();
         queue = new PriorityQueue<>();
 
-        var sourceVertex = Dijkstra.coordinatesToLong(from.x(), from.y());
-        var targetVertex = Dijkstra.coordinatesToLong(to.x(), to.y());
+        var sourceVertex = Dijkstra.coordinatesToLong(from);
+        var targetVertex = Dijkstra.coordinatesToLong(to);
 
         queue.add(new Node(sourceVertex, 0));
         distTo.put(sourceVertex, 0f);
@@ -189,7 +191,7 @@ public class Dijkstra implements OSMObserver, Serializable {
     private static List<Long> extractPath(long sourceVertex, long targetVertex, Map<Long, Edge> edgeTo) {
         var path = new ArrayList<Long>();
 
-        long from = coordinatesToLong(Float.NaN, Float.NaN);
+        long from = coordinatesToLong(new Point(Float.NaN, Float.NaN));
         long to = targetVertex;
         path.add(to);
 
@@ -304,11 +306,11 @@ public class Dijkstra implements OSMObserver, Serializable {
         };
     }
 
-    private static float calculateDistance(SlimOSMNode firstNode, SlimOSMNode secondNode) {
-        var x1 = firstNode.lon();
-        var y1 = firstNode.lat();
-        var x2 = secondNode.lon();
-        var y2 = secondNode.lat();
+    private static float calculateDistance(Point firstPoint, Point secondPoint) {
+        var x1 = firstPoint.x();
+        var y1 = firstPoint.y();
+        var x2 = secondPoint.x();
+        var y2 = secondPoint.y();
 
         return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
