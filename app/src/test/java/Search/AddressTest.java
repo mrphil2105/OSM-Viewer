@@ -16,7 +16,6 @@ public class AddressTest {
     static AddressDatabase addressDatabase;
     static Address[] addresses;
 
-
    @BeforeAll
    static void initiateAddresses(){
       addressDatabase=new AddressDatabase();
@@ -40,7 +39,6 @@ public class AddressTest {
       addressDatabase.buildTries();
 
    }
-
 
    //tests
 
@@ -139,18 +137,28 @@ public class AddressTest {
 
     @Test
     public void testFalseInput(){
+
+       //No addresses should be returned if an empty string is given
         var list = search("");
         assertTrue(list ==null || list.isEmpty());
 
+        //No addresses should be returned for this input, since it doesn't match any of the street names
         var list2 = search("drgdfgdcfg");
         assertTrue(list2 ==null || list2.isEmpty());
 
-        var list3 = search("An 3 anden testby 5060");
+        //No addresses should be returned for this input, since the street is not in the given city
+        var list3 = search("testvej 2 Fjerde Testby ");
         assertTrue(list3 ==null || list3.isEmpty());
 
+        //No addresses should be returned for this input, since the city and the post code doesn't match (correct city)
+        var list4 = search("An 3 4050 anden testby ");
+        assertTrue(list4 ==null || list4.isEmpty());
+
+        //No addresses should be returned for this input, since the street is not in the given postcode
+        var list5 = search("testvej 2 6000 ");
+        assertTrue(list5 ==null || list5.isEmpty());
 
     }
-
 
     //Utils
 
@@ -167,7 +175,6 @@ public class AddressTest {
 
         return addressDatabase.possibleAddresses(address.build(),5);
     }
-
 
     private boolean containsExactly(List<Address> checkList, int[] numbers){
         var shouldContain=new ArrayList<Address>();
