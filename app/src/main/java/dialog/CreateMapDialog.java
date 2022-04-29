@@ -24,7 +24,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javax.xml.stream.XMLStreamException;
 import osm.ReaderStats;
 
 public class CreateMapDialog extends Dialog {
@@ -121,7 +120,7 @@ public class CreateMapDialog extends Dialog {
                                             progress.setProgress(100);
                                             timeline.stop();
                                         });
-                            } catch (IOException | XMLStreamException e) {
+                            } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         });
