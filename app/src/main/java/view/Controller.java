@@ -264,7 +264,7 @@ public class Controller {
     }
 
     private void setModel(Model model) {
-        if (this.model != null) this.model.dispose();
+        disableAll();
 
         this.model = model;
 
@@ -274,10 +274,6 @@ public class Controller {
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
-        } else {
-            canvas.dispose();
-            canvas.setVisible(false);
-            rightVBox.setDisable(true);
         }
 
         if (model.supports(Feature.ADDRESS_SEARCH)) {
@@ -291,8 +287,6 @@ public class Controller {
                                         searchTextField.showMenuItems((ObservableList<Address>) c.getList());
                                     });
 
-        } else {
-            searchTextField.setDisable(true);
         }
 
         if (model.supports(Feature.PATHFINDING)) {
@@ -314,8 +308,6 @@ public class Controller {
                                     c -> {
                                         fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
                                     });
-        } else {
-            searchTextField.setDisable(true);
         }
 
         if (model.supports(Feature.NEAREST_NEIGHBOR)) {
@@ -323,9 +315,22 @@ public class Controller {
                     .textProperty()
                     .bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
             nearestRoadLabel.setVisible(true);
-        } else {
-            nearestRoadLabel.setVisible(false);
         }
+    }
+
+    public void disableAll() {
+        if (model != null) model.dispose();
+
+        canvas.dispose();
+        canvas.setVisible(false);
+        rightVBox.setDisable(true);
+
+        searchTextField.setDisable(true);
+
+        toRouteTextField.setDisable(true);
+        fromRouteTextField.setDisable(true);
+
+        nearestRoadLabel.setVisible(false);
     }
 
     public void dispose() {
@@ -479,17 +484,16 @@ public class Controller {
         var file = diag.showOpenDialog(scene.getWindow());
         if (file == null) return;
 
-        CreateMapDialog.showDialog(
-                file,
-                r -> {
-                    if (r instanceof CreateMapDialogResult result) {
-                        try {
-                            loadFile(result.file);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                });
+        disableAll();
+
+        file = CreateMapDialog.showDialog(file);
+        if (file != null) {
+            try {
+                loadFile(file);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void loadFile(File file) throws Exception {

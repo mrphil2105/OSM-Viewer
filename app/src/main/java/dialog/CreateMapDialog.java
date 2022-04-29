@@ -34,7 +34,6 @@ public class CreateMapDialog extends Dialog {
     @FXML private VBox checkboxes;
     @FXML private GridPane statsGrid;
     @FXML private Button next;
-    @FXML private Button cancel;
     @FXML private Label nodeTotal;
     @FXML private Label nodeThroughput;
     @FXML private Label wayTotal;
@@ -62,13 +61,15 @@ public class CreateMapDialog extends Dialog {
         }
     }
 
-    public static void showDialog(File file, Consumer<DialogResult> callback) throws IOException {
+    public static File showDialog(File file) throws IOException {
         var diag = (CreateMapDialog) load("CreateMapDialog.fxml");
 
         diag.setSet(EnumSet.allOf(Feature.class));
         diag.file = file;
 
-        diag.show(callback);
+        diag.showAndWait();
+
+        return diag.file;
     }
 
     @FXML
@@ -76,7 +77,6 @@ public class CreateMapDialog extends Dialog {
         header.textProperty().set("Creating map...");
         checkboxes.setDisable(true);
         statsGrid.setVisible(true);
-        cancel.setDisable(true);
         next.setDisable(true);
         next.onActionProperty().set(e -> close(new CreateMapDialogResult(file)));
         next.textProperty().set("Open");
@@ -115,7 +115,6 @@ public class CreateMapDialog extends Dialog {
                                 Platform.runLater(
                                         () -> {
                                             next.setDisable(false);
-                                            cancel.setDisable(false);
                                             header.textProperty().set(file.getName() + " created");
                                             progress.setProgress(100);
                                             timeline.stop();
@@ -127,10 +126,5 @@ public class CreateMapDialog extends Dialog {
 
         thread.setDaemon(true);
         thread.start();
-    }
-
-    @FXML
-    private void cancel() {
-        close(null);
     }
 }
