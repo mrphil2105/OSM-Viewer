@@ -36,7 +36,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.util.Pair;
 import navigation.EdgeRole;
@@ -261,8 +260,7 @@ public class Controller {
                 e -> {
                     setZoomAndScale();
                 });
-        canvas.setZoomHandler(model.bounds);
-        setZoomAndScale();
+
 
         // FIXME: yuck
         categories
@@ -307,7 +305,8 @@ public class Controller {
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
             canvas.setVisible(true);
-
+            canvas.setZoomHandler(model.bounds);
+            setZoomAndScale();
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
