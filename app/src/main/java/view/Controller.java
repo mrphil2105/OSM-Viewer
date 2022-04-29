@@ -341,7 +341,7 @@ public class Controller {
         var address = result.get(0);
 
         Point point =
-                Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
+                Point.geoToMap(new Point(address.lon(), address.lat()));
         zoomOn(point);
         var drawing = Drawing.create(new Vector2D(point), Drawable.ADDRESS);
         canvas.getRenderer().draw(drawing);
@@ -560,8 +560,8 @@ public class Controller {
     }
 
     private void routeBetweenAddresses(Address addressFrom, Address addressTo, EdgeRole mode) {
-        Point from = new Point((float) addressFrom.node().lon(), (float) addressFrom.node().lat());
-        Point to = new Point((float) addressTo.node().lon(), (float) addressTo.node().lat());
+        Point from = new Point(addressFrom.lon(), addressFrom.lat());
+        Point to = new Point(addressTo.lon(), addressTo.lat());
 
         Point dijkstraFrom = model.getNearestPoint(from);
         Point dijkstraTo = model.getNearestPoint(to);

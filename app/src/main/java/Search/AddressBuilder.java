@@ -5,7 +5,7 @@ import osm.elements.SlimOSMNode;
 
 public class AddressBuilder implements Serializable {
     private String street, house, floor, side, postcode, city;
-    private SlimOSMNode node;
+    private float lat, lon;
 
     public String getStreet(){
         return street;
@@ -39,11 +39,14 @@ public class AddressBuilder implements Serializable {
         this.city = city;
     }
 
-    public void SlimOSMNode(SlimOSMNode node) {
-        this.node = node;
+    public void lat(float lat){
+        this.lat = lat;
+    }
+    public void lon(float lon){
+        this.lon = lon;
     }
 
     public Address build() {
-        return new Address(street, house, floor, side, postcode, city, node);
+        return new Address(street, house, floor, side, postcode, city, lat, lon);
     }
 }
