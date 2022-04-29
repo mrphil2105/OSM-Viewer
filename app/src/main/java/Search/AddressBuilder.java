@@ -1,7 +1,6 @@
 package Search;
 
 import java.io.Serializable;
-import osm.elements.SlimOSMNode;
 
 public class AddressBuilder implements Serializable {
     private String street, house, floor, side, postcode, city;

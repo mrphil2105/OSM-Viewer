@@ -4,7 +4,6 @@ import collections.trie.Trie;
 import collections.trie.TrieBuilder;
 import java.io.Serializable;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
