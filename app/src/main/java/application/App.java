@@ -17,7 +17,8 @@ public class App extends Application {
                 new Model(
                         FileParser.readMap(
                                 FileParser.createMapFromOsm(
-                                        new File("data/bornholm.xml.zip"), FeatureSet.ALL, null)));
+                                        new File("data/bornholm.xml.zip"), FeatureSet.ALL, null)),
+                        null);
 
         new View(model, primaryStage);
     }

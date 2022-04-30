@@ -498,9 +498,9 @@ public class Controller {
         AtomicReference<Model> modelRef = new AtomicReference<>();
         LoadingDialog.showDialog(
                 "Loading " + file.getName(),
-                () -> {
+                bar -> {
                     try (var res = FileParser.readMap(file)) {
-                        modelRef.set(new Model(res));
+                        modelRef.set(new Model(res, bar));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

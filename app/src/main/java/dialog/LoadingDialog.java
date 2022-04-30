@@ -5,6 +5,7 @@ import static util.TimeFormat.formatDuration;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.function.Consumer;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -23,7 +24,7 @@ public class LoadingDialog extends Dialog {
     @FXML
     private void initialize() {}
 
-    public static void showDialog(String header, Runnable task) throws IOException {
+    public static void showDialog(String header, Consumer<ProgressBar> task) throws IOException {
         var diag = (LoadingDialog) load("LoadingDialog.fxml");
 
         var start = LocalTime.now();
@@ -41,7 +42,7 @@ public class LoadingDialog extends Dialog {
         var thread =
                 new Thread(
                         () -> {
-                            task.run();
+                            task.accept(diag.progress);
                             Platform.runLater(
                                     () -> {
                                         diag.closeBtn.setDisable(false);
