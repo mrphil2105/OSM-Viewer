@@ -1,6 +1,5 @@
 package osm;
 
-import collections.lists.ByteList;
 import geometry.Rect;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import jdk.incubator.vector.*;
 import osm.elements.*;
 import osm.tables.NodeTable;
 import osm.tables.WayTable;
@@ -31,9 +31,32 @@ public class OSMReader {
         }
     }
 
+    private static final VectorSpecies<Byte> SPECIES = ByteVector.SPECIES_PREFERRED;
+    private static final int SPECIES_LENGTH = SPECIES.length();
+
+    private static final VectorMask<Byte>[] LSHIFT_MASKS =
+            (VectorMask<Byte>[]) new VectorMask[SPECIES_LENGTH];
+    private static final double[] POWERS_OF_TEN = new double[24];
+
+    private static final ByteVector TAG = ByteVector.broadcast(SPECIES, (byte) '<');
+    private static final ByteVector QUOTE = ByteVector.broadcast(SPECIES, (byte) '"');
+    private static final ByteVector L = ByteVector.broadcast(SPECIES, (byte) 'l');
+    private static final ByteVector DOT = ByteVector.broadcast(SPECIES, (byte) '.');
+
+    static {
+        for (int i = 0; i < SPECIES_LENGTH; i++) {
+            LSHIFT_MASKS[i] = VectorMask.fromLong(SPECIES, 0xFFFF_FFFF_FFFF_FFFFL << i);
+        }
+
+        for (int i = 0; i < POWERS_OF_TEN.length; i++) {
+            POWERS_OF_TEN[i] = Math.pow(10, i);
+        }
+    }
+
     private InputStream stream;
-    private final byte[] buf = new byte[4096];
-    private int cur;
+    private final byte[] buf = new byte[64 * 4096]; // must be multiple of 64
+    private int cur = 0;
+    private int offset = 0;
 
     private final List<OSMObserver> observers = new ArrayList<>();
 
@@ -50,6 +73,7 @@ public class OSMReader {
 
     public void parse(InputStream stream) throws Exception {
         this.stream = stream;
+        stream.read(buf);
 
         parseBounds();
 
@@ -66,72 +90,107 @@ public class OSMReader {
         this.observers.addAll(Arrays.asList(observers));
     }
 
-    private byte read() throws IOException {
-        atTag = false;
-        cur++;
+    private void refill() throws IOException {
+        int half = buf.length >> 1;
 
-        if (cur < buf.length) {
-            return buf[cur];
+        if (cur >= half) {
+            System.arraycopy(buf, half, buf, 0, half);
+            stream.read(buf, half, half);
+            cur -= half;
         }
-
-        stream.read(buf);
-        cur = 0;
-        return buf[cur];
     }
 
-    private void advance(byte until) throws IOException {
-        // Read a byte until the byte read is `until`
-        byte b;
-        do {
-            b = read();
-        } while (b != until);
+    private byte read() {
+        advance();
+        return at();
     }
 
-    private void advanceQuote() throws IOException {
-        advance((byte) '"');
+    private byte at() {
+        return buf[cur + offset];
     }
 
-    private void advanceTag() throws IOException {
-        advance((byte) '<');
-        read();
+    private void advance() {
+        atTag = false;
+        offset++;
+
+        if (offset == SPECIES_LENGTH) {
+            cur += SPECIES_LENGTH;
+            offset = 0;
+        }
+    }
+
+    private void advance(int amount) {
+        atTag = false;
+        offset += amount;
+
+        while (offset >= SPECIES_LENGTH) {
+            cur += SPECIES_LENGTH;
+            offset -= SPECIES_LENGTH;
+        }
+    }
+
+    private void advance(ByteVector until) {
+        offset =
+                ByteVector.fromArray(SPECIES, buf, cur).eq(until).and(LSHIFT_MASKS[offset]).firstTrue();
+
+        // The happy path would be avoiding this condition.
+        if (offset == SPECIES_LENGTH) {
+            cur += SPECIES_LENGTH;
+            advanceLoop(until);
+        }
+    }
+
+    private void advanceLoop(ByteVector until) {
+        while (true) {
+            offset = ByteVector.fromArray(SPECIES, buf, cur).eq(until).firstTrue();
+
+            if (offset == SPECIES_LENGTH) {
+                cur += SPECIES_LENGTH;
+            } else {
+                return;
+            }
+        }
+    }
+
+    private void advanceTag() {
+        advance(TAG);
+        advance();
         atTag = true;
     }
 
-    private void parseBounds() throws IOException {
-        // Find tag whose name starts with b
+    private void parseBounds() {
         do {
             advanceTag();
-        } while (buf[cur] != 'b');
+        } while (at() != 'b');
 
         double minlat;
         double minlon;
         double maxlat;
         double maxlon;
 
-        advance((byte) 'l');
-        read();
-        var latFirst = buf[cur] == 'a';
-        advanceQuote();
+        advance(L);
+        var latFirst = read() == 'a';
+        advance(QUOTE);
         if (latFirst) {
             minlat = getDouble();
-            advanceQuote();
+            advance(QUOTE);
             minlon = getDouble();
         } else {
             minlon = getDouble();
-            advanceQuote();
+            advance(QUOTE);
             minlat = getDouble();
         }
 
-        advance((byte) 'l');
+        advance(L);
         latFirst = read() == 'a';
-        advanceQuote();
+        advance(QUOTE);
         if (latFirst) {
             maxlat = getDouble();
-            advanceQuote();
+            advance(QUOTE);
             maxlon = getDouble();
         } else {
             maxlon = getDouble();
-            advanceQuote();
+            advance(QUOTE);
             maxlat = getDouble();
         }
 
@@ -144,26 +203,31 @@ public class OSMReader {
 
     private void parseAll(Parseable parseable, ThrowingRunnable runnable) throws Exception {
         while (true) {
+            refill();
+
             if (!atTag) advanceTag();
 
-            if (buf[cur] != parseable.b) {
-                if (!parseable.isContainer || buf[cur] != '/') {
+            if (at() != parseable.b) {
+                if (!parseable.isContainer || at() != '/') {
                     return;
                 }
 
                 advanceTag();
-            } else runnable.run();
+            } else {
+                runnable.run();
+            }
         }
     }
 
     private void parseNode() throws Exception {
-        advanceQuote();
+        advance(8); // advance(QUOTE);
         var id = getLong();
-        advance((byte) 'l');
-        advanceQuote();
+
+        advance(L);
+        advance(4); // advance(QUOTE);
         var lat = getDouble();
-        advance((byte) 'l');
-        advanceQuote();
+        advance(L);
+        advance(4); // advance(QUOTE);
         var lon = getDouble();
 
         var node = new OSMNode(id, lon, lat);
@@ -177,7 +241,7 @@ public class OSMReader {
     }
 
     private void parseWay() throws Exception {
-        advanceQuote();
+        advance(7); // advance(QUOTE);
         var id = getLong();
 
         var way = new OSMWay(id);
@@ -195,7 +259,7 @@ public class OSMReader {
     }
 
     private void parseRelation() throws Exception {
-        advanceQuote();
+        advance(12); // advance(QUOTE);
         var id = getLong();
 
         var relation = new OSMRelation(id);
@@ -209,73 +273,118 @@ public class OSMReader {
         }
     }
 
-    private void parseTag() throws IOException {
-        advanceQuote();
+    private void parseTag() {
+        advance(6); // advance(QUOTE);
         var k = getString();
         var key = OSMTag.Key.from(k);
         if (key == null) return;
 
-        advanceQuote();
+        advance(3); // advance(QUOTE);
         var v = getString().intern();
         var tag = new OSMTag(key, v);
 
         current.tags().add(tag);
     }
 
-    private void parseNd() throws IOException {
-        advanceQuote();
+    private void parseNd() {
+        advance(7); // advance(QUOTE);
         var ref = getLong();
         var node = nodes.get(ref);
         if (node == null) return;
         wayNdList.add(node);
     }
 
-    private void parseMember() throws IOException {
-        advanceQuote();
-        var type = getString();
+    private void parseMember() {
+        advance(12); // advance(QUOTE);
+        var type = read();
 
-        if (type.equals("way")) {
-            advanceQuote();
-            var ref = getLong();
-            var way = ways.get(ref);
-            if (way == null) return;
+        if (type != 'w') return; // way
 
-            advanceQuote();
-            var role = getString();
+        advance(9); // advance(QUOTE);
+        var ref = getLong();
 
-            var member = OSMMemberWay.from(way, role);
-            if (member == null) return;
+        advance(6); // advance(QUOTE);
+        var role = read();
 
-            ((OSMRelation) current).members().add(member);
+        if (role != 'o') return; // outer
+
+        var way = ways.get(ref);
+        if (way == null) return;
+
+        ((OSMRelation) current).ways().add(way);
+    }
+
+    private String getString() {
+        advance();
+        int off = cur + offset;
+        advance();
+        advance(QUOTE);
+        int len = cur + offset - off;
+
+        advance(); // advance past end quote
+
+        return new String(buf, off, len, StandardCharsets.UTF_8);
+    }
+
+    private long getLong() {
+        long num = 0;
+
+        advance();
+        int off = cur + offset;
+        advance();
+        advance(QUOTE);
+        int len = cur + offset - off;
+
+        for (int i = 0; i < len; i++) {
+            num = num * 10 + buf[off + i] - '0';
         }
-    }
 
-    private String getString() throws IOException {
-        var list = new ByteList();
-        byte b;
+        advance(); // advance past end quote
 
-        while ((b = read()) != '"') list.add(b);
-
-        return new String(list.toArray(), StandardCharsets.UTF_8);
-    }
-
-    // AKA readNum
-    private long getLong() throws IOException {
-        long num = 0, b;
-        while ((b = read()) != '"') num = num * 10 + b - '0';
         return num;
     }
 
-    private double getDouble() throws IOException {
-        long first = 0, b;
-        while ((b = read()) != '.') first = first * 10 + b - '0';
+    private double getDouble() {
+        int off = cur + offset + 1;
+        advance(DOT);
+        int len = cur + offset - off;
 
-        long second = 0, i = 0;
-        while ((b = read()) != '"') {
-            second = second * 10 + b - '0';
-            i++;
+        // really nasty edge-case where some coords don't have any decimal places
+        if (len > 4) {
+            return getDoubleNoDecimals(off);
         }
 
-        return first + second / Math.pow(10, i);
+        int first = readInt(off, len);
+
+        off = cur + offset + 1;
+        advance(QUOTE);
+        len = cur + offset - off;
+
+        int second = readInt(off, len);
+
+        advance(); // advance past end quote
+
+        return first + second / POWERS_OF_TEN[len];
+    }
+
+    private double getDoubleNoDecimals(int start) {
+        // backtrack
+        cur = (start - 1) / SPECIES_LENGTH * SPECIES_LENGTH;
+        offset = start - cur;
+
+        // parse again
+        int off = cur + offset;
+        advance(QUOTE);
+        int len = cur + offset - off;
+
+        return readInt(off, len);
+    }
+
+    private int readInt(int off, int len) {
+        int num = 0;
+        for (int i = 0; i < len; i++) {
+            num = num * 10 + buf[off + i] - '0';
+        }
+        return num;
     }
 }
