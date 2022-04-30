@@ -1,17 +1,17 @@
 module BFST22.app.main {
     requires jdk.incubator.vector;
-
     requires javafx.base;
     requires javafx.graphics;
     requires javafx.fxml;
     requires javafx.controls;
-
     requires earcut4j;
     requires jogamp.fat;
     requires parallelgzip;
 
-    opens view to javafx.fxml;
-    opens dialog to javafx.fxml;
+    opens view to
+            javafx.fxml;
+    opens dialog to
+            javafx.fxml;
 
     exports application;
     exports canvas;

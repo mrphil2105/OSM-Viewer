@@ -11,7 +11,6 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.EnumSet;
 import java.util.Set;
-import java.util.function.Consumer;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
