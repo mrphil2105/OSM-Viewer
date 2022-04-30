@@ -7,6 +7,7 @@ module BFST22.app.main {
     requires earcut4j;
     requires jogamp.fat;
     requires parallelgzip;
+    requires org.apache.commons.compress;
 
     opens view to
             javafx.fxml;
