@@ -11,8 +11,8 @@ public final class OSMRelation extends OSMElement {
         this(id, new ArrayList<>(), new ArrayList<>());
     }
 
-    public OSMRelation(long id, List<OSMMemberWay> members, List<OSMTag> tags) {
-        this.slim = new SlimOSMRelation(id, members);
+    public OSMRelation(long id, List<SlimOSMWay> ways, List<OSMTag> tags) {
+        this.slim = new SlimOSMRelation(id, ways);
         this.tags = tags;
     }
 
@@ -21,8 +21,8 @@ public final class OSMRelation extends OSMElement {
         return slim.id();
     }
 
-    public List<OSMMemberWay> members() {
-        return slim.members();
+    public List<SlimOSMWay> ways() {
+        return slim.ways();
     }
 
     @Override

@@ -88,9 +88,7 @@ public class PolygonsWriter extends TempFileWriter {
         // Create line segments from all members and join them
         var joiner =
                 new SegmentJoiner<>(
-                        relation.members().stream()
-                                .filter(m -> m.role() == OSMMemberWay.Role.OUTER)
-                                .map(OSMMemberWay::way)
+                        relation.ways().stream()
                                 .map(SlimOSMWay::nodes)
                                 .map(Arrays::asList)
                                 .map(Segment<SlimOSMNode>::new)
