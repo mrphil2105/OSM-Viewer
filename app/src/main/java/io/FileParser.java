@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipFile;
+import javafx.application.Platform;
+import javafx.scene.control.ProgressBar;
 import javafx.util.Pair;
 import org.anarres.parallelgzip.ParallelGZIPInputStream;
 import org.anarres.parallelgzip.ParallelGZIPOutputStream;
@@ -23,7 +25,8 @@ public class FileParser implements IOConstants {
     private static final String FEATURES = "FEATURES";
     private static final String BOUNDS = "BOUNDS";
 
-    public static File createMapFromOsm(File infile, FeatureSet features, OSMObserver... observers)
+    public static File createMapFromOsm(
+            File infile, FeatureSet features, ProgressBar bar, OSMObserver... observers)
             throws Exception {
         var writers = new ArrayList<Pair<String, Writer>>();
 
@@ -45,7 +48,7 @@ public class FileParser implements IOConstants {
 
             reader.addObservers(observers);
 
-            reader.parse(getInputStream(infile));
+            reader.parse(getInputStream(infile, bar));
         }
 
         System.gc();
@@ -55,6 +58,9 @@ public class FileParser implements IOConstants {
                         infile.getPath().substring(0, infile.getPath().length() - infile.getName().length())
                                 + infile.getName().split("\\.")[0]
                                 + EXT);
+
+        if (bar != null) Platform.runLater(() -> bar.setProgress(-1));
+
         createMapFromWriters(outfile, writers);
 
         System.gc();
@@ -108,13 +114,24 @@ public class FileParser implements IOConstants {
                                         .orElseThrow())));
     }
 
-    private static InputStream getInputStream(File file) throws IOException {
+    private static InputStream getInputStream(File file, ProgressBar bar) throws IOException {
+        long size;
+        InputStream stream;
+
         if (file.getName().endsWith(".zip")) {
             var zipFile = new ZipFile(file);
             var entry = zipFile.entries().nextElement();
-            return new BufferedInputStream(zipFile.getInputStream(entry), BUFFER_SIZE);
+            size = entry.getSize();
+            stream = zipFile.getInputStream(entry);
+        } else {
+            stream = new FileInputStream(file);
+            size = file.length();
         }
 
-        return new BufferedInputStream(new FileInputStream(file), BUFFER_SIZE);
+        stream = new BufferedInputStream(stream, BUFFER_SIZE);
+
+        if (bar != null) stream = new ProgressBarInputStream(stream, bar, size);
+
+        return stream;
     }
 }

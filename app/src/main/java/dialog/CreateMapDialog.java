@@ -110,7 +110,7 @@ public class CreateMapDialog extends Dialog {
                 new Thread(
                         () -> {
                             try {
-                                file = FileParser.createMapFromOsm(file, featureSet, stats);
+                                file = FileParser.createMapFromOsm(file, featureSet, progress, stats);
                                 Platform.runLater(
                                         () -> {
                                             next.setDisable(false);
