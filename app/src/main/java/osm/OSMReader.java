@@ -65,6 +65,9 @@ public class OSMReader {
     private final NodeTable nodes = new NodeTable();
     private final WayTable ways = new WayTable();
 
+    private final OSMNode node = new OSMNode();
+    private final OSMWay way = new OSMWay();
+    private final OSMRelation relation = new OSMRelation();
     private OSMElement current;
     private final List<SlimOSMNode> wayNdList = new ArrayList<>();
     private boolean atTag;
@@ -81,8 +84,11 @@ public class OSMReader {
 
         parseBounds();
 
+        current = node;
         parseAll(Parseable.NODE, this::parseNode);
+        current = way;
         parseAll(Parseable.WAY, this::parseWay);
+        current = relation;
         parseAll(Parseable.RELATION, this::parseRelation);
 
         for (var observer : observers) {
@@ -234,8 +240,7 @@ public class OSMReader {
         advance(4); // advance(QUOTE);
         var lon = getDouble();
 
-        var node = new OSMNode(id, lon, lat);
-        current = node;
+        node.init(id, lon, lat);
 
         parseAll(Parseable.TAG, this::parseTag);
 
@@ -248,8 +253,7 @@ public class OSMReader {
         advance(7); // advance(QUOTE);
         var id = getLong();
 
-        var way = new OSMWay(id);
-        current = way;
+        way.init(id);
 
         parseAll(Parseable.ND, this::parseNd);
         parseAll(Parseable.TAG, this::parseTag);
@@ -266,8 +270,7 @@ public class OSMReader {
         advance(12); // advance(QUOTE);
         var id = getLong();
 
-        var relation = new OSMRelation(id);
-        current = relation;
+        relation.init(id);
 
         parseAll(Parseable.MEMBER, this::parseMember);
         parseAll(Parseable.TAG, this::parseTag);
