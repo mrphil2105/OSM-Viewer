@@ -10,11 +10,13 @@ import io.PolygonsReader;
 import io.ReadResult;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.ProgressBar;
 import navigation.Dijkstra;
 import navigation.EdgeRole;
 import navigation.NearestNeighbor;
@@ -36,10 +38,15 @@ public class Model {
     private final ObservableList<Address> toSuggestions = FXCollections.observableArrayList();
     private final ObservableList<Address> fromSuggestions = FXCollections.observableArrayList();
 
-    public Model(ReadResult result) {
+    public Model(ReadResult result, ProgressBar bar) {
         bounds = result.bounds().getRect();
 
         features = new FeatureSet(result.readers().keySet());
+
+        double total = result.readers().size();
+        AtomicInteger progress = new AtomicInteger();
+
+        if (total == 1 && bar != null) Platform.runLater(() -> bar.setProgress(-1));
 
         for (var entry : result.readers().entrySet()) {
             switch (entry.getKey()) {
@@ -52,6 +59,8 @@ public class Model {
                     addresses.buildTries();
                 }
             }
+
+            if (bar != null) Platform.runLater(() -> bar.setProgress(progress.incrementAndGet() / total));
         }
 
         pointsOfInterest = new ArrayList<>();
@@ -97,9 +106,7 @@ public class Model {
             return;
         }
 
-        var routePoints = shortestPath.stream()
-            .map(Point::geoToMap)
-            .toList();
+        var routePoints = shortestPath.stream().map(Point::geoToMap).toList();
         this.routePoints.setAll(routePoints);
     }
 
@@ -134,5 +141,4 @@ public class Model {
     public void setFromSuggestions(List<Address> suggestions) {
         this.fromSuggestions.setAll(suggestions);
     }
-
 }
