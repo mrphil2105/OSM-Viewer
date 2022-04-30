@@ -1,8 +1,10 @@
 package osm;
 
 import geometry.Rect;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +74,9 @@ public class OSMReader {
     }
 
     public void parse(InputStream stream) throws Exception {
-        this.stream = stream;
+        this.stream =
+                new SequenceInputStream(
+                        stream, new ByteArrayInputStream("<end>".getBytes(StandardCharsets.UTF_8)));
         stream.read(buf);
 
         parseBounds();
