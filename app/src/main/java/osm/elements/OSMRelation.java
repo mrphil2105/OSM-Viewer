@@ -4,16 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class OSMRelation extends OSMElement {
-    private final SlimOSMRelation slim;
-    private final List<OSMTag> tags;
+    private final List<OSMTag> tags = new ArrayList<>();
+    private SlimOSMRelation slim;
 
-    public OSMRelation(long id) {
-        this(id, new ArrayList<>(), new ArrayList<>());
-    }
-
-    public OSMRelation(long id, List<SlimOSMWay> ways, List<OSMTag> tags) {
-        this.slim = new SlimOSMRelation(id, ways);
-        this.tags = tags;
+    public void init(long id) {
+        this.slim = new SlimOSMRelation(id, new ArrayList<>());
+        tags.clear();
     }
 
     @Override

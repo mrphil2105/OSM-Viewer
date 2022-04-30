@@ -6,7 +6,6 @@ import drawing.Drawing;
 import geometry.Point;
 import geometry.Rect;
 import geometry.Vector2D;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

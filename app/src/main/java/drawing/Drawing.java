@@ -114,10 +114,10 @@ public class Drawing extends Entity implements Serializable {
         }
 
         // Calculate indices for each vertex in triangulated polygon
-        Earcut.earcut(verts).stream()
-                // Offset each index before adding to indices
-                .map(i -> offset + i)
-                .forEach(indices()::add);
+        for (var i : Earcut.earcut(verts)) {
+            // Offset each index before adding to indices
+            indices().add(i + offset);
+        }
     }
 
     private void drawLine(List<Vector2D> points, Drawable drawable, int offset) {
