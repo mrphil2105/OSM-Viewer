@@ -6,7 +6,6 @@ import canvas.MapCanvas;
 import canvas.Renderer;
 import com.jogamp.newt.event.MouseEvent;
 import dialog.CreateMapDialog;
-import dialog.CreateMapDialogResult;
 import dialog.LoadingDialog;
 import drawing.Category;
 import drawing.Drawable;
@@ -286,7 +285,6 @@ public class Controller {
                                     c -> {
                                         searchTextField.showMenuItems((ObservableList<Address>) c.getList());
                                     });
-
         }
 
         if (model.supports(Feature.PATHFINDING)) {
