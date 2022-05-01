@@ -34,6 +34,7 @@ public enum Drawable {
     INDUSTRIAL(Shape.FILL, Color.web("#ebdbe8"), 0, Category.CITY),
     PLANT_NURSERY(Shape.FILL, Color.web("#aedfa3"), 0, Category.CITY),
     WATER(Shape.FILL, Color.web("#aad3df"), 0, Category.LAND),
+    WATERWAY(Shape.POLYLINE, Color.web("#aad3df"), 0.3, Category.LAND),
     MUSEUM(Shape.FILL, Color.web("#f2efe9"), 0, Category.CITY),
     BUILDING(Shape.FILL, Color.web("#d9d0c9"), 0, Category.CITY),
     REST_AREA(Shape.FILL, Color.web("#efc8c8"), 0, Category.CITY),
@@ -214,6 +215,10 @@ public enum Drawable {
                         "path",
                         "pedestrian",
                         "steps" -> PATH;
+                default -> _default(tag);
+            };
+            case WATERWAY -> switch (tag.value()) {
+                case "river", "stream" -> WATERWAY;
                 default -> _default(tag);
             };
             default -> _default(tag);
