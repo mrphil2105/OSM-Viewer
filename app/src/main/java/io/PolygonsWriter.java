@@ -56,11 +56,11 @@ public class PolygonsWriter extends TempFileWriter {
     public void onBounds(Rect bounds) {
         manager.draw(
                 List.of(
-                        new Vector2D(Point.geoToMap(bounds.getTopLeft())),
-                        new Vector2D(Point.geoToMap(bounds.getTopRight())),
-                        new Vector2D(Point.geoToMap(bounds.getBottomRight())),
-                        new Vector2D(Point.geoToMap(bounds.getBottomLeft())),
-                        new Vector2D(Point.geoToMap(bounds.getTopLeft()))),
+                        Vector2D.create(Point.geoToMap(bounds.getTopLeft())),
+                        Vector2D.create(Point.geoToMap(bounds.getTopRight())),
+                        Vector2D.create(Point.geoToMap(bounds.getBottomRight())),
+                        Vector2D.create(Point.geoToMap(bounds.getBottomLeft())),
+                        Vector2D.create(Point.geoToMap(bounds.getTopLeft()))),
                 Drawable.BOUNDS);
     }
 
@@ -72,10 +72,12 @@ public class PolygonsWriter extends TempFileWriter {
         // Transform nodes to points
         var points =
                 Arrays.stream(way.nodes())
-                        .map(n -> new Vector2D(Point.geoToMapX(n.lon()), Point.geoToMapY(n.lat())))
+                        .map(n -> Vector2D.create(Point.geoToMapX(n.lon()), Point.geoToMapY(n.lat())))
                         .toList();
 
         manager.draw(points, drawable, vertexCount / 2);
+
+        points.forEach(Vector2D::reuse);
 
         if (manager.byteSize() >= BUFFER_SIZE) writeDrawing();
     }
@@ -97,12 +99,14 @@ public class PolygonsWriter extends TempFileWriter {
 
         // Draw all the segments
         for (var segment : joiner) {
-            manager.draw(
+            var points =
                     segment.stream()
-                            .map(n -> new Vector2D(Point.geoToMapX(n.lon()), Point.geoToMapY(n.lat())))
-                            .toList(),
-                    drawable,
-                    vertexCount / 2);
+                            .map(n -> Vector2D.create(Point.geoToMapX(n.lon()), Point.geoToMapY(n.lat())))
+                            .toList();
+
+            manager.draw(points, drawable, vertexCount / 2);
+
+            points.forEach(Vector2D::reuse);
         }
 
         if (manager.byteSize() >= BUFFER_SIZE) writeDrawing();
