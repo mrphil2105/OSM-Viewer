@@ -132,7 +132,7 @@ public class Controller {
                                     var renderer = canvas.getRenderer();
                                     if (routeDrawing != null) renderer.clear(routeDrawing);
 
-                                    var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
+                                    var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
                                     routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
 
                                     renderer.draw(routeDrawing);
@@ -180,7 +180,7 @@ public class Controller {
                                                     point.x(),
                                                     point.y(),
                                                     tf.getText(),
-                                                    Drawing.create(new Vector2D(point), Drawable.POI)));
+                                                    Drawing.create(Vector2D.create(point), Drawable.POI)));
                                     cm.hide();
                                 });
 
@@ -351,7 +351,7 @@ public class Controller {
         Point point =
                 Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
         zoomOn(point);
-        var drawing = Drawing.create(new Vector2D(point), Drawable.ADDRESS);
+        var drawing = Drawing.create(Vector2D.create(point), Drawable.ADDRESS);
         canvas.getRenderer().draw(drawing);
         if (lastDrawnAddress != null) {
             canvas.getRenderer().clear(lastDrawnAddress);
