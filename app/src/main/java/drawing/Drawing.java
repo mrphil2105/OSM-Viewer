@@ -75,8 +75,13 @@ public class Drawing extends Entity implements Serializable {
 
     Drawing offset(int offset) {
         // Return a new instance with the same points, just with indices shifted by `offset`
+        var newIndices = new int[indices().size()];
+        for (int i = 0; i < indices().size(); i++) {
+            newIndices[i] = indices().get(i) + offset;
+        }
+
         return new Drawing(
-                new IntList(Arrays.stream(indices().toArray()).map(i -> i + offset).toArray()),
+                new IntList(newIndices),
                 new FloatList(vertices().toArray()),
                 new ByteList(drawables().toArray()),
                 id());
