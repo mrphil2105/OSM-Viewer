@@ -376,7 +376,7 @@ public class OSMReader {
 
     private double getDoubleNoDecimals(int start) {
         // backtrack
-        cur = (start - 1) / SPECIES_LENGTH * SPECIES_LENGTH;
+        cur = start / SPECIES_LENGTH * SPECIES_LENGTH;
         offset = start - cur;
 
         // parse again
