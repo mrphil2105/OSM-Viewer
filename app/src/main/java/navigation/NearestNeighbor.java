@@ -3,7 +3,7 @@ package navigation;
 import static osm.elements.OSMTag.Key.HIGHWAY;
 import static osm.elements.OSMTag.Key.NAME;
 
-import collections.spatial.TwoDTree;
+import collections.spatial.LinearSearchTwoDTree;
 import collections.spatial.SpatialTree;
 import geometry.Point;
 import geometry.Rect;
@@ -16,12 +16,15 @@ import osm.elements.OSMTag;
 import osm.elements.OSMWay;
 
 public class NearestNeighbor implements OSMObserver, Serializable {
+    private transient Rect bounds;
     private transient List<Pair<Point, String>> nodeCache = new ArrayList<>();
+
     private SpatialTree<String> tree;
 
     @Override
     public void onBounds(Rect bounds) {
-        tree = new TwoDTree<>(bounds);
+        this.bounds = bounds;
+        tree = new LinearSearchTwoDTree<>(1000, bounds);
     }
 
     @Override
