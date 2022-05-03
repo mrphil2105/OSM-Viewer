@@ -79,7 +79,9 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         var point = median.getKey();
         var name = median.getValue();
 
-        tree.insert(point, name);
+        if (bounds.contains(point)) {
+            tree.insert(point, name);
+        }
 
         if (nodes.size() == 1) {
             return;
