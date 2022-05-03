@@ -327,8 +327,30 @@ public class Dijkstra implements OSMObserver, Serializable {
                 "secondary_link",
                 "tertiary_link",
                 "living_street" -> edgeRoles.set(EdgeRole.CAR);
-            case "cycleway" -> edgeRoles.set(EdgeRole.BIKE);
-            case "footway" -> edgeRoles.set(EdgeRole.WALK);
+        }
+
+        switch (highwayTag.value()) {
+            case "cycleway",
+                "primary",
+                "secondary",
+                "tertiary",
+                "unclassified",
+                "residential",
+                "primary_link",
+                "secondary_link",
+                "tertiary_link",
+                "living_street" -> edgeRoles.set(EdgeRole.BIKE);
+        }
+
+        switch (highwayTag.value()) {
+            case "footway",
+                "secondary",
+                "tertiary",
+                "unclassified",
+                "residential",
+                "secondary_link",
+                "tertiary_link",
+                "living_street" -> edgeRoles.set(EdgeRole.WALK);
         }
 
         return edgeRoles;
