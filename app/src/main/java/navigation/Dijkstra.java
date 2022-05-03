@@ -6,12 +6,21 @@ import java.io.Serializable;
 import java.util.*;
 
 import collections.enumflags.EnumFlags;
+import collections.spatial.LinearSearchTwoDTree;
+import collections.spatial.SpatialTree;
 import geometry.Point;
+import geometry.Rect;
 import osm.OSMObserver;
 import osm.elements.*;
 
 public class Dijkstra implements OSMObserver, Serializable {
+    private static final float MAX_DISTANCE_INACCURACY = 0.0005f;
+
     private final Graph graph;
+    private SpatialTree<Object> carTree;
+    private SpatialTree<Object> bikeTree;
+    private SpatialTree<Object> walkTree;
+
     private transient Map<Long, Float> distTo;
     private transient Map<Long, Edge> edgeTo;
     private transient Set<Long> settled;
@@ -23,6 +32,13 @@ public class Dijkstra implements OSMObserver, Serializable {
         graph = new Graph();
 
         mode = EdgeRole.CAR;
+    }
+
+    @Override
+    public void onBounds(Rect bounds) {
+        carTree = new LinearSearchTwoDTree<>(1000, bounds);
+        bikeTree = new LinearSearchTwoDTree<>(1000, bounds);
+        walkTree = new LinearSearchTwoDTree<>(1000, bounds);
     }
 
     @Override
@@ -76,6 +92,19 @@ public class Dijkstra implements OSMObserver, Serializable {
                 graph.addEdge(edge);
             }
 
+            for (var edgeRole : EdgeRole.values()) {
+                if (edgeRoles.isSet(edgeRole)) {
+                    var tree = switch (edgeRole) {
+                        case CAR -> carTree;
+                        case BIKE -> bikeTree;
+                        case WALK -> walkTree;
+                    };
+
+                    tree.insert(firstPoint, null);
+                    tree.insert(secondPoint, null);
+                }
+            }
+
             firstNode = secondNode;
         }
     }
@@ -104,6 +133,22 @@ public class Dijkstra implements OSMObserver, Serializable {
         edgeTo = new HashMap<>();
         settled = new HashSet<>();
         queue = new PriorityQueue<>();
+
+        var tree = switch (mode) {
+            case CAR -> carTree;
+            case BIKE -> bikeTree;
+            case WALK -> walkTree;
+        };
+
+        var fromResult = tree.nearest(from);
+        var toResult = tree.nearest(to);
+
+        var fromDistance = calculateDistance(from, fromResult.point());
+        var toDistance = calculateDistance(to, toResult.point());
+
+        if (fromDistance > MAX_DISTANCE_INACCURACY || toDistance > MAX_DISTANCE_INACCURACY) {
+            return null;
+        }
 
         var sourceVertex = Dijkstra.coordinatesToLong(from);
         var targetVertex = Dijkstra.coordinatesToLong(to);
