@@ -54,6 +54,10 @@ public class VBOWrapper {
         gl.glBufferSubData(type, offset, length, buffer);
     }
 
+    public void dispose() {
+        gl.glDeleteBuffers(1, new int[] {vbo}, 0);
+    }
+
     // private void grow(long newSize) {
     //    while (capacity < newSize) capacity *= 2;
 
