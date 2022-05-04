@@ -129,7 +129,7 @@ public class Controller {
                                     var renderer = canvas.getRenderer();
                                     if (routeDrawing != null) renderer.clear(routeDrawing);
 
-                                    var vectors = listener.getAddedSubList().stream().map(Vector2D::new).toList();
+                                    var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
                                     routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
 
                                     renderer.draw(routeDrawing);
@@ -177,7 +177,7 @@ public class Controller {
                                                     point.x(),
                                                     point.y(),
                                                     tf.getText(),
-                                                    Drawing.create(new Vector2D(point), Drawable.POI)));
+                                                    Drawing.create(Vector2D.create(point), Drawable.POI)));
                                     cm.hide();
                                 });
 
@@ -260,7 +260,7 @@ public class Controller {
     }
 
     private void setModel(Model model) {
-        if (this.model != null) this.model.dispose();
+        disableAll();
 
         this.model = model;
 
@@ -270,10 +270,6 @@ public class Controller {
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
-        } else {
-            canvas.dispose();
-            canvas.setVisible(false);
-            rightVBox.setDisable(true);
         }
 
         if (model.supports(Feature.ADDRESS_SEARCH)) {
@@ -286,9 +282,6 @@ public class Controller {
                                     c -> {
                                         searchTextField.showMenuItems((ObservableList<Address>) c.getList());
                                     });
-
-        } else {
-            searchTextField.setDisable(true);
         }
 
         if (model.supports(Feature.PATHFINDING)) {
@@ -310,8 +303,6 @@ public class Controller {
                                     c -> {
                                         fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
                                     });
-        } else {
-            searchTextField.setDisable(true);
         }
 
         if (model.supports(Feature.NEAREST_NEIGHBOR)) {
@@ -319,9 +310,22 @@ public class Controller {
                     .textProperty()
                     .bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
             nearestRoadLabel.setVisible(true);
-        } else {
-            nearestRoadLabel.setVisible(false);
         }
+    }
+
+    public void disableAll() {
+        if (model != null) model.dispose();
+
+        canvas.dispose();
+        canvas.setVisible(false);
+        rightVBox.setDisable(true);
+
+        searchTextField.setDisable(true);
+
+        toRouteTextField.setDisable(true);
+        fromRouteTextField.setDisable(true);
+
+        nearestRoadLabel.setVisible(false);
     }
 
     public void dispose() {
@@ -343,7 +347,7 @@ public class Controller {
         Point point =
                 Point.geoToMap(new Point(address.lon(), address.lat()));
         zoomOn(point);
-        var drawing = Drawing.create(new Vector2D(point), Drawable.ADDRESS);
+        var drawing = Drawing.create(Vector2D.create(point), Drawable.ADDRESS);
         canvas.getRenderer().draw(drawing);
         if (lastDrawnAddress != null) {
             canvas.getRenderer().clear(lastDrawnAddress);
@@ -461,7 +465,7 @@ public class Controller {
         pointOfInterestMode = true;
     }
 
-    public void openMap(ActionEvent actionEvent) throws Exception {
+    public void openMap() throws Exception {
         var diag = new FileChooser();
         diag.setTitle("Open map file");
         diag.getExtensionFilters()
@@ -473,7 +477,7 @@ public class Controller {
         loadFile(file);
     }
 
-    public void createMap(ActionEvent actionEvent) throws Exception {
+    public void createMap() throws Exception {
         var diag = new FileChooser();
         diag.setTitle("Open OSM data file");
         // *.zip is here because *.osm.zip doesn't work on Linux
@@ -484,27 +488,34 @@ public class Controller {
         var file = diag.showOpenDialog(scene.getWindow());
         if (file == null) return;
 
-        file = CreateMapDialog.showDialog(file);
-        if (file == null) return;
+        disableAll();
 
-        loadFile(file);
+        file = CreateMapDialog.showDialog(file);
+        if (file != null) {
+            try {
+                loadFile(file);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void loadFile(File file) throws Exception {
-        AtomicReference<Model> model = new AtomicReference<>();
+        AtomicReference<Model> modelRef = new AtomicReference<>();
         LoadingDialog.showDialog(
                 "Loading " + file.getName(),
-                () -> {
+                bar -> {
                     try (var res = FileParser.readMap(file)) {
-                        model.set(new Model(res));
+                        modelRef.set(new Model(res, bar));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 });
 
-        var value = model.get();
-        if (value != null) {
-            setModel(value);
+        var model = modelRef.get();
+        if (model != null) {
+            setModel(model);
+            center(Point.geoToMap(model.bounds.center()));
         }
     }
 
