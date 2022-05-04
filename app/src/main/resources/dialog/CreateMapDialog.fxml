@@ -19,7 +19,6 @@
     <bottom>
         <HBox alignment="CENTER_RIGHT" spacing="8">
             <Button fx:id="next" onAction="#next" style="-fx-background-color: #3498DB" text="Next"/>
-            <Button fx:id="cancel" onAction="#cancel" text="Cancel"/>
             <BorderPane.margin>
                 <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
             </BorderPane.margin>
