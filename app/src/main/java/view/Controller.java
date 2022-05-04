@@ -38,6 +38,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
+import javafx.util.Pair;
 import navigation.EdgeRole;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
@@ -49,6 +50,7 @@ public class Controller {
     private TimerTask queryPointTimerTask;
     private Point fromPoint, toPoint;
     private Drawing routeDrawing;
+    private Pair<Drawing,Drawing> fromToDrawings;
     private boolean pointOfInterestMode = false;
     private Tooltip addPointOfInterestText;
     private Drawing lastDrawnAddress;
@@ -131,11 +133,23 @@ public class Controller {
 
                                     var renderer = canvas.getRenderer();
                                     if (routeDrawing != null) renderer.clear(routeDrawing);
+                                    if (fromToDrawings != null){
+                                        renderer.clear(fromToDrawings.getKey());
+                                        renderer.clear(fromToDrawings.getValue());
+                                    }
 
                                     var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
                                     routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
 
                                     renderer.draw(routeDrawing);
+
+                                    var fromPoint= model.getFromToPoints().getKey();
+                                    var toPoint = model.getFromToPoints().getValue();
+
+                                    fromToDrawings=new Pair<>(Drawing.create( Vector2D.create(fromPoint),Drawable.ADDRESS) , Drawing.create( Vector2D.create(toPoint),Drawable.ADDRESS));
+
+                                    renderer.draw(fromToDrawings.getValue());
+                                    renderer.draw(fromToDrawings.getKey());
                                 });
 
         fps.textProperty().bind(canvas.fpsProperty.asString("FPS: %.1f"));
@@ -146,17 +160,19 @@ public class Controller {
                         var point = new Point(e.getX(), e.getY());
                         point = canvas.canvasToMap(point);
                         point = Point.mapToGeo(point);
-                        point = model.getNearestPoint(point);
 
                         if (fromPoint == null) {
                             fromPoint = point;
                         } else if (toPoint == null) {
                             toPoint = point;
-                            model.calculateBestRoute(fromPoint, toPoint);
+                            model.setFromToPoints(new Pair<>(Point.geoToMap(fromPoint),Point.geoToMap(toPoint)));
+                            model.calculateBestRoute(model.getNearestPoint(fromPoint), model.getNearestPoint(toPoint));
                         } else {
                             fromPoint = point;
                             toPoint = null;
                         }
+
+
 
                         return;
                     }
@@ -270,6 +286,7 @@ public class Controller {
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
             canvas.setVisible(true);
+
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
@@ -562,7 +579,12 @@ public class Controller {
         Point dijkstraFrom = model.getNearestPoint(from);
         Point dijkstraTo = model.getNearestPoint(to);
 
+        model.setFromToPoints(new Pair<>(Point.geoToMap(from),Point.geoToMap(to)));
+
         model.calculateBestRoute(dijkstraFrom, dijkstraTo);
+
+
+        zoomOn(Point.geoToMap(from));
     }
 
     private void setZoomAndScale() {
