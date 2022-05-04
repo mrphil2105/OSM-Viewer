@@ -16,7 +16,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -24,7 +23,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javax.xml.stream.XMLStreamException;
 import osm.ReaderStats;
 
 public class CreateMapDialog extends Dialog {
@@ -35,7 +33,6 @@ public class CreateMapDialog extends Dialog {
     @FXML private VBox checkboxes;
     @FXML private GridPane statsGrid;
     @FXML private Button next;
-    @FXML private Button cancel;
     @FXML private Label nodeTotal;
     @FXML private Label nodeThroughput;
     @FXML private Label wayTotal;
@@ -75,13 +72,12 @@ public class CreateMapDialog extends Dialog {
     }
 
     @FXML
-    private void next(ActionEvent actionEvent) {
+    private void next() {
         header.textProperty().set("Creating map...");
         checkboxes.setDisable(true);
         statsGrid.setVisible(true);
-        cancel.setDisable(true);
         next.setDisable(true);
-        next.onActionProperty().set(e -> close());
+        next.onActionProperty().set(e -> close(new CreateMapDialogResult(file)));
         next.textProperty().set("Open");
 
         var start = LocalTime.now();
@@ -114,27 +110,20 @@ public class CreateMapDialog extends Dialog {
                 new Thread(
                         () -> {
                             try {
-                                file = FileParser.createMapFromOsm(file, featureSet, stats);
+                                file = FileParser.createMapFromOsm(file, featureSet, progress, stats);
                                 Platform.runLater(
                                         () -> {
                                             next.setDisable(false);
-                                            cancel.setDisable(false);
                                             header.textProperty().set(file.getName() + " created");
                                             progress.setProgress(100);
                                             timeline.stop();
                                         });
-                            } catch (IOException | XMLStreamException e) {
+                            } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         });
 
         thread.setDaemon(true);
         thread.start();
-    }
-
-    @FXML
-    private void cancel(ActionEvent actionEvent) {
-        file = null;
-        close();
     }
 }

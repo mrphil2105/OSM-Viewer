@@ -16,7 +16,7 @@
 
     <BorderPane>
         <left>
-            <VBox id="allVBox" fx:id="leftVBox">
+            <VBox fx:id="leftVBox">
                 <padding>
                     <Insets top="10" bottom="10" left="10" right="10"/>
                 </padding>
@@ -47,7 +47,7 @@
             </VBox>
         </left>
         <right>
-            <VBox id="allVBox" fx:id="rightVBox">
+            <VBox fx:id="rightVBox">
                 <padding>
                     <Insets top="10" bottom="10" left="10" right="10"/>
                 </padding>
@@ -83,9 +83,9 @@
             </MenuBar>
         </top>
         <center>
-            <VBox id="allVBox" fx:id="middleVBox">
+            <VBox fx:id="middleVBox">
                 <MapCanvas fx:id="canvas" prefWidth="1280" prefHeight="720"/>
-                <HBox alignment="center" fx:id="middleHBox">
+                <HBox alignment="center" fx:id="middleHBox" maxHeight="20">
                     <padding>
                         <Insets left="20" right="10"/>
                     </padding>
