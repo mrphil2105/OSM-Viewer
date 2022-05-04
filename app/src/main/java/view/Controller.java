@@ -333,9 +333,9 @@ public class Controller {
     @FXML
     public void handleSearchClick() {
         var result = searchTextField.handleSearch();
-        if (result == null) return; // TODO: handle exception and show message?
+        if (result == null) return; // TODO: handle and show error message
         if (result.size() > 1) {
-            // TODO: popup message
+            // TODO: Give user ability to choose one of the results to search for
             return;
         }
         var address = result.get(0);
