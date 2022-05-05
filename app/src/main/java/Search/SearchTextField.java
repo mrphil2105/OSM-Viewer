@@ -56,9 +56,8 @@ public class SearchTextField extends TextField {
         this.currentSearch = currentSearch;
     }
 
-    private String reformat(String string) {
+    public static String reformat(String string) {
         if (string == null) return null;
-
         string = string.toLowerCase();
 
         var stringBuilder = new StringBuilder();
