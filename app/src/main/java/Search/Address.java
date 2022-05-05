@@ -10,13 +10,14 @@ public record Address(
         String side,
         String postcode,
         String city,
-        SlimOSMNode node)
+        float lat,
+        float lon)
         implements Serializable {
     @Override
     public String toString() {
-        var floor = this.floor == null ? "" : this.floor;
-        var side = this.side == null ? "" : this.side;
+        var floor = this.floor == null ? "" : this.floor + " ";
+        var side = this.side == null ? "" : this.side + " ";
 
-        return street + " " + houseNumber + " " + floor + side + ", " + postcode + " " + city;
+        return street + " " + houseNumber + " " + floor + side + postcode + " " + city;
     }
 }

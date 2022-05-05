@@ -24,15 +24,15 @@
                     <SearchTextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0"
                                      GridPane.rowIndex="0" onAction="#handleSearchClick"
                                      onKeyTyped="#handleSearchKeyTyped"
-                                     onMouseClicked="#handleInFocus"/>
+                                     onMouseClicked="#handleSearchInFocus"/>
                     <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="1">
                         <Button fx:id="searchButton" id="allButtons" text="Search" onAction="#handleSearchClick">
                         </Button>
                     </HBox>
                     <SearchTextField fx:id="fromRouteTextField" promptText="From" GridPane.columnIndex="0"
-                                     GridPane.rowIndex="2" onKeyTyped="#handleFromKeyTyped"/>
+                                     GridPane.rowIndex="2" onKeyTyped="#handleFromKeyTyped" onMouseClicked="#handleFromInFocus"/>
                     <SearchTextField fx:id="toRouteTextField" promptText="To" GridPane.columnIndex="0"
-                                     GridPane.rowIndex="3" onKeyTyped="#handleToKeyTyped"/>
+                                     GridPane.rowIndex="3" onKeyTyped="#handleToKeyTyped" onMouseClicked="#handleToInFocus"/>
                     <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="4">
                         <Button fx:id="routeButton" id="allButtons" text="Find route" onAction="#handleRouteClick"/>
                     </HBox>
