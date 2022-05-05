@@ -4,7 +4,6 @@ import collections.trie.Trie;
 import collections.trie.TrieBuilder;
 import java.io.Serializable;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -20,7 +19,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
     private TrieBuilder<List<Address>> streetTrieBuilder;
     private TrieBuilder<List<Address>> cityTrieBuilder;
     private TrieBuilder<List<Address>> postcodeTrieBuilder;
-    private List<Address> history;
+    private final List<Address> history;
 
     public AddressDatabase() {
         streetTrieBuilder = new TrieBuilder<>('\0');
@@ -91,16 +90,14 @@ public class AddressDatabase implements OSMObserver, Serializable {
             }
         }
 
-        builder.SlimOSMNode(node.slim());
+        builder.lat((float) node.lat());
+        builder.lon((float) node.lon());
+
         if (isAddress) addAddress(builder.build());
     }
 
     @Override
     public void onFinish() {
-        //TODO
-    }
-
-    public void buildTries() {
         streetToAddress = streetTrieBuilder.build();
         cityToAddress = cityTrieBuilder.build();
         postcodeToAddress = postcodeTrieBuilder.build();
@@ -177,26 +174,5 @@ public class AddressDatabase implements OSMObserver, Serializable {
                     .toList();
         }
 
-        //        if (input.houseNumber() != null) {
-        //            filteringSet.stream().limit(maxEntries).forEach(e -> results.add(e.build()));
-        //        } else {
-        //            filteringSet.stream()
-        //                    .limit(maxEntries)
-        //                    .forEach(
-        //                            e -> {
-        //                                if (parsedStreetsAndCities.add(e.getStreet() + "|" +
-        // e.getPostcode())) {
-        //                                    results.add(e.build());
-        //                                }
-        //                            });
-        //        }
-    }
-
-    // test method
-    public void display() {
-        for (Iterator<Entry<String, List<Address>>> it = streetToAddress.withPrefix("");
-                it.hasNext(); ) {
-            it.next().getValue().forEach(e -> System.out.println(e.street()));
-        }
     }
 }
