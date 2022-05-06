@@ -17,9 +17,8 @@ public class SearchTextField extends TextField {
         popupEntries = new AutofillContextMenu(this, addressDatabase);
     }
 
-    public List<Address> handleSearch() {
+    public List<Address> handleSearch(Address parsedAddress) {
         popupEntries.hide();
-        var parsedAddress = parseAddress();
         if (parsedAddress == null) return null;
         return addressDatabase.search(parsedAddress);
     }
