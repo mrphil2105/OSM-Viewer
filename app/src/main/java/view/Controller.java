@@ -308,7 +308,7 @@ public class Controller {
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
-            middleHBox.setVisible(true);
+            middleHBox.setDisable(false);
             canvas.setZoomHandler(model.bounds);
             setZoomAndScale();
         }
@@ -373,7 +373,7 @@ public class Controller {
         fromRouteTextField.setDisable(true);
 
         nearestRoadLabel.setVisible(false);
-        middleHBox.setVisible(false);
+        middleHBox.setDisable(true);
     }
 
     public void dispose() {
