@@ -85,8 +85,13 @@ public class Dijkstra implements OSMObserver, Serializable {
         var nodes = way.nodes();
         var firstNode = nodes[0];
 
+        String name = tags.stream().filter(t -> t.key() == NAME).map(t -> (t.value().toString()))
+        .findFirst().orElse(null);
+        var roadRole = getRoadRole(way);
+
         for (int i = 1; i < nodes.length; i++) {
             var secondNode = nodes[i];
+
 
             var firstPoint = new Point((float) firstNode.lon(), (float) firstNode.lat());
             var secondPoint = new Point((float) secondNode.lon(), (float) secondNode.lat());
@@ -104,12 +109,14 @@ public class Dijkstra implements OSMObserver, Serializable {
             }
 
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
-                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles);
+                Road road = new Road(name, firstNode.lat(), firstNode.lon(), secondNode.lat(), secondNode.lon(), roadRole);
+                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles, road);
                 graph.addEdge(edge);
             }
 
             if (direction == Direction.REVERSE || direction == Direction.BOTH) {
-                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, edgeRoles);
+                Road road = new Road(name, secondNode.lat(), secondNode.lon(), firstNode.lat(), firstNode.lon(), roadRole);
+                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, edgeRoles, road);
                 graph.addEdge(edge);
             }
 
@@ -281,6 +288,7 @@ public class Dijkstra implements OSMObserver, Serializable {
 
     private static List<Long> extractPath(long sourceVertex, long targetVertex, Map<Long, Edge> edgeTo) {
         var path = new ArrayList<Long>();
+        List<Road> roads = new ArrayList<>();
 
         long from = coordinatesToLong(new Point(Float.NaN, Float.NaN));
         long to = targetVertex;
@@ -295,11 +303,14 @@ public class Dijkstra implements OSMObserver, Serializable {
 
             from = edge.from();
             path.add(from);
+            roads.add(edge.road());
             to = from;
         }
 
         if (from == sourceVertex) {
             Collections.reverse(path);
+            Collections.reverse(roads);
+            new Instructions(roads);
             return path;
         }
 
@@ -446,6 +457,24 @@ public class Dijkstra implements OSMObserver, Serializable {
             case "residential", "living_street" -> 40;
             default -> 0; // Return 0 for highways that aren't handled by Dijkstra in CAR mode.
         };
+    }
+
+    private RoadRole getRoadRole(OSMWay way){
+        var tags = way.tags().stream().filter(t -> t.key() == HIGHWAY).findFirst().orElse(null);
+        var tagsRoundabout = way.tags().stream().filter(t -> t.key() == JUNCTION).findFirst().orElse(null);
+        if (tagsRoundabout == null){
+            return switch (tags.value()) {
+            case "motorway" -> RoadRole.MOTORWAY;
+            case "motorway_link" -> RoadRole.MOTORWAY_LINK;
+            default -> RoadRole.WAY;
+            };
+        }
+        else {
+            return switch (tagsRoundabout.value()) {
+            case "roundabout" -> RoadRole.ROUNDABOUT;
+            default -> RoadRole.WAY;
+            };
+        }
     }
 
     private record Node(long vertex, float weight) implements Comparable<Node>, Serializable {

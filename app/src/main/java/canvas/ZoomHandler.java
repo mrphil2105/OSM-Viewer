@@ -7,14 +7,15 @@ public class ZoomHandler {
     private Rect bounds;
     private MapCanvas canvas;
     private float currentScale;
-    private final float R = 6371; //Earth radius in km
+    private final static float R = 6371; //Earth radius in km
     private float max;
     private boolean isX;
 
     public ZoomHandler(Rect bounds, MapCanvas canvas) {
         this.bounds = bounds;
         this.canvas = canvas;
-        currentScale = (float) (getScaleBarDistance() * (100/canvas.getPrefWidth()));
+        currentScale = (float) (getDistance(bounds.getBottomLeft().x(), bounds.getBottomLeft().y(), 
+                                bounds.getBottomRight().x(), bounds.getBottomRight().y()) * (100/canvas.getPrefWidth()));
         if (1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x())
                 > 720/(Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y())) {
             max = (Point.geoToMap(bounds.getTopLeft()).y() - Point.geoToMap(bounds.getBottomRight()).y());
@@ -64,11 +65,7 @@ public class ZoomHandler {
         return (1280/(Point.geoToMap(bounds.getBottomRight()).x() - Point.geoToMap(bounds.getTopLeft()).x()));
     } 
 
-    private float getScaleBarDistance() {
-        float lon1 = bounds.getBottomLeft().x();
-        float lat1 = bounds.getBottomLeft().y();
-        float lon2 = bounds.getBottomRight().x();
-        float lat2 = bounds.getBottomRight().y();
+    public static float getDistance(float lon1, float lat1, float lon2, float lat2) {
         //Haversine method
         var deltaLat = degreeToRadian(lat2-lat1);
         var deltaLon = degreeToRadian(lon2-lon1);
@@ -82,7 +79,7 @@ public class ZoomHandler {
         return (float) (d * 1000); //convert to metres
     }
 
-    private float degreeToRadian(float degree) {
+    private static float degreeToRadian(float degree) {
         return (float) (degree * (Math.PI/180));
     }
 }
