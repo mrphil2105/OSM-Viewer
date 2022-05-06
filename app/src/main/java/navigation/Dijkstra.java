@@ -159,6 +159,9 @@ public class Dijkstra implements OSMObserver, Serializable {
             return null;
         }
 
+        from = fromResult.point();
+        to = toResult.point();
+
         var sourceVertex = Dijkstra.coordinatesToLong(from);
         var targetVertex = Dijkstra.coordinatesToLong(to);
 
