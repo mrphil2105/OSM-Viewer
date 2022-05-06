@@ -340,8 +340,8 @@ public class Controller {
         if (result == null || result.size() <= 0){
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("We couldn't help you find the address");
-            alert.setHeaderText("No results");
-            alert.setContentText("Perhaps you misspelled or used a wrong format.\n The format is <Street> <House Number> (<Floor> <Side>)* (<Postcode>) (<City>)");
+            alert.setHeaderText("No Results");
+            alert.setContentText("Perhaps you misspelled or used a wrong format.\n The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
 
             alert.showAndWait();
             return null;
@@ -349,7 +349,7 @@ public class Controller {
         if (result.size() > 1) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("We couldn't help you find the address");
-            alert.setHeaderText("Too many results");
+            alert.setHeaderText("Too Many Results");
             alert.setContentText("There were too many results. Try being more specific");
 
             alert.showAndWait();
