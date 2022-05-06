@@ -8,9 +8,9 @@ import canvas.ZoomHandler;
     private double preDir = 0.0;
     private Road preEdge;
     private Road currentEdge;
-    private Road lastInstruction;
     private Road nextEdge;
-    private double distTotal;
+    private double lastDistance = 0.0;
+    private String name = "";
 
     public Instructions(List<Road> edges) {
         this.edges = edges;
@@ -21,7 +21,6 @@ import canvas.ZoomHandler;
         for (int i = 0; i < edges.size(); i++) {
             if (preEdge == null) {
                 preEdge = edges.get(0);
-                lastInstruction = edges.get(0);
                 nextEdge = edges.get(i+1);
                 System.out.println("Start at " + preEdge.name());
                 continue;
@@ -31,51 +30,79 @@ import canvas.ZoomHandler;
             currentEdge = edges.get(i);
             if (i < edges.size() - 1){
                 nextEdge = edges.get(i + 1);
+            } else {
+                System.out.println("Stay at " + edges.get(i).name() + " for " + getDist((float)currentEdge.from().x(), (float)currentEdge.from().y(), (float)currentEdge.to().x(), (float)currentEdge.to().y()));
             }
             getDir(calc - preDir);
             preDir = calc;
             preEdge = edges.get(i);
         }
+        System.out.println("You have arrived");
     }
 
     private void getDir(double calc) {
         double abs = Math.abs(calc);
-        String dist = getDist((float)lastInstruction.fromLon(), (float)lastInstruction.fromLat(), (float)currentEdge.fromLon(), (float)currentEdge.fromLat());
-        switch (currentEdge.role()){
-            case ROUNDABOUT :
-                if (preEdge.role() == RoadRole.ROUNDABOUT){
-                    break;
+        String dist = getDist((float)currentEdge.from().x(), (float)currentEdge.from().y(), (float)currentEdge.to().x(), (float)currentEdge.to().y());
+        switch (currentEdge.role()){            
+            case 1 :
+                if (!preEdge.name().equals(currentEdge.name()) && !preEdge.name().equals(("")) && !currentEdge.name().equals("")){
+                    System.out.println("Stay at " + preEdge.name() + " for " + dist + "and then take " + currentEdge.name());
+                    lastDistance = 0.0;
                 }
-                System.out.println("Continue forward for " + dist + "at " + preEdge.name() + " and then take the roundabout");
-                lastInstruction = currentEdge;
                 break;
-            case MOTORWAY_LINK :
-                if (preEdge.role() == RoadRole.MOTORWAY) {
-                    System.out.println("Continue forward for " + dist + "at " + preEdge.name() + " and then take the exit towards " + nextEdge.name());
+
+            case 2 :
+                if (preEdge.role() != 2){
+                        name = preEdge.name();
+                } 
+                switch(nextEdge.role()){
+                    case 3:
+                        System.out.println("Stay at " +  name + " for " + dist + "and then take the exit towards " + nextEdge.name());
+                        lastDistance = 0.0;
+                        break;
+                    case 1:
+                        if (name.equals(nextEdge.name())){
+                            break;
+                        }
+                        System.out.println("Stay at " + name + " for " + dist + "and then take " + nextEdge.name());
+                        lastDistance = 0.0;
+                        break;
+                    default:
+                        break;
+                };
+                
+                break;
+
+            case 4 :
+                if (preEdge.role() != 4){
+                    System.out.println("Stay at " + preEdge.name() + " for " + dist + "and then take the roundabout");
+                    lastDistance = 0.0;
                 }
-                lastInstruction = currentEdge;
+                else if (nextEdge.role() != 4) {
+                    System.out.println("Exit the roundabout towards " + nextEdge.name());
+                    lastDistance = 0.0;
+                }               
+                
                 break;
+            
             default:
-                if (abs > 0.8 ) {
-                    if (preEdge.role() == RoadRole.ROUNDABOUT){
-                        System.out.println("Exit the roundabout towards " + currentEdge.name());
-                    }
-                    else if (calc > 0){
-                        System.out.println("Continue forward for " + dist + "at " + preEdge.name() + " and then turn left " + "at " + currentEdge.name());
+                if (abs > 0.7 && preEdge.role() != 4) {
+                    if (calc > 0){
+                        System.out.println("Stay at " + preEdge.name() + " for " + dist + "and then turn left " + "at " + currentEdge.name());
                     } else {
-                        System.out.println("Continue forward for " + dist + "at " + preEdge.name() + " and then turn right " + "at " + currentEdge.name());
-                    }
-                    lastInstruction = currentEdge;   
+                        System.out.println("Stay at " + preEdge.name() + " for " + dist + "and then turn right " + "at " + currentEdge.name());
+                    }  
+                    lastDistance = 0.0;
                 }
                 break;
             };
     }
 
     private double calc(Road edge) {
-        double fromLat = edge.fromLat(); 
-        double fromLon = edge.fromLon();
-        double toLat = edge.toLat();
-        double toLon = edge.toLon();
+        double fromLat = edge.from().y();
+        double fromLon = edge.from().x();
+        double toLat = edge.to().y();
+        double toLon = edge.to().x();
         return (Math.atan2(toLat-fromLat, (toLon-fromLon)));
     }
 
@@ -97,7 +124,8 @@ import canvas.ZoomHandler;
     }
 
     private String getDist(float fromLon, float fromLat, float toLon, float toLat){
-        double dist = ZoomHandler.getDistance(fromLon, fromLat, toLon, toLat);
+        double dist = ZoomHandler.getDistance(fromLon, fromLat, toLon, toLat) + lastDistance;
+        lastDistance = dist;
         if (dist < 1000) {
             int distM = (int)Math.round(dist/10.0) * 10;
             return distM + " m ";

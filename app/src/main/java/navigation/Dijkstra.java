@@ -86,7 +86,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         var firstNode = nodes[0];
 
         String name = tags.stream().filter(t -> t.key() == NAME).map(t -> (t.value().toString()))
-        .findFirst().orElse(null);
+        .findFirst().orElse("");
         var roadRole = getRoadRole(way);
 
         for (int i = 1; i < nodes.length; i++) {
@@ -109,14 +109,12 @@ public class Dijkstra implements OSMObserver, Serializable {
             }
 
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
-                Road road = new Road(name, firstNode.lat(), firstNode.lon(), secondNode.lat(), secondNode.lon(), roadRole);
-                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles, road);
+                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles, roadRole, name);
                 graph.addEdge(edge);
             }
 
             if (direction == Direction.REVERSE || direction == Direction.BOTH) {
-                Road road = new Road(name, secondNode.lat(), secondNode.lon(), firstNode.lat(), firstNode.lon(), roadRole);
-                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, edgeRoles, road);
+                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, edgeRoles, roadRole, name);
                 graph.addEdge(edge);
             }
 
@@ -303,7 +301,7 @@ public class Dijkstra implements OSMObserver, Serializable {
 
             from = edge.from();
             path.add(from);
-            roads.add(edge.road());
+            roads.add(new Road(edge.name(), longToCoordinates(edge.from()), longToCoordinates(edge.to()), edge.role()));
             to = from;
         }
 

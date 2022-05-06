@@ -106,6 +106,8 @@ public class Controller {
 
     @FXML private VBox middleVBox;
 
+    @FXML private HBox middleHBox;
+
     @FXML private Label nearestRoadLabel;
 
     @FXML private CheckMenuItem nearestRoadDelayItem;
@@ -113,8 +115,6 @@ public class Controller {
     @FXML private PointsOfInterestVBox pointsOfInterestVBox;
 
     @FXML private Label scaleBarText;
-
-    @FXML private Rectangle scaleBarRectangle;
 
     @FXML private Label zoomLevelText;
 
@@ -305,11 +305,12 @@ public class Controller {
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
             canvas.setVisible(true);
-            canvas.setZoomHandler(model.bounds);
-            setZoomAndScale();
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
+            middleHBox.setVisible(true);
+            canvas.setZoomHandler(model.bounds);
+            setZoomAndScale();
         }
 
         if (model.supports(Feature.ADDRESS_SEARCH)) {
@@ -372,6 +373,7 @@ public class Controller {
         fromRouteTextField.setDisable(true);
 
         nearestRoadLabel.setVisible(false);
+        middleHBox.setVisible(false);
     }
 
     public void dispose() {
