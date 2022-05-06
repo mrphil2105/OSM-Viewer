@@ -313,6 +313,7 @@ public class Dijkstra implements OSMObserver, Serializable {
             edgeRoles.set(EdgeRole.WALK);
         }
 
+        // The following is in accordance with: https://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Access_restrictions#Denmark
         switch (highwayTag.value()) {
             case "motorway",
                 "trunk",
@@ -321,36 +322,44 @@ public class Dijkstra implements OSMObserver, Serializable {
                 "tertiary",
                 "unclassified",
                 "residential",
+                "living_street",
                 "motorway_link",
                 "trunk_link",
                 "primary_link",
                 "secondary_link",
-                "tertiary_link",
-                "living_street" -> edgeRoles.set(EdgeRole.CAR);
+                "tertiary_link" -> edgeRoles.set(EdgeRole.CAR);
         }
 
         switch (highwayTag.value()) {
-            case "cycleway",
-                "primary",
+            case "primary",
                 "secondary",
                 "tertiary",
                 "unclassified",
                 "residential",
+                "living_street",
+                "track",
+                "path",
+                "cycleway",
                 "primary_link",
                 "secondary_link",
-                "tertiary_link",
-                "living_street" -> edgeRoles.set(EdgeRole.BIKE);
+                "tertiary_link" -> edgeRoles.set(EdgeRole.BIKE);
         }
 
         switch (highwayTag.value()) {
-            case "footway",
+            case "primary",
                 "secondary",
                 "tertiary",
                 "unclassified",
                 "residential",
+                "living_street",
+                "track",
+                "path",
+                "cycleway",
+                "footway",
+                "pedestrian",
+                "primary_link",
                 "secondary_link",
-                "tertiary_link",
-                "living_street" -> edgeRoles.set(EdgeRole.WALK);
+                "tertiary_link" -> edgeRoles.set(EdgeRole.WALK);
         }
 
         return edgeRoles;
