@@ -23,14 +23,6 @@ public class SearchTextField extends TextField {
         return addressDatabase.search(parsedAddress);
     }
 
-    public void showHistory() {
-        System.out.println("HISTORY");
-        popupEntries.hide();
-        popupEntries.getItems().clear();
-        addressDatabase.getHistory().forEach(e -> popupEntries.getItems().add(new AddressMenuItem(e)));
-        showCurrentAddresses();
-    }
-
     public void showMenuItems(ObservableList<Address> itemsToShow) {
             popupEntries.hide();
 
