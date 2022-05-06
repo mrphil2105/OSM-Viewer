@@ -19,13 +19,10 @@ public class AddressDatabase implements OSMObserver, Serializable {
     private TrieBuilder<List<Address>> streetTrieBuilder;
     private TrieBuilder<List<Address>> cityTrieBuilder;
     private TrieBuilder<List<Address>> postcodeTrieBuilder;
-    private final List<Address> history;
-
     public AddressDatabase() {
         streetTrieBuilder = new TrieBuilder<>('\0');
         cityTrieBuilder = new TrieBuilder<>('\0');
         postcodeTrieBuilder = new TrieBuilder<>('\0');
-        history = new ArrayList<>();
     }
 
     public static AddressBuilder parse(String toParse) {
@@ -43,10 +40,6 @@ public class AddressDatabase implements OSMObserver, Serializable {
             return null;
         }
         return builder;
-    }
-
-    public List<Address> getHistory() {
-        return history;
     }
 
     public void addAddress(Address a) {
