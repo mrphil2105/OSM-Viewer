@@ -62,10 +62,6 @@ public enum Drawable {
     PARTITION_HORIZONTAL(Shape.POLYLINE, Color.BLUE, 1, Category.DEBUG),
     PARTITION_VERTICAL(Shape.POLYLINE, Color.RED, 1, Category.DEBUG),
     POINT(Shape.POLYLINE, Color.BLACK, 2, Category.DEBUG),
-    POINTCONTINUE(Shape.FILL, Color.WHITE, 0.4, Category.DEBUG),
-    POINTSLIGHT(Shape.FILL, Color.RED, 0.4, Category.DEBUG),
-    POINTTURN(Shape.FILL, Color.GREEN, 0.4, Category.DEBUG),
-    POINTSHARP(Shape.FILL, Color.BLUE, 0.4, Category.DEBUG),
     UNKNOWN(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG),
     IGNORED(Shape.FILL, Color.web("#000000"), 0, Category.DEBUG);
 
