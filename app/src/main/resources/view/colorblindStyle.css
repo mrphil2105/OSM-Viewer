@@ -21,6 +21,10 @@
     -fx-background-color: #ffffff;
     -fx-text-fill: #000000;
 }
+ .button:hover {
+     -fx-background-color: #cccccc  ;
+
+ }
 
 #removeButton{
     -fx-background-color: #e6e6e6;
