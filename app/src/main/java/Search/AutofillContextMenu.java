@@ -39,10 +39,10 @@ public class AutofillContextMenu extends ContextMenu {
             stringBuilder.append(address.floor()).append(" ");
         if (address.side() != null)
             stringBuilder.append(address.side()).append(" ");
-        if (address.city() != null || appendCity)
-            stringBuilder.append(menuAddress.city()).append(" ");
         if (address.postcode() != null)
             stringBuilder.append(menuAddress.postcode()).append(" ");
+        if (address.city() != null || appendCity)
+            stringBuilder.append(menuAddress.city()).append(" ");
 
         text.setText(stringBuilder.toString());
         if (appendCity && address.houseNumber() == null) {
