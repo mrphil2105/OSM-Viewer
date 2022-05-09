@@ -82,13 +82,21 @@ public class Dijkstra implements OSMObserver, Serializable {
             var secondVertex = coordinatesToLong(secondPoint);
             var distance = calculateDistance(firstPoint, secondPoint);
 
+            boolean trafficLights=false;
+            for (OSMTag t : way.tags()){
+                if (t.key()==HIGHWAY && t.value().equals("traffic_signals")){
+                    trafficLights=true;
+                    break;
+                }
+            }
+
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
-                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles);
+                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles,trafficLights);
                 graph.addEdge(edge);
             }
 
             if (direction == Direction.REVERSE || direction == Direction.BOTH) {
-                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, edgeRoles);
+                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, edgeRoles,trafficLights);
                 graph.addEdge(edge);
             }
 
@@ -210,6 +218,8 @@ public class Dijkstra implements OSMObserver, Serializable {
         if (mode == EdgeRole.CAR) {
             weight /= edge.maxSpeed();
         }
+
+        if (edge.trafficLights()) weight=weight+0.25f*weight;
 
         return weight;
     }
