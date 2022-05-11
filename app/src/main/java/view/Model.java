@@ -82,10 +82,6 @@ public class Model {
         return nearestRoad.get();
     }
 
-    public Point getNearestPoint(Point query) {
-        return nearestNeighbor.nearestTo(query);
-    }
-
     public void setQueryPoint(Point query) {
         var road = nearestNeighbor.nearestRoad(query);
         nearestRoadProperty().set(road);

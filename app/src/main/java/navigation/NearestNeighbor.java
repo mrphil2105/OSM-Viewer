@@ -57,12 +57,6 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         addToTree(nodes, 0);
     }
 
-    public Point nearestTo(Point query) {
-        var nearestResult = tree.nearest(query);
-
-        return nearestResult.point();
-    }
-
     public String nearestRoad(Point query) {
         var nearestResult = tree.nearest(query);
 

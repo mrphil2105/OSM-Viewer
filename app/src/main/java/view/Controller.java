@@ -147,7 +147,6 @@ public class Controller {
                         var point = new Point(e.getX(), e.getY());
                         point = canvas.canvasToMap(point);
                         point = Point.mapToGeo(point);
-                        point = this.model.getNearestPoint(point);
 
                         if (fromPoint == null) {
                             fromPoint = point;
@@ -571,10 +570,7 @@ public class Controller {
         Point from = new Point((float) addressFrom.node().lon(), (float) addressFrom.node().lat());
         Point to = new Point((float) addressTo.node().lon(), (float) addressTo.node().lat());
 
-        Point dijkstraFrom = model.getNearestPoint(from);
-        Point dijkstraTo = model.getNearestPoint(to);
-
-        model.calculateBestRoute(dijkstraFrom, dijkstraTo, mode);
+        model.calculateBestRoute(from, to, mode);
     }
 
     private void setZoomAndScale() {

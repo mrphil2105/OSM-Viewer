@@ -16,6 +16,8 @@ import osm.elements.*;
 public class Dijkstra implements OSMObserver, Serializable {
     private static final float MAX_DISTANCE_INACCURACY = 0.0005f;
 
+    private transient Rect bounds;
+
     private final Graph graph;
     private SpatialTree<Object> carTree;
     private SpatialTree<Object> bikeTree;
@@ -36,6 +38,8 @@ public class Dijkstra implements OSMObserver, Serializable {
 
     @Override
     public void onBounds(Rect bounds) {
+        this.bounds = bounds;
+
         carTree = new LinearSearchTwoDTree<>(1000, bounds);
         bikeTree = new LinearSearchTwoDTree<>(1000, bounds);
         walkTree = new LinearSearchTwoDTree<>(1000, bounds);
@@ -78,6 +82,11 @@ public class Dijkstra implements OSMObserver, Serializable {
 
             var firstPoint = new Point((float)firstNode.lon(), (float)firstNode.lat());
             var secondPoint = new Point((float)secondNode.lon(), (float)secondNode.lat());
+
+            if (!bounds.contains(firstPoint) || !bounds.contains(secondPoint)) {
+                continue;
+            }
+
             var firstVertex = coordinatesToLong(firstPoint);
             var secondVertex = coordinatesToLong(secondPoint);
             var distance = calculateDistance(firstPoint, secondPoint);
@@ -157,6 +166,9 @@ public class Dijkstra implements OSMObserver, Serializable {
         if (fromDistance > MAX_DISTANCE_INACCURACY || toDistance > MAX_DISTANCE_INACCURACY) {
             return null;
         }
+
+        from = fromResult.point();
+        to = toResult.point();
 
         var sourceVertex = Dijkstra.coordinatesToLong(from);
         var targetVertex = Dijkstra.coordinatesToLong(to);
