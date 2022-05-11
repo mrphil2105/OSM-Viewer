@@ -15,10 +15,7 @@ import geometry.Point;
 import geometry.Vector2D;
 import io.FileParser;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -354,19 +351,39 @@ public class Controller {
         queryPointTimer.cancel();
     }
 
+    private Address handleSearchInput(SearchTextField textField){
+        var parsedAddress = textField.parseAddress();
+        var result = textField.handleSearch(parsedAddress);
+        if (result == null || result.size() <= 0){
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("We couldn't help you find the address");
+            alert.setHeaderText("No Results");
+            alert.setContentText("Perhaps you misspelled or used a wrong format.\n The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
+
+            alert.showAndWait();
+            return null;
+        }
+        if (result.size() > 1) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("We couldn't help you find the address");
+            alert.setHeaderText("Too Many Results");
+            alert.setContentText("There were too many results. Try being more specific");
+
+            alert.showAndWait();
+            return null;
+        }
+        return result.get(0);
+    }
+
     @FXML
     public void handleSearchClick() {
-        var result = searchTextField.handleSearch();
-        if (result == null) return; // TODO: handle exception and show message?
-        if (result.size() > 1) {
-            // TODO: popup message
-        } else if (result.size() < 1) {
-
+        var result = handleSearchInput(searchTextField);
+        if(result == null){
+            return;
         }
-        var address = result.get(0);
 
         Point point =
-                Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
+                Point.geoToMap(new Point(result.lon(), result.lat()));
         zoomOn(point);
         var drawing = Drawing.create(Vector2D.create(point), Drawable.ADDRESS);
         canvas.getRenderer().draw(drawing);
@@ -375,26 +392,40 @@ public class Controller {
         }
         lastDrawnAddress = drawing;
 
-        searchTextField.clear(); // TODO: find ud af om den skal bruges
+        searchTextField.clear();
     }
 
     @FXML
-    public void handleInFocus() {
-        searchTextField.showHistory();
+    public void handleSearchInFocus() {
+        searchTextField.showCurrentAddresses();
+    }
+
+    @FXML
+    public void handleToInFocus() {
+        toRouteTextField.showCurrentAddresses();
+    }
+
+    @FXML
+    public void handleFromInFocus() {
+        fromRouteTextField.showCurrentAddresses();
     }
 
     @FXML
     public void handleRouteClick() {
+        var parsedAddress = searchTextField.parseAddress();
 
-        if (fromRouteTextField.handleSearch() == null || toRouteTextField.handleSearch() == null) {
+        var fromRouteResult = handleSearchInput(fromRouteTextField);
+        var toRouteResult = handleSearchInput(toRouteTextField);
+
+        if (fromRouteResult == null || toRouteResult == null) {
             routeErrorLabel.setText("Please enter valid from and to addresses.");
             routeErrorLabel.setVisible(true);
 
             return;
         }
         routeBetweenAddresses(
-                fromRouteTextField.handleSearch().get(0),
-                toRouteTextField.handleSearch().get(0),
+                fromRouteResult,
+                toRouteResult,
                 EdgeRole.CAR);
     }
 
@@ -550,7 +581,10 @@ public class Controller {
         routeErrorLabel.setVisible(false);
 
         var result = handleKeyTyped(event);
-        if (result == null) return;
+        if (result == null){
+            model.setFromSuggestions(Collections.emptyList());
+            return;
+        }
         model.setFromSuggestions(result);
     }
 
@@ -559,14 +593,20 @@ public class Controller {
         routeErrorLabel.setVisible(false);
 
         var result = handleKeyTyped(event);
-        if (result == null) return;
+        if (result == null){
+            model.setFromSuggestions(Collections.emptyList());
+            return;
+        }
         model.setToSuggestions(result);
     }
 
     @FXML
     public void handleSearchKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
-        if (result == null) return;
+        if (result == null){
+            model.setSearchSuggestions(Collections.emptyList());
+            return;
+        };
         model.setSearchSuggestions(result);
     }
 
@@ -580,8 +620,8 @@ public class Controller {
     }
 
     private void routeBetweenAddresses(Address addressFrom, Address addressTo, EdgeRole mode) {
-        Point from = new Point((float) addressFrom.node().lon(), (float) addressFrom.node().lat());
-        Point to = new Point((float) addressTo.node().lon(), (float) addressTo.node().lat());
+        Point from = new Point(addressFrom.lon(), addressFrom.lat());
+        Point to = new Point(addressTo.lon(), addressTo.lat());
 
         var hasRoute = model.calculateBestRoute(from, to, mode);
 
