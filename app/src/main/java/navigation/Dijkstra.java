@@ -14,8 +14,6 @@ import osm.OSMObserver;
 import osm.elements.*;
 
 public class Dijkstra implements OSMObserver, Serializable {
-    private static final float MAX_DISTANCE_INACCURACY = 0.0005f;
-
     private transient Rect bounds;
 
     private final Graph graph;
@@ -151,13 +149,6 @@ public class Dijkstra implements OSMObserver, Serializable {
 
         var fromResult = tree.nearest(from);
         var toResult = tree.nearest(to);
-
-        var fromDistance = calculateDistance(from, fromResult.point());
-        var toDistance = calculateDistance(to, toResult.point());
-
-        if (fromDistance > MAX_DISTANCE_INACCURACY || toDistance > MAX_DISTANCE_INACCURACY) {
-            return null;
-        }
 
         from = fromResult.point();
         to = toResult.point();
