@@ -93,19 +93,19 @@ public class Dijkstra implements OSMObserver, Serializable {
             var secondVertex = coordinatesToLong(secondPoint);
             var distance = calculateDistance(firstPoint, secondPoint);
 
-            boolean trafficLights = false;
+
             if (trafficLightNodes.contains(firstNode.id()) || trafficLightNodes.contains(secondNode.id())) {
-                trafficLights = true;
+               edgeRoles.set(EdgeRole.TRAFFIC_SIGNAL);
             }
 
 
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
-                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles, trafficLights);
+                var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles);
                 graph.addEdge(edge);
             }
 
             if (direction == Direction.REVERSE || direction == Direction.BOTH) {
-                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, edgeRoles, trafficLights);
+                var edge = new Edge(secondVertex, firstVertex, distance, maxSpeed, edgeRoles);
                 graph.addEdge(edge);
             }
 
@@ -115,7 +115,12 @@ public class Dijkstra implements OSMObserver, Serializable {
                         case CAR -> carTree;
                         case BIKE -> bikeTree;
                         case WALK -> walkTree;
+                        case TRAFFIC_SIGNAL -> null;
                     };
+
+                    if (tree == null) {
+                        continue;
+                    }
 
                     tree.insert(firstPoint, null);
                     tree.insert(secondPoint, null);
@@ -155,6 +160,7 @@ public class Dijkstra implements OSMObserver, Serializable {
             case CAR -> carTree;
             case BIKE -> bikeTree;
             case WALK -> walkTree;
+            case TRAFFIC_SIGNAL -> null;
         };
 
         var fromResult = tree.nearest(from);
@@ -230,8 +236,21 @@ public class Dijkstra implements OSMObserver, Serializable {
         if (mode == EdgeRole.CAR) {
             weight /= edge.maxSpeed();
         }
+        if (edge.hasRole(EdgeRole.TRAFFIC_SIGNAL)) {
 
-        if (edge.trafficLights()) weight += 15;
+            var trafficSignalModifier = switch (mode) {
+                case CAR -> carTree;
+                case BIKE -> bikeTree;
+                case WALK -> walkTree;
+                case TRAFFIC_SIGNAL -> null;
+            };
+
+        }
+
+
+
+
+        if (edge.hasRole(EdgeRole.TRAFFIC_SIGNAL)) weight += 15;
 
         return weight;
     }
