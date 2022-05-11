@@ -35,6 +35,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -66,6 +67,8 @@ public class Controller {
     @FXML private HBox pointsOfInterestHeader;
 
     @FXML private VBox categories;
+
+    @FXML private GridPane searchPane;
 
     @FXML private SearchTextField searchTextField;
 
@@ -233,6 +236,7 @@ public class Controller {
 
         navigationModeBox.setItems(FXCollections.observableArrayList(EdgeRole.values()));
         navigationModeBox.getSelectionModel().select(0);
+        routeErrorLabel.prefWidthProperty().bind(searchPane.widthProperty());
 
         canvas.mapMouseWheelProperty.set(
                 e -> {

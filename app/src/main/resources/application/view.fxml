@@ -20,7 +20,7 @@
                 <padding>
                     <Insets top="10" bottom="10" left="10" right="10"/>
                 </padding>
-                <GridPane alignment="center" hgap="10" vgap="10">
+                <GridPane fx:id="searchPane" alignment="center" hgap="10" vgap="10">
                     <SearchTextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0"
                                      GridPane.rowIndex="0" onAction="#handleSearchClick"
                                      onKeyTyped="#handleSearchKeyTyped"
@@ -38,7 +38,7 @@
                         <Button fx:id="routeButton" id="allButtons" text="Find route" onAction="#handleRouteClick"/>
                     </HBox>
                     <Label fx:id="routeErrorLabel" GridPane.columnIndex="0" GridPane.rowIndex="6"
-                           textFill="RED" visible="false" />
+                           textFill="RED" wrapText="true" visible="false" />
                 </GridPane>
             </VBox>
         </left>
