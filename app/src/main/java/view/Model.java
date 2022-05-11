@@ -55,8 +55,6 @@ public class Model {
                 case PATHFINDING -> dijkstra = (Dijkstra) entry.getValue().read();
                 case ADDRESS_SEARCH -> {
                     addresses = (AddressDatabase) entry.getValue().read();
-                    // FIXME: Why are the tries not built at the .map file creation step?
-                    addresses.buildTries();
                 }
             }
 
@@ -91,18 +89,20 @@ public class Model {
         return routePoints;
     }
 
-    public void calculateBestRoute(Point from, Point to, EdgeRole mode) {
+    public boolean calculateBestRoute(Point from, Point to, EdgeRole mode) {
         var shortestPath = dijkstra.shortestPath(from, to, mode);
 
         if (shortestPath == null) {
             routePoints.clear();
             System.out.println("No path between " + from + " and " + to + ".");
 
-            return;
+            return false;
         }
 
         var routePoints = shortestPath.stream().map(Point::geoToMap).toList();
         this.routePoints.setAll(routePoints);
+
+        return true;
     }
 
     public AddressDatabase getAddresses() {

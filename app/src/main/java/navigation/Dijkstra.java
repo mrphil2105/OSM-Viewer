@@ -13,10 +13,9 @@ import geometry.Point;
 import geometry.Rect;
 import osm.OSMObserver;
 import osm.elements.*;
+import util.DistanceUtils;
 
 public class Dijkstra implements OSMObserver, Serializable {
-    private static final float MAX_DISTANCE_INACCURACY = 0.0005f;
-
     private transient Rect bounds;
     private transient RefList trafficLightNodes;
 
@@ -91,7 +90,7 @@ public class Dijkstra implements OSMObserver, Serializable {
 
             var firstVertex = coordinatesToLong(firstPoint);
             var secondVertex = coordinatesToLong(secondPoint);
-            var distance = calculateDistance(firstPoint, secondPoint);
+            var distance = (float)DistanceUtils.calculateEarthDistance(firstPoint, secondPoint);
 
 
             if (trafficLightNodes.contains(firstNode.id()) || trafficLightNodes.contains(secondNode.id())) {
@@ -165,13 +164,6 @@ public class Dijkstra implements OSMObserver, Serializable {
 
         var fromResult = tree.nearest(from);
         var toResult = tree.nearest(to);
-
-        var fromDistance = calculateDistance(from, fromResult.point());
-        var toDistance = calculateDistance(to, toResult.point());
-
-        if (fromDistance > MAX_DISTANCE_INACCURACY || toDistance > MAX_DISTANCE_INACCURACY) {
-            return null;
-        }
 
         from = fromResult.point();
         to = toResult.point();
@@ -421,15 +413,6 @@ public class Dijkstra implements OSMObserver, Serializable {
             case "residential", "living_street" -> 40;
             default -> 0; // Return 0 for highways that aren't handled by Dijkstra in CAR mode.
         };
-    }
-
-    private static float calculateDistance(Point firstPoint, Point secondPoint) {
-        var x1 = firstPoint.x();
-        var y1 = firstPoint.y();
-        var x2 = secondPoint.x();
-        var y2 = secondPoint.y();
-
-        return (float) Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
     private record Node(long vertex, float weight) implements Comparable<Node>, Serializable {

@@ -1,46 +1,30 @@
 package Search;
 
-import view.Model;
 import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.TextField;
+import view.Model;
 
 public class SearchTextField extends TextField {
     AutofillContextMenu popupEntries;
     Address currentSearch;
     AddressDatabase addressDatabase;
 
-    public AddressDatabase getAddressDatabase() { // TODO: FJERN
-        return addressDatabase;
-    }
-
     public void init(Model model) {
         var addressDatabase = model.getAddresses();
         this.addressDatabase = addressDatabase;
         popupEntries = new AutofillContextMenu(this, addressDatabase);
+        currentSearch=null;
     }
 
-    public List<Address> handleSearch() {
+    public List<Address> handleSearch(Address parsedAddress) {
         popupEntries.hide();
-        var parsedAddress = parseAddress();
         if (parsedAddress == null) return null;
         return addressDatabase.search(parsedAddress);
     }
 
-    public void showHistory() {
-        popupEntries.hide();
-        popupEntries.getItems().clear();
-        addressDatabase.getHistory().forEach(e -> popupEntries.getItems().add(new AddressMenuItem(e)));
-        if (!popupEntries.isShowing()) {
-            popupEntries.show(this, Side.BOTTOM, 0, 0);
-        }
-    }
-
     public void showMenuItems(ObservableList<Address> itemsToShow) {
-        if (getText().length() == 0) {
-            showHistory();
-        } else {
             popupEntries.hide();
 
             boolean showStreet = (currentSearch.street() != null);
@@ -57,19 +41,15 @@ public class SearchTextField extends TextField {
                 item.setOnAction(popupEntries::onMenuClick);
                 popupEntries.getItems().add(item);
             }
-            if (!popupEntries.isShowing()) {
-                popupEntries.show(this, Side.BOTTOM, 0, 0);
-            }
-        }
+            showCurrentAddresses();
     }
 
     public void setCurrentSearch(Address currentSearch) {
         this.currentSearch = currentSearch;
     }
 
-    private String reformat(String string) {
+    public static String reformat(String string) {
         if (string == null) return null;
-
         string = string.toLowerCase();
 
         var stringBuilder = new StringBuilder();
@@ -96,5 +76,15 @@ public class SearchTextField extends TextField {
         searchedAddressBuilder.city(reformat(searchedAddressBuilder.getCity()));
 
         return searchedAddressBuilder.build();
+    }
+
+    public void showCurrentAddresses() {
+        if(getText().isBlank()) {
+            popupEntries.hide();
+            return;
+        }
+        if (!popupEntries.isShowing()) {
+            popupEntries.show(this, Side.BOTTOM, 0, 0);
+        }
     }
 }
