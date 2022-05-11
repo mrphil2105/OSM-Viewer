@@ -37,8 +37,8 @@
                     <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="5">
                         <Button fx:id="routeButton" id="allButtons" text="Find route" onAction="#handleRouteClick"/>
                     </HBox>
-                    <Label fx:id="noRouteLabel" GridPane.columnIndex="0" GridPane.rowIndex="6"
-                           text="No route could be found." textFill="RED" visible="false" />
+                    <Label fx:id="routeErrorLabel" GridPane.columnIndex="0" GridPane.rowIndex="6"
+                           textFill="RED" visible="false" />
                 </GridPane>
             </VBox>
         </left>

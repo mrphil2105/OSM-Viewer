@@ -77,7 +77,7 @@ public class Controller {
 
     @FXML private ComboBox<EdgeRole> navigationModeBox;
 
-    @FXML private Label noRouteLabel;
+    @FXML private Label routeErrorLabel;
 
     @FXML private RadioButton radioButtonCar;
 
@@ -383,6 +383,9 @@ public class Controller {
     public void handleRouteClick() {
 
         if (fromRouteTextField.handleSearch() == null || toRouteTextField.handleSearch() == null) {
+            routeErrorLabel.setText("Please enter valid from and to addresses.");
+            routeErrorLabel.setVisible(true);
+
             return;
         }
         routeBetweenAddresses(
@@ -540,7 +543,7 @@ public class Controller {
 
     @FXML
     public void handleFromKeyTyped(KeyEvent event) {
-        noRouteLabel.setVisible(false);
+        routeErrorLabel.setVisible(false);
 
         var result = handleKeyTyped(event);
         if (result == null) return;
@@ -549,7 +552,7 @@ public class Controller {
 
     @FXML
     public void handleToKeyTyped(KeyEvent event) {
-        noRouteLabel.setVisible(false);
+        routeErrorLabel.setVisible(false);
 
         var result = handleKeyTyped(event);
         if (result == null) return;
@@ -579,7 +582,8 @@ public class Controller {
         var hasRoute = model.calculateBestRoute(from, to, mode);
 
         if (!hasRoute) {
-            noRouteLabel.setVisible(true);
+            routeErrorLabel.setText("No route could be found.");
+            routeErrorLabel.setVisible(true);
         }
     }
 
