@@ -15,6 +15,7 @@ public class SearchTextField extends TextField {
         var addressDatabase = model.getAddresses();
         this.addressDatabase = addressDatabase;
         popupEntries = new AutofillContextMenu(this, addressDatabase);
+        currentSearch=null;
     }
 
     public List<Address> handleSearch(Address parsedAddress) {
