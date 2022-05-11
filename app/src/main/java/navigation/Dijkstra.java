@@ -12,6 +12,7 @@ import geometry.Point;
 import geometry.Rect;
 import osm.OSMObserver;
 import osm.elements.*;
+import util.DistanceUtils;
 
 public class Dijkstra implements OSMObserver, Serializable {
     private transient Rect bounds;
@@ -87,7 +88,7 @@ public class Dijkstra implements OSMObserver, Serializable {
 
             var firstVertex = coordinatesToLong(firstPoint);
             var secondVertex = coordinatesToLong(secondPoint);
-            var distance = calculateDistance(firstPoint, secondPoint);
+            var distance = (float)DistanceUtils.calculateEarthDistance(firstPoint, secondPoint);
 
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
                 var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles);
@@ -383,15 +384,6 @@ public class Dijkstra implements OSMObserver, Serializable {
             case "residential", "living_street" -> 40;
             default -> 0; // Return 0 for highways that aren't handled by Dijkstra in CAR mode.
         };
-    }
-
-    private static float calculateDistance(Point firstPoint, Point secondPoint) {
-        var x1 = firstPoint.x();
-        var y1 = firstPoint.y();
-        var x2 = secondPoint.x();
-        var y2 = secondPoint.y();
-
-        return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
     private record Node(long vertex, float weight) implements Comparable<Node>, Serializable {
