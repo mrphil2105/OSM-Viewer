@@ -225,24 +225,25 @@ public class Dijkstra implements OSMObserver, Serializable {
     private float calculateWeight(Edge edge) {
         float weight = edge.distance();
 
+
         if (mode == EdgeRole.CAR) {
             weight /= edge.maxSpeed();
         }
         if (edge.hasRole(EdgeRole.TRAFFIC_SIGNAL)) {
 
             var trafficSignalModifier = switch (mode) {
-                case CAR -> carTree;
-                case BIKE -> bikeTree;
-                case WALK -> walkTree;
-                case TRAFFIC_SIGNAL -> null;
+                //according to this source (https://transportist.org/2018/03/06/how-much-time-is-spent-at-traffic-signals/), one stop at a traffic light takes on averedge 15 seconds, so we add that to the weight.
+                case CAR -> 15/3600;
+                case BIKE -> 15/3600*27; //average biking speed is about 27 km/h (https://www.declinemagazine.com/mtb/average-cycling-speed-by-age/)
+                case WALK -> 15/3600*5; //average walking speed is 5 km/h (https://www.business-standard.com/article/current-affairs/fit-proper-what-is-the-ideal-walking-speed-for-you-115100900029_1.html)
+                case TRAFFIC_SIGNAL -> 0;
             };
+            weight += trafficSignalModifier;
 
         }
 
 
 
-
-        if (edge.hasRole(EdgeRole.TRAFFIC_SIGNAL)) weight += 15;
 
         return weight;
     }
