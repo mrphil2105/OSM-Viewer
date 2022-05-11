@@ -91,18 +91,20 @@ public class Model {
         return routePoints;
     }
 
-    public void calculateBestRoute(Point from, Point to, EdgeRole mode) {
+    public boolean calculateBestRoute(Point from, Point to, EdgeRole mode) {
         var shortestPath = dijkstra.shortestPath(from, to, mode);
 
         if (shortestPath == null) {
             routePoints.clear();
             System.out.println("No path between " + from + " and " + to + ".");
 
-            return;
+            return false;
         }
 
         var routePoints = shortestPath.stream().map(Point::geoToMap).toList();
         this.routePoints.setAll(routePoints);
+
+        return true;
     }
 
     public AddressDatabase getAddresses() {

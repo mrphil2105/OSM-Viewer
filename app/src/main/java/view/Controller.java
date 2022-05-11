@@ -77,6 +77,8 @@ public class Controller {
 
     @FXML private ComboBox<EdgeRole> navigationModeBox;
 
+    @FXML private Label noRouteLabel;
+
     @FXML private RadioButton radioButtonCar;
 
     @FXML private RadioButton radioButtonBikeOrWalk;
@@ -538,6 +540,8 @@ public class Controller {
 
     @FXML
     public void handleFromKeyTyped(KeyEvent event) {
+        noRouteLabel.setVisible(false);
+
         var result = handleKeyTyped(event);
         if (result == null) return;
         model.setFromSuggestions(result);
@@ -545,6 +549,8 @@ public class Controller {
 
     @FXML
     public void handleToKeyTyped(KeyEvent event) {
+        noRouteLabel.setVisible(false);
+
         var result = handleKeyTyped(event);
         if (result == null) return;
         model.setToSuggestions(result);
@@ -570,7 +576,11 @@ public class Controller {
         Point from = new Point((float) addressFrom.node().lon(), (float) addressFrom.node().lat());
         Point to = new Point((float) addressTo.node().lon(), (float) addressTo.node().lat());
 
-        model.calculateBestRoute(from, to, mode);
+        var hasRoute = model.calculateBestRoute(from, to, mode);
+
+        if (!hasRoute) {
+            noRouteLabel.setVisible(true);
+        }
     }
 
     private void setZoomAndScale() {
