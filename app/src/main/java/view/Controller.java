@@ -355,21 +355,12 @@ public class Controller {
         var parsedAddress = textField.parseAddress();
         var result = textField.handleSearch(parsedAddress);
         if (result == null || result.size() <= 0){
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("We couldn't help you find the address");
-            alert.setHeaderText("No Results");
-            alert.setContentText("Perhaps you misspelled or used a wrong format.\n The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
-
-            alert.showAndWait();
             return null;
         }
         if (result.size() > 1) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("We couldn't help you find the address");
-            alert.setHeaderText("Too Many Results");
-            alert.setContentText("There were too many results. Try being more specific");
+            routeErrorLabel.setText("More than one address was found. Try being more specific.");
+            routeErrorLabel.setVisible(true);
 
-            alert.showAndWait();
             return null;
         }
         return result.get(0);
@@ -379,6 +370,11 @@ public class Controller {
     public void handleSearchClick() {
         var result = handleSearchInput(searchTextField);
         if(result == null){
+            routeErrorLabel.setText("Please enter valid search address." +
+                System.lineSeparator() +
+                "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
+            routeErrorLabel.setVisible(true);
+
             return;
         }
 
@@ -418,7 +414,9 @@ public class Controller {
         var toRouteResult = handleSearchInput(toRouteTextField);
 
         if (fromRouteResult == null || toRouteResult == null) {
-            routeErrorLabel.setText("Please enter valid from and to addresses.");
+            routeErrorLabel.setText("Please enter valid from and to addresses." +
+                System.lineSeparator() +
+                "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
             routeErrorLabel.setVisible(true);
 
             return;
