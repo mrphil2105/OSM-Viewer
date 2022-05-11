@@ -22,6 +22,7 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -36,6 +37,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.util.Pair;
@@ -74,6 +76,8 @@ public class Controller {
     @FXML private SearchTextField toRouteTextField;
 
     @FXML private Button routeButton;
+
+    @FXML private ComboBox<EdgeRole> navigationModeBox;
 
     @FXML private RadioButton radioButtonCar;
 
@@ -115,42 +119,41 @@ public class Controller {
 
     @FXML private Label fps;
 
+    private final ListChangeListener<? super Point> routeRedrawListener = listener -> {
+        while (listener.next()) {
+        }
+
+        if (!listener.wasAdded()) {
+            return;
+        }
+
+        var renderer = canvas.getRenderer();
+        if (routeDrawing != null) renderer.clear(routeDrawing);
+
+        var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
+        routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
+
+        renderer.draw(routeDrawing);
+
+        if (fromToDrawings!=null){
+            renderer.clear(fromToDrawings.getValue());
+            renderer.clear(fromToDrawings.getKey());
+        }
+
+        var fromPoint= model.getFromToPoints().getKey();
+        var toPoint = model.getFromToPoints().getValue();
+
+        fromToDrawings=new Pair<>(Drawing.create( Vector2D.create(fromPoint),Drawable.ADDRESS) , Drawing.create( Vector2D.create(toPoint),Drawable.ADDRESS));
+
+        renderer.draw(fromToDrawings.getValue());
+        renderer.draw(fromToDrawings.getKey());
+
+    };
+
     public void init(Model model) {
         setModel(model);
 
         setStyleSheets("style.css");
-
-        model
-                .getRoutePoints()
-                .addListener(
-                        (ListChangeListener<? super Point>)
-                                listener -> {
-                                    while (listener.next()) {}
-
-                                    if (!listener.wasAdded()) {
-                                        return;
-                                    }
-
-                                    var renderer = canvas.getRenderer();
-                                    if (routeDrawing != null) renderer.clear(routeDrawing);
-                                    if (fromToDrawings != null){
-                                        renderer.clear(fromToDrawings.getKey());
-                                        renderer.clear(fromToDrawings.getValue());
-                                    }
-
-                                    var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
-                                    routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
-
-                                    renderer.draw(routeDrawing);
-
-                                    var fromPoint= model.getFromToPoints().getKey();
-                                    var toPoint = model.getFromToPoints().getValue();
-
-                                    fromToDrawings=new Pair<>(Drawing.create( Vector2D.create(fromPoint),Drawable.ADDRESS) , Drawing.create( Vector2D.create(toPoint),Drawable.ADDRESS));
-
-                                    renderer.draw(fromToDrawings.getValue());
-                                    renderer.draw(fromToDrawings.getKey());
-                                });
 
         fps.textProperty().bind(canvas.fpsProperty.asString("FPS: %.1f"));
 
@@ -165,8 +168,11 @@ public class Controller {
                             fromPoint = point;
                         } else if (toPoint == null) {
                             toPoint = point;
-                            model.setFromToPoints(new Pair<>(Point.geoToMap(fromPoint),Point.geoToMap(toPoint)));
-                            model.calculateBestRoute(model.getNearestPoint(fromPoint), model.getNearestPoint(toPoint));
+
+                            this.model.setFromToPoints(new Pair<>(Point.geoToMap(fromPoint),Point.geoToMap(toPoint)));
+
+                            var mode = navigationModeBox.getValue();
+                            this.model.calculateBestRoute(fromPoint, toPoint, mode);
                         } else {
                             fromPoint = point;
                             toPoint = null;
@@ -243,12 +249,17 @@ public class Controller {
                                 e.getY() + screenBounds.getMinY() - 30);
                     }
                 });
+
+        navigationModeBox.setItems(FXCollections.observableArrayList(EdgeRole.values()));
+        navigationModeBox.getSelectionModel().select(0);
+
         canvas.mapMouseWheelProperty.set(
                 e -> {
                     setZoomAndScale();
                 });
         canvas.setZoomHandler(model.bounds);
         setZoomAndScale();
+
         // FIXME: yuck
         categories
                 .getChildren()
@@ -279,9 +290,14 @@ public class Controller {
     }
 
     private void setModel(Model model) {
+        if (this.model != null) {
+            this.model.getRoutePoints().removeListener(routeRedrawListener);
+        }
+
         disableAll();
 
         this.model = model;
+        model.getRoutePoints().addListener(routeRedrawListener);
 
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
@@ -576,15 +592,12 @@ public class Controller {
         Point from = new Point((float) addressFrom.node().lon(), (float) addressFrom.node().lat());
         Point to = new Point((float) addressTo.node().lon(), (float) addressTo.node().lat());
 
-        Point dijkstraFrom = model.getNearestPoint(from);
-        Point dijkstraTo = model.getNearestPoint(to);
+
 
         model.setFromToPoints(new Pair<>(Point.geoToMap(from),Point.geoToMap(to)));
-
-        model.calculateBestRoute(dijkstraFrom, dijkstraTo);
-
-
+        model.calculateBestRoute(from, to, mode);
         zoomOn(Point.geoToMap(from));
+
     }
 
     private void setZoomAndScale() {

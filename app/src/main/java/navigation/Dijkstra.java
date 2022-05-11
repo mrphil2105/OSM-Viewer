@@ -6,27 +6,42 @@ import java.io.Serializable;
 import java.util.*;
 
 import collections.enumflags.EnumFlags;
+import collections.spatial.LinearSearchTwoDTree;
+import collections.spatial.SpatialTree;
 import geometry.Point;
+import geometry.Rect;
 import osm.OSMObserver;
 import osm.elements.*;
+import util.DistanceUtils;
 
 public class Dijkstra implements OSMObserver, Serializable {
-    private final Graph graph;
-    private final Map<Long, Float> distTo;
-    private final Map<Long, Edge> edgeTo;
-    private final Set<Long> settled;
-    private final PriorityQueue<Node> queue;
+    private transient Rect bounds;
 
-    private EdgeRole mode;
+    private final Graph graph;
+    private SpatialTree<Object> carTree;
+    private SpatialTree<Object> bikeTree;
+    private SpatialTree<Object> walkTree;
+
+    private transient Map<Long, Float> distTo;
+    private transient Map<Long, Edge> edgeTo;
+    private transient Set<Long> settled;
+    private transient PriorityQueue<Node> queue;
+
+    private transient EdgeRole mode;
 
     public Dijkstra() {
         graph = new Graph();
-        distTo = new HashMap<>();
-        edgeTo = new HashMap<>();
-        settled = new HashSet<>();
-        queue = new PriorityQueue<>();
 
         mode = EdgeRole.CAR;
+    }
+
+    @Override
+    public void onBounds(Rect bounds) {
+        this.bounds = bounds;
+
+        carTree = new LinearSearchTwoDTree<>(1000, bounds);
+        bikeTree = new LinearSearchTwoDTree<>(1000, bounds);
+        walkTree = new LinearSearchTwoDTree<>(1000, bounds);
     }
 
     @Override
@@ -64,9 +79,16 @@ public class Dijkstra implements OSMObserver, Serializable {
         for (int i = 1; i < nodes.length; i++) {
             var secondNode = nodes[i];
 
-            var firstVertex = coordinatesToLong((float)firstNode.lon(), (float)firstNode.lat());
-            var secondVertex = coordinatesToLong((float)secondNode.lon(), (float)secondNode.lat());
-            var distance = calculateDistance(firstNode, secondNode);
+            var firstPoint = new Point((float)firstNode.lon(), (float)firstNode.lat());
+            var secondPoint = new Point((float)secondNode.lon(), (float)secondNode.lat());
+
+            if (!bounds.contains(firstPoint) || !bounds.contains(secondPoint)) {
+                continue;
+            }
+
+            var firstVertex = coordinatesToLong(firstPoint);
+            var secondVertex = coordinatesToLong(secondPoint);
+            var distance = (float)DistanceUtils.calculateEarthDistance(firstPoint, secondPoint);
 
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
                 var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles);
@@ -78,13 +100,26 @@ public class Dijkstra implements OSMObserver, Serializable {
                 graph.addEdge(edge);
             }
 
+            for (var edgeRole : EdgeRole.values()) {
+                if (edgeRoles.isSet(edgeRole)) {
+                    var tree = switch (edgeRole) {
+                        case CAR -> carTree;
+                        case BIKE -> bikeTree;
+                        case WALK -> walkTree;
+                    };
+
+                    tree.insert(firstPoint, null);
+                    tree.insert(secondPoint, null);
+                }
+            }
+
             firstNode = secondNode;
         }
     }
 
-    private static long coordinatesToLong(float lon, float lat) {
-        var lonBits = Float.floatToIntBits(lon);
-        var latBits = Float.floatToIntBits(lat);
+    private static long coordinatesToLong(Point point) {
+        var lonBits = Float.floatToIntBits(point.x());
+        var latBits = Float.floatToIntBits(point.y());
 
         return (((long)lonBits) << 32) | (latBits & 0xFFFFFFFFL);
     }
@@ -102,13 +137,25 @@ public class Dijkstra implements OSMObserver, Serializable {
     public List<Point> shortestPath(Point from, Point to, EdgeRole mode) {
         this.mode = mode;
 
-        distTo.clear();
-        edgeTo.clear();
-        settled.clear();
-        queue.clear();
+        distTo = new HashMap<>();
+        edgeTo = new HashMap<>();
+        settled = new HashSet<>();
+        queue = new PriorityQueue<>();
 
-        var sourceVertex = Dijkstra.coordinatesToLong(from.x(), from.y());
-        var targetVertex = Dijkstra.coordinatesToLong(to.x(), to.y());
+        var tree = switch (mode) {
+            case CAR -> carTree;
+            case BIKE -> bikeTree;
+            case WALK -> walkTree;
+        };
+
+        var fromResult = tree.nearest(from);
+        var toResult = tree.nearest(to);
+
+        from = fromResult.point();
+        to = toResult.point();
+
+        var sourceVertex = Dijkstra.coordinatesToLong(from);
+        var targetVertex = Dijkstra.coordinatesToLong(to);
 
         queue.add(new Node(sourceVertex, 0));
         distTo.put(sourceVertex, 0f);
@@ -193,7 +240,7 @@ public class Dijkstra implements OSMObserver, Serializable {
     private static List<Long> extractPath(long sourceVertex, long targetVertex, Map<Long, Edge> edgeTo) {
         var path = new ArrayList<Long>();
 
-        long from = coordinatesToLong(Float.NaN, Float.NaN);
+        long from = coordinatesToLong(new Point(Float.NaN, Float.NaN));
         long to = targetVertex;
         path.add(to);
 
@@ -270,6 +317,7 @@ public class Dijkstra implements OSMObserver, Serializable {
             edgeRoles.set(EdgeRole.WALK);
         }
 
+        // The following is in accordance with: https://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Access_restrictions#Denmark
         switch (highwayTag.value()) {
             case "motorway",
                 "trunk",
@@ -278,14 +326,44 @@ public class Dijkstra implements OSMObserver, Serializable {
                 "tertiary",
                 "unclassified",
                 "residential",
+                "living_street",
                 "motorway_link",
                 "trunk_link",
                 "primary_link",
                 "secondary_link",
-                "tertiary_link",
-                "living_street" -> edgeRoles.set(EdgeRole.CAR);
-            case "cycleway" -> edgeRoles.set(EdgeRole.BIKE);
-            case "footway" -> edgeRoles.set(EdgeRole.WALK);
+                "tertiary_link" -> edgeRoles.set(EdgeRole.CAR);
+        }
+
+        switch (highwayTag.value()) {
+            case "primary",
+                "secondary",
+                "tertiary",
+                "unclassified",
+                "residential",
+                "living_street",
+                "track",
+                "path",
+                "cycleway",
+                "primary_link",
+                "secondary_link",
+                "tertiary_link" -> edgeRoles.set(EdgeRole.BIKE);
+        }
+
+        switch (highwayTag.value()) {
+            case "primary",
+                "secondary",
+                "tertiary",
+                "unclassified",
+                "residential",
+                "living_street",
+                "track",
+                "path",
+                "cycleway",
+                "footway",
+                "pedestrian",
+                "primary_link",
+                "secondary_link",
+                "tertiary_link" -> edgeRoles.set(EdgeRole.WALK);
         }
 
         return edgeRoles;
@@ -306,15 +384,6 @@ public class Dijkstra implements OSMObserver, Serializable {
             case "residential", "living_street" -> 40;
             default -> 0; // Return 0 for highways that aren't handled by Dijkstra in CAR mode.
         };
-    }
-
-    private static float calculateDistance(SlimOSMNode firstNode, SlimOSMNode secondNode) {
-        var x1 = firstNode.lon();
-        var y1 = firstNode.lat();
-        var x2 = secondNode.lon();
-        var y2 = secondNode.lat();
-
-        return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
     private record Node(long vertex, float weight) implements Comparable<Node>, Serializable {

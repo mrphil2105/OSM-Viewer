@@ -84,10 +84,6 @@ public class Model {
         return nearestRoad.get();
     }
 
-    public Point getNearestPoint(Point query) {
-        return nearestNeighbor.nearestTo(query);
-    }
-
     public void setQueryPoint(Point query) {
         var road = nearestNeighbor.nearestRoad(query);
         nearestRoadProperty().set(road);
@@ -97,9 +93,8 @@ public class Model {
         return routePoints;
     }
 
-    public void calculateBestRoute(Point from, Point to) {
-        // TODO: Allow user to set edge role.
-        var shortestPath = dijkstra.shortestPath(from, to, EdgeRole.CAR);
+    public void calculateBestRoute(Point from, Point to, EdgeRole mode) {
+        var shortestPath = dijkstra.shortestPath(from, to, mode);
 
 
 

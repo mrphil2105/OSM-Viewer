@@ -33,15 +33,9 @@
                                      GridPane.rowIndex="2" onKeyTyped="#handleFromKeyTyped"/>
                     <SearchTextField fx:id="toRouteTextField" promptText="To" GridPane.columnIndex="0"
                                      GridPane.rowIndex="3" onKeyTyped="#handleToKeyTyped"/>
-                    <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                    <ComboBox fx:id="navigationModeBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="5">
                         <Button fx:id="routeButton" id="allButtons" text="Find route" onAction="#handleRouteClick"/>
-                    </HBox>
-                    <HBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="5">
-                        <fx:define>
-                            <ToggleGroup fx:id="groupRoute"/>
-                        </fx:define>
-                        <RadioButton fx:id="radioButtonCar" text="Car" toggleGroup="$groupRoute" selected="true"/>
-                        <RadioButton fx:id="radioButtonBikeOrWalk" text="Bike or walk" toggleGroup="$groupRoute"/>
                     </HBox>
                 </GridPane>
             </VBox>
