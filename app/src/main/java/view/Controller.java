@@ -303,26 +303,6 @@ public class Controller {
                                     c -> {
                                         fromRouteTextField.showMenuItems((ObservableList<Address>) c.getList());
                                     });
-
-            model
-                    .getRoutePoints()
-                    .addListener(
-                            (ListChangeListener<? super Point>)
-                                    listener -> {
-                                        while (listener.next()) {}
-
-                                        if (!listener.wasAdded()) {
-                                            return;
-                                        }
-
-                                        var renderer = canvas.getRenderer();
-                                        if (routeDrawing != null) renderer.clear(routeDrawing);
-
-                                        var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
-                                        routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
-
-                                        renderer.draw(routeDrawing);
-                                    });
         }
 
         if (model.supports(Feature.NEAREST_NEIGHBOR)) {
