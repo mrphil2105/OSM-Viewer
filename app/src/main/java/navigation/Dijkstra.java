@@ -76,6 +76,10 @@ public class Dijkstra implements OSMObserver, Serializable {
                 .findFirst()
                 .orElse(getExpectedMaxSpeed(way));
 
+        if (edgeRoles.isSet(EdgeRole.CAR) && maxSpeed == 0) {
+            throw new RuntimeException("Max speed cannot be zero when edge is used for CAR mode.");
+        }
+
         var direction = determineDirection(way);
 
         if (direction == Direction.UNKNOWN) {
@@ -438,7 +442,7 @@ public class Dijkstra implements OSMObserver, Serializable {
             throw new IllegalArgumentException("The OSM way must be a highway or cycleway.");
         }
 
-        return switch (highwayTag.value()) {
+        var maxSpeed = switch (highwayTag.value()) {
             case "motorway", "motorway_link" -> 110;
             case "primary", "primary_link", "trunk", "trunk_link" -> 80;
             case "secondary", "secondary_link", "unclassified" -> 60;
@@ -446,6 +450,20 @@ public class Dijkstra implements OSMObserver, Serializable {
             case "residential", "living_street" -> 40;
             default -> 0; // Return 0 for highways that aren't handled by Dijkstra in CAR mode.
         };
+
+        if (maxSpeed == 0) {
+            var serviceTag = way.tags().stream().filter(t -> t.key() == SERVICE).findFirst().orElse(null);
+
+            if (serviceTag != null) {
+                maxSpeed = switch (serviceTag.value()) {
+                    case "parking_aisle" -> 15;
+                    case "driveway" -> 20;
+                    default -> 0; // Return 0 for service roads that aren't handled by Dijkstra in CAR mode.
+                };
+            }
+        }
+
+        return maxSpeed;
     }
 
     private record Node(long vertex, float weight) implements Comparable<Node>, Serializable {
