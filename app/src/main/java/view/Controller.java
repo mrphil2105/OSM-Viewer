@@ -355,6 +355,9 @@ public class Controller {
                     .bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
             nearestRoadLabel.setVisible(true);
         }
+
+        canvas.giveFocus();
+
     }
 
     public void disableAll() {
