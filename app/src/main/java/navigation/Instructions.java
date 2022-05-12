@@ -35,6 +35,7 @@ import util.DistanceUtils;
             double calc = calc(edges.get(i));
             preDir = calc(preEdge);
             currentEdge = edges.get(i);
+            //Checks if it is the last edge
             if (i < edges.size() - 1){
                 nextEdge = edges.get(i + 1);
             } else {
@@ -142,7 +143,7 @@ import util.DistanceUtils;
                 break;
         };
     }
-    //calculates the angle in radians
+    //Calculates the angle in radians
     private double calc(Road edge) {
         double fromLat = edge.from().y();
         double fromLon = edge.from().x();
