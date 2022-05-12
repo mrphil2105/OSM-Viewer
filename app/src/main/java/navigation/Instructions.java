@@ -3,14 +3,19 @@ package navigation;
 import java.util.List;
 
 import canvas.ZoomHandler;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
  public class Instructions{
     private List<Road> edges;
     private double preDir = 0.0;
+    private double preAbs;
     private Road preEdge;
     private Road currentEdge;
     private Road nextEdge;
     private double lastDistance = 0.0;
     private String name = "";
+    private String instructionsString = "";
+    private int role;
 
     public Instructions(List<Road> edges) {
         this.edges = edges;
@@ -22,80 +27,121 @@ import canvas.ZoomHandler;
             if (preEdge == null) {
                 preEdge = edges.get(0);
                 nextEdge = edges.get(i+1);
-                System.out.println("Start at " + preEdge.name());
+                instructionsString += "Start at " + preEdge.name() + "\n";
                 continue;
             }
             double calc = calc(edges.get(i));
-            calc = alignOrientation(preDir, calc);
+            preDir = calc(preEdge);
             currentEdge = edges.get(i);
             if (i < edges.size() - 1){
                 nextEdge = edges.get(i + 1);
             } else {
-                System.out.println("Stay at " + edges.get(i).name() + " for " + getDist((float)currentEdge.from().x(), (float)currentEdge.from().y(), (float)currentEdge.to().x(), (float)currentEdge.to().y()));
+                instructionsString += "Stay at " + edges.get(i).name() + " for " + getDist((float)currentEdge.from().x(), (float)currentEdge.from().y(), (float)currentEdge.to().x(), (float)currentEdge.to().y())  + "\n";
+                break;
             }
-            getDir(calc - preDir);
-            preDir = calc;
+            getDir(alignOrientation(preDir, calc) - preDir);
             preEdge = edges.get(i);
         }
-        System.out.println("You have arrived");
+        instructionsString += "You have arrived" + "\n";
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(instructionsString);
+        clipboard.setContent(content);
     }
 
     private void getDir(double calc) {
         double abs = Math.abs(calc);
         String dist = getDist((float)currentEdge.from().x(), (float)currentEdge.from().y(), (float)currentEdge.to().x(), (float)currentEdge.to().y());
+
+        if (!preEdge.name().equals("Unnamed way")){
+            name = preEdge.name();
+            role = preEdge.role();
+        } 
         switch (currentEdge.role()){            
             case 1 :
-                if (!preEdge.name().equals(currentEdge.name()) && !preEdge.name().equals(("")) && !currentEdge.name().equals("")){
-                    System.out.println("Stay at " + preEdge.name() + " for " + dist + "and then take " + currentEdge.name());
+                if (!preEdge.name().equals(currentEdge.name()) && !currentEdge.name().equals("Unnamed way") && !nextEdge.name().equals("Unnamed way") && preEdge.role() != 2){
+                    instructionsString += "Stay at " + name + " for " + dist + "and then continue on " + currentEdge.name() + "\n";
+                    lastDistance = 0.0;
+                } else if (!preEdge.name().equals(currentEdge.name()) && !currentEdge.name().equals("Unnamed way") && !nextEdge.name().equals("Unnamed way") && preEdge.role() == 2){
+                    instructionsString += "Merge with " + currentEdge.name() + " in " + dist + "\n";
                     lastDistance = 0.0;
                 }
                 break;
 
             case 2 :
-                if (preEdge.role() != 2){
-                        name = preEdge.name();
-                } 
                 switch(nextEdge.role()){
                     case 3:
-                        System.out.println("Stay at " +  name + " for " + dist + "and then take the exit towards " + nextEdge.name());
+                        instructionsString += "Stay at " +  name  + " and in " + dist + "then take the exit towards " + nextEdge.name() + "\n";
                         lastDistance = 0.0;
                         break;
                     case 1:
                         if (name.equals(nextEdge.name())){
                             break;
+                        } 
+                        else if (role == 1){
+                            instructionsString += "Stay at " + name + " for " + dist + "then continue on " + nextEdge.name() + "\n";
+                        } else {
+                            instructionsString += "Stay at " + name + " and then take the access road in " + dist + "to " +  nextEdge.name() + "\n";
                         }
-                        System.out.println("Stay at " + name + " for " + dist + "and then take " + nextEdge.name());
+                        
                         lastDistance = 0.0;
                         break;
                     default:
                         break;
                 };
-                
                 break;
 
             case 4 :
                 if (preEdge.role() != 4){
-                    System.out.println("Stay at " + preEdge.name() + " for " + dist + "and then take the roundabout");
+                    instructionsString += "Stay at " + name + " and then take the roundabout in " + dist + "\n";
                     lastDistance = 0.0;
                 }
                 else if (nextEdge.role() != 4) {
-                    System.out.println("Exit the roundabout towards " + nextEdge.name());
+                    instructionsString += "Exit the roundabout towards " + nextEdge.name() + "\n";
                     lastDistance = 0.0;
-                }               
-                
+                }   
                 break;
             
             default:
-                if (abs > 0.7 && preEdge.role() != 4) {
+                if (preEdge.name().equals("Unnamed way") && currentEdge.name().equals("Unnamed way") && nextEdge.name().equals("Unnamed way")){
+                    preAbs += abs;
+                }else {
+                     if (preAbs > abs && preAbs > 0.7 && !currentEdge.name().equals("Unnamed way")){
+                    abs = preAbs;
+                    preAbs = 0;
+                    }
+                }
+
+                if (abs > 0.7 && preEdge.role() != 4 && !currentEdge.name().equals("Unnamed way")) {
                     if (calc > 0){
-                        System.out.println("Stay at " + preEdge.name() + " for " + dist + "and then turn left " + "at " + currentEdge.name());
+                        instructionsString += "Stay at " + name + " and then turn left in " + dist + "at " + currentEdge.name() + " \n";
                     } else {
-                        System.out.println("Stay at " + preEdge.name() + " for " + dist + "and then turn right " + "at " + currentEdge.name());
+                        instructionsString += "Stay at " + name + " and then turn right in " + dist + "at " + currentEdge.name() + "\n";
                     }  
+                    lastDistance = 0.0;
+                }                 
+                else if (preEdge.role() == 2  && currentEdge.role() != 2){
+                    if (calc > 0){
+                        instructionsString += "Turn left in " + dist + "at " + currentEdge.name() + "\n";
+                    } else {
+                        instructionsString += "Turn right in " + dist + "at " + currentEdge.name() + "\n";
+                    }
+                    lastDistance = 0.0;
+                }
+                else if (preEdge.role() == 5 && currentEdge.role() != 5) {
+                    if (calc > 0){
+                        instructionsString += "Stay at " + name + " and then turn left in " + dist + "at " + currentEdge.name() + "\n";
+                    } else {
+                        instructionsString += "Stay at " + name + " and then turn right in " + dist + "at " + currentEdge.name() + "\n";
+                    }
+                    lastDistance = 0.0;
+                }
+                else if (!preEdge.name().equals(currentEdge.name()) && !preEdge.name().equals("Unnamed way") && !currentEdge.name().equals("Unnamed way")){
+                    instructionsString += "Stay at " + name + " for " + dist + "and then continue on " + currentEdge.name() + "\n";
                     lastDistance = 0.0;
                 }
                 break;
-            };
+        };
     }
 
     private double calc(Road edge) {
@@ -131,7 +177,7 @@ import canvas.ZoomHandler;
             return distM + " m ";
         } else {
             dist = (Math.round((dist/1000) * 100.0) / 100.0);
-            return (dist) + " km ";
+            return dist + " km ";
         }
     }
 }

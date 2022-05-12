@@ -86,7 +86,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         var firstNode = nodes[0];
 
         String name = tags.stream().filter(t -> t.key() == NAME).map(t -> (t.value().toString()))
-        .findFirst().orElse("");
+        .findFirst().orElse("Unnamed way");
         var roadRole = getRoadRole(way);
 
         for (int i = 1; i < nodes.length; i++) {
@@ -457,7 +457,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         };
     }
 
-    private RoadRole getRoadRole(OSMWay way){
+    private int getRoadRole(OSMWay way){
         var tags = way.tags().stream().filter(t -> t.key() == HIGHWAY).findFirst().orElse(null);
         var tagsRoundabout = way.tags().stream().filter(t -> t.key() == JUNCTION).findFirst().orElse(null);
         if (tagsRoundabout == null){

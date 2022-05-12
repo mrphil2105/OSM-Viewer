@@ -55,6 +55,7 @@ public enum Drawable {
     SECONDARY(Shape.POLYLINE, Color.web("#f7fabf"), 0.8, Category.ROAD),
     PRIMARY(Shape.POLYLINE, Color.web("#fcd6a4"), 0.9, Category.ROAD),
     MOTORWAY(Shape.POLYLINE, Color.web("#e892a2"), 1.0, Category.ROAD),
+    TRUNK(Shape.POLYLINE, Color.web("#f9b29c"), 0.9, Category.ROAD),
     ROUTE(Shape.POLYLINE, Color.web("#1967d2"), 0.6, Category.ROAD),
     BOUNDS(Shape.POLYLINE, Color.rgb(255, 0, 150, 0.5), 5.0, Category.MISC),
     ADDRESS(Shape.FILL, Color.web("#D22B2B"), 0.4, Category.MISC),
@@ -201,10 +202,11 @@ public enum Drawable {
                 case "secondary" -> SECONDARY;
                 case "tertiary" -> TERTIARY;
                 case "service" -> SERVICE;
+                case "trunk" -> TRUNK;
                 case "rest_area" -> REST_AREA;
                 case "track" -> TRACK;
                 case "proposed" -> IGNORED;
-                case "road", "residential", "unclassified", "raceway", "taxiway" -> ROAD;
+                case "road", "residential", "unclassified", "raceway", "taxiway", "motorway_link", "primary_link", "secondary_link", "trunk_link" -> ROAD;
                 case "bridleway",
                         "construction",
                         "crossing",
