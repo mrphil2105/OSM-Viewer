@@ -136,7 +136,7 @@ import javafx.scene.input.ClipboardContent;
                     }
                     lastDistance = 0.0;
                 }
-                else if (!preEdge.name().equals(currentEdge.name()) && !preEdge.name().equals("Unnamed way") && !currentEdge.name().equals("Unnamed way")){
+                else if (!preEdge.name().equals(currentEdge.name()) && !preEdge.name().equals("Unnamed way") && !currentEdge.name().equals("Unnamed way") && preEdge.role() != 4){
                     instructionsString += "Stay at " + name + " for " + dist + "and then continue on " + currentEdge.name() + "\n";
                     lastDistance = 0.0;
                 }
