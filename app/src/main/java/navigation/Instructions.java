@@ -1,10 +1,10 @@
 package navigation;
 
 import java.util.List;
-
-import canvas.ZoomHandler;
+import geometry.Point;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import util.DistanceUtils;
  public class Instructions{
     private List<Road> edges;
     private double preDir = 0.0;
@@ -170,7 +170,7 @@ import javafx.scene.input.ClipboardContent;
     }
 
     private String getDist(float fromLon, float fromLat, float toLon, float toLat){
-        double dist = ZoomHandler.getDistance(fromLon, fromLat, toLon, toLat) + lastDistance;
+        double dist = (DistanceUtils.calculateEarthDistance(new Point(fromLon, fromLat), new Point(toLon, toLat)) * 1000) + lastDistance;
         lastDistance = dist;
         if (dist < 1000) {
             int distM = (int)Math.round(dist/10.0) * 10;
