@@ -39,8 +39,6 @@ public class AddressDatabase implements OSMObserver, Serializable {
             builder.house("");
             builder.city("");
             builder.postcode("");
-            builder.floor("");
-            builder.side("");
             return builder;
         }
 
@@ -52,8 +50,6 @@ public class AddressDatabase implements OSMObserver, Serializable {
             builder.house(matcher.group("house"));
             builder.postcode(matcher.group("postcode"));
             builder.city(matcher.group("city"));
-            builder.floor(matcher.group("floor"));
-            builder.side(matcher.group("side"));
         } else {
             return null;
         }
@@ -126,7 +122,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
         for (PointOfInterest poi : pointsOfInterest){
             if (input.street().toLowerCase().equals((poi.name() + " (point of interest)").toLowerCase())){
                 var list = new ArrayList<Address>();
-                list.add(new Address(poi.name() + " (Point of interest)","","","","","",(float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
+                list.add(new Address(poi.name() + " (Point of interest)","","","",(float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
                 return list;
             }
         }
@@ -197,7 +193,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
         List<Address> newResult=new ArrayList<>();
         for (PointOfInterest poi : pointsOfInterest){
             if (poi.name().toLowerCase().startsWith(input.street().toLowerCase())){
-                newResult.add(new Address(poi.name() + " (Point of interest)","","","","","", (float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
+                newResult.add(new Address(poi.name() + " (Point of interest)","","","", (float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
             }
         }
 
