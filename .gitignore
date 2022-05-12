@@ -119,6 +119,7 @@ modules.xml
 *.tar.gz
 *.rar
 *.map
+*.osm
 
 !app/lib/jars/*.jar
 app/bin

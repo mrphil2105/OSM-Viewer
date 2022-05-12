@@ -2,15 +2,32 @@ package pointsOfInterest;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import drawing.Drawable;
+import drawing.Drawing;
+import geometry.Point;
+import geometry.Vector2D;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
 public class PointsOfInterestVBox extends VBox {
 
-    private List<PointOfInterest> pointsOfInterest;
+    private ObservableList<PointOfInterest> pointsOfInterest;
 
-    public void init(List<PointOfInterest> points) {
+    public void init(ObservableList<PointOfInterest> points) {
+
         pointsOfInterest = points;
+        points.addListener(
+                (ListChangeListener<? super PointOfInterest>)
+                        listener -> {
+                            update();
+
+                        });
+
+
+        update();
     }
 
     public void update() {

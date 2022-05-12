@@ -18,33 +18,31 @@ public class AutofillContextMenu extends ContextMenu {
 
         AddressMenuItem menuItem = (AddressMenuItem) actionEvent.getSource();
         Address menuAddress = menuItem.getAddress();
+        boolean pointOfIntest= (menuAddress.street().toLowerCase().contains(("(point of interest)")));
 
-        AddressBuilder addressBuilder = AddressDatabase.parse(inputText);
-        assert addressBuilder != null;
+        AddressBuilder parsed = AddressDatabase.parse(inputText);
+        assert parsed != null;
+        Address address = parsed.build();
 
         StringBuilder stringBuilder = new StringBuilder();
         boolean appendCity = false;
 
-        if (addressBuilder.getStreet() != null) {
+        if (address.street() != null) {
             stringBuilder.append(menuAddress.street()).append(" ");
             appendCity = true;
         }
-        if (addressBuilder.getHouse() != null) {
+        if (address.houseNumber() != null) {
             stringBuilder.append(menuAddress.houseNumber()).append(" ");
-        } else if (appendCity) {
+        } else if (appendCity && !pointOfIntest) {
             stringBuilder.append("House No. ");
         }
-        if (addressBuilder.getFloor() != null)
-            stringBuilder.append(addressBuilder.getFloor()).append(" ");
-        if (addressBuilder.getSide() != null)
-            stringBuilder.append(addressBuilder.getSide()).append(" ");
-        if (addressBuilder.getCity() != null || appendCity)
-            stringBuilder.append(menuAddress.city()).append(" ");
-        if (addressBuilder.getPostcode() != null)
+        if (address.postcode() != null)
             stringBuilder.append(menuAddress.postcode()).append(" ");
+        if (address.city() != null || appendCity)
+            stringBuilder.append(menuAddress.city()).append(" ");
 
         text.setText(stringBuilder.toString());
-        if (appendCity && addressBuilder.getHouse() == null) {
+        if (appendCity && address.houseNumber() == null && !pointOfIntest) {
             for (int i = 0; i < menuAddress.street().split(" ").length; i++) {
                 text.nextWord();
             }

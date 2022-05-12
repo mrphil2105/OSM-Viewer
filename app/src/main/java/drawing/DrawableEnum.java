@@ -56,7 +56,7 @@ public enum DrawableEnum implements Drawable {
     MOTORWAY(Shape.POLYLINE, Color.web("#e892a2"), 1.0, Category.ROAD, 2),
     ROUTE(Shape.POLYLINE, Color.web("#1967d2"), 0.6, Category.ROAD, 0),
     BOUNDS(Shape.POLYLINE, Color.rgb(200, 0, 150), 5.0, Category.MISC, 5),
-    ADDRESS(Shape.FILL, Color.web("#D22B2B"), 0.4, Category.MISC, 5),
+    ADDRESS(Shape.FILL, Color.web("#D22B2B"), 2, Category.MISC, 5),
     POI(Shape.FILL, Color.web("#6495ED"), 4, Category.MISC, 5),
     PARTITION_HORIZONTAL(Shape.POLYLINE, Color.BLUE, 1, Category.DEBUG, 5),
     PARTITION_VERTICAL(Shape.POLYLINE, Color.RED, 1, Category.DEBUG, 5),

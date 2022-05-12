@@ -4,33 +4,46 @@ import collections.trie.Trie;
 import collections.trie.TrieBuilder;
 import java.io.Serializable;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import geometry.Point;
 import osm.OSMObserver;
 import osm.elements.OSMNode;
 import osm.elements.OSMTag;
+import pointsOfInterest.PointOfInterest;
 import util.Predicates;
 
 public class AddressDatabase implements OSMObserver, Serializable {
-    private Trie<List<AddressBuilder>> streetToAddress;
-    private Trie<List<AddressBuilder>> cityToAddress;
-    private Trie<List<AddressBuilder>> postcodeToAddress;
-    private TrieBuilder<List<AddressBuilder>> streetTrieBuilder;
-    private TrieBuilder<List<AddressBuilder>> cityTrieBuilder;
-    private TrieBuilder<List<AddressBuilder>> postcodeTrieBuilder;
-    private List<Address> history;
+    private Trie<List<Address>> streetToAddress;
+    private Trie<List<Address>> cityToAddress;
+    private Trie<List<Address>> postcodeToAddress;
+    private TrieBuilder<List<Address>> streetTrieBuilder;
+    private TrieBuilder<List<Address>> cityTrieBuilder;
+    private TrieBuilder<List<Address>> postcodeTrieBuilder;
+
+    private List<PointOfInterest> pointsOfInterest;
 
     public AddressDatabase() {
         streetTrieBuilder = new TrieBuilder<>('\0');
         cityTrieBuilder = new TrieBuilder<>('\0');
         postcodeTrieBuilder = new TrieBuilder<>('\0');
-        history = new ArrayList<>();
+        pointsOfInterest=new ArrayList<>();
     }
 
     public static AddressBuilder parse(String toParse) {
+
         var builder = new AddressBuilder();
+        if (toParse.contains("(Point of interest)")){
+            builder.street(toParse);
+            builder.house("");
+            builder.city("");
+            builder.postcode("");
+            return builder;
+        }
+
+
         var matcher = PATTERN.matcher(toParse);
 
         if (matcher.matches()) {
@@ -38,29 +51,23 @@ public class AddressDatabase implements OSMObserver, Serializable {
             builder.house(matcher.group("house"));
             builder.postcode(matcher.group("postcode"));
             builder.city(matcher.group("city"));
-            builder.floor(matcher.group("floor"));
-            builder.side(matcher.group("side"));
         } else {
             return null;
         }
         return builder;
     }
 
-    public List<Address> getHistory() {
-        return history;
-    }
-
-    public void addAddress(AddressBuilder a) {
-        addToTrie(streetTrieBuilder, a.getStreet(), a);
-        if (a.getCity() != null) {
-            addToTrie(cityTrieBuilder, a.getCity(), a);
+    public void addAddress(Address a) {
+        addToTrie(streetTrieBuilder, a.street(), a);
+        if (a.city() != null) {
+            addToTrie(cityTrieBuilder, a.city(), a);
         }
-        if (a.getPostcode() != null) {
-            addToTrie(postcodeTrieBuilder, a.getPostcode(), a);
+        if (a.postcode() != null) {
+            addToTrie(postcodeTrieBuilder, a.postcode(), a);
         }
     }
 
-    private void addToTrie(TrieBuilder<List<AddressBuilder>> trie, String key, AddressBuilder value) {
+    private void addToTrie(TrieBuilder<List<Address>> trie, String key, Address value) {
         var set = trie.get(key);
         if (set == null) {
             set = new ArrayList<>();
@@ -91,11 +98,14 @@ public class AddressDatabase implements OSMObserver, Serializable {
             }
         }
 
-        builder.SlimOSMNode(node.slim());
-        if (isAddress) addAddress(builder);
+        builder.lat((float) node.lat());
+        builder.lon((float) node.lon());
+
+        if (isAddress) addAddress(builder.build());
     }
 
-    public void buildTries() {
+    @Override
+    public void onFinish() {
         streetToAddress = streetTrieBuilder.build();
         cityToAddress = cityTrieBuilder.build();
         postcodeToAddress = postcodeTrieBuilder.build();
@@ -110,25 +120,33 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
     public List<Address> search(Address input) {
 
+        for (PointOfInterest poi : pointsOfInterest){
+            if (input.street().toLowerCase().equals((poi.name() + " (point of interest)").toLowerCase())){
+                var list = new ArrayList<Address>();
+                list.add(new Address(poi.name() + " (Point of interest)","","","",(float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
+                return list;
+            }
+        }
+
         var searchedStreets = streetToAddress.get(input.street());
         if (searchedStreets == null) return null;
 
         var filterStream = searchedStreets.stream();
 
         if (input.postcode() != null) {
-            filterStream = filterStream.filter(e -> e.getPostcode().equals(input.postcode()));
+            filterStream = filterStream.filter(e -> e.postcode().equals(input.postcode()));
         }
         if (input.city() != null) {
-            filterStream = filterStream.filter(e -> e.getCity().equals(input.city()));
+            filterStream = filterStream.filter(e -> e.city().equals(input.city()));
         }
         if (input.houseNumber() != null) {
-            filterStream = filterStream.filter(e -> e.getHouse().equals(input.houseNumber()));
+            filterStream = filterStream.filter(e -> e.houseNumber().equals(input.houseNumber()));
         }
-        return filterStream.map(AddressBuilder::build).toList();
+        return filterStream.toList();
     }
 
     public List<Address> possibleAddresses(Address input, int maxEntries) {
-        Stream<AddressBuilder> filterStream =
+        Stream<Address> filterStream =
                 StreamSupport.stream(
                                 Spliterators.spliteratorUnknownSize(
                                         streetToAddress.withPrefix(input.street()), Spliterator.ORDERED),
@@ -136,13 +154,13 @@ public class AddressDatabase implements OSMObserver, Serializable {
                         .flatMap(e -> e.getValue().stream());
 
         if (input.houseNumber() != null) {
-            filterStream = filterStream.filter(e -> e.getHouse().startsWith(input.houseNumber()));
+            filterStream = filterStream.filter(e -> e.houseNumber().startsWith(input.houseNumber()));
         }
 
         if (input.postcode() != null) {
             var searchedPostcodes = postcodeToAddress.withPrefix(input.postcode());
 
-            var retain = new HashSet<AddressBuilder>();
+            var retain = new HashSet<Address>();
             while (searchedPostcodes.hasNext()) {
                 var entry = searchedPostcodes.next().getValue();
                 retain.addAll(entry);
@@ -153,7 +171,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
         if (input.city() != null) {
             var searchedCities = cityToAddress.withPrefix(input.city());
-            var retain = new HashSet<AddressBuilder>();
+            var retain = new HashSet<Address>();
             while (searchedCities.hasNext()) {
                 var entry = searchedCities.next().getValue();
                 retain.addAll(entry);
@@ -162,37 +180,33 @@ public class AddressDatabase implements OSMObserver, Serializable {
             filterStream = filterStream.filter(retain::contains);
         }
 
+        List<Address> results;
         if (input.houseNumber() != null) {
-            return filterStream.limit(maxEntries).map(AddressBuilder::build).toList();
+            results= filterStream.limit(maxEntries).toList();
         } else {
-            return filterStream
+            results= filterStream
                     .filter(
-                            Predicates.distinctByKey(e -> e.getStreet().hashCode() * e.getPostcode().hashCode()))
+                            Predicates.distinctByKey(e -> e.street().hashCode() * e.postcode().hashCode()))
                     .limit(maxEntries)
-                    .map(AddressBuilder::build)
                     .toList();
         }
 
-        //        if (input.houseNumber() != null) {
-        //            filteringSet.stream().limit(maxEntries).forEach(e -> results.add(e.build()));
-        //        } else {
-        //            filteringSet.stream()
-        //                    .limit(maxEntries)
-        //                    .forEach(
-        //                            e -> {
-        //                                if (parsedStreetsAndCities.add(e.getStreet() + "|" +
-        // e.getPostcode())) {
-        //                                    results.add(e.build());
-        //                                }
-        //                            });
-        //        }
+        List<Address> newResult=new ArrayList<>();
+        for (PointOfInterest poi : pointsOfInterest){
+            if (poi.name().toLowerCase().startsWith(input.street().toLowerCase())){
+                newResult.add(new Address(poi.name() + " (Point of interest)","","","", (float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
+            }
+        }
+
+        newResult.addAll(results);
+
+        return newResult;
+
+
     }
 
-    // test method
-    public void display() {
-        for (Iterator<Entry<String, List<AddressBuilder>>> it = streetToAddress.withPrefix("");
-                it.hasNext(); ) {
-            it.next().getValue().forEach(e -> System.out.println(e.getStreet()));
-        }
+
+    public void setPointsOfInterest(List<PointOfInterest> pointsOfInterest) {
+        this.pointsOfInterest = pointsOfInterest;
     }
 }

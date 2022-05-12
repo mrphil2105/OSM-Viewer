@@ -16,13 +16,11 @@ import geometry.Point;
 import geometry.Vector2D;
 import io.FileParser;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -35,10 +33,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
+import javafx.util.Pair;
 import navigation.EdgeRole;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
@@ -50,6 +50,7 @@ public class Controller {
     private TimerTask queryPointTimerTask;
     private Point fromPoint, toPoint;
     private Entity routeDrawing;
+    private Pair<Entity, Entity> fromToDrawings;
     private boolean pointOfInterestMode = false;
     private Tooltip addPointOfInterestText;
     private Entity lastDrawnAddress;
@@ -66,6 +67,8 @@ public class Controller {
 
     @FXML private VBox categories;
 
+    @FXML private GridPane searchPane;
+
     @FXML private SearchTextField searchTextField;
 
     @FXML private SearchTextField fromRouteTextField;
@@ -73,6 +76,10 @@ public class Controller {
     @FXML private SearchTextField toRouteTextField;
 
     @FXML private Button routeButton;
+
+    @FXML private ComboBox<EdgeRole> navigationModeBox;
+
+    @FXML private Label routeErrorLabel;
 
     @FXML private RadioButton radioButtonCar;
 
@@ -100,6 +107,8 @@ public class Controller {
 
     @FXML private VBox middleVBox;
 
+    @FXML private HBox middleHBox;
+
     @FXML private Label nearestRoadLabel;
 
     @FXML private CheckMenuItem nearestRoadDelayItem;
@@ -108,35 +117,42 @@ public class Controller {
 
     @FXML private Label scaleBarText;
 
-    @FXML private Rectangle scaleBarRectangle;
-
     @FXML private Label zoomLevelText;
 
     @FXML private Label fps;
+
+    @FXML private Button instructionsButton;
+
+    private final ListChangeListener<? super Point> routeRedrawListener = listener -> {
+        while (listener.next()) {
+        }
+
+        if (!listener.wasAdded()) {
+            return;
+        }
+
+        var renderer = canvas.getRenderer();
+        if (routeDrawing != null) renderer.clear(routeDrawing);
+
+        var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
+
+        routeDrawing = renderer.draw(vectors, DrawableEnum.ROUTE);
+
+        if (fromToDrawings!=null){
+            renderer.clear(fromToDrawings.getValue());
+            renderer.clear(fromToDrawings.getKey());
+        }
+
+        var fromPoint= model.getFromToPoints().getKey();
+        var toPoint = model.getFromToPoints().getValue();
+
+        fromToDrawings = new Pair<>(renderer.draw(Vector2D.create(fromPoint), DrawableEnum.ADDRESS), renderer.draw(Vector2D.create(toPoint), DrawableEnum.ADDRESS));
+    };
 
     public void init(Model model) {
         setModel(model);
 
         setStyleSheets("style.css");
-
-        model
-                .getRoutePoints()
-                .addListener(
-                        (ListChangeListener<? super Point>)
-                                listener -> {
-                                    while (listener.next()) {}
-
-                                    if (!listener.wasAdded()) {
-                                        return;
-                                    }
-
-                                    var renderer = canvas.getRenderer();
-                                    if (routeDrawing != null) renderer.clear(routeDrawing);
-
-                                    var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
-
-                                    routeDrawing = renderer.draw(vectors, DrawableEnum.ROUTE);
-                                });
 
         fps.textProperty().bind(canvas.fpsProperty.asString("FPS: %.1f"));
 
@@ -146,13 +162,14 @@ public class Controller {
                         var point = new Point(e.getX(), e.getY());
                         point = canvas.canvasToMap(point);
                         point = Point.mapToGeo(point);
-                        point = model.getNearestPoint(point);
 
                         if (fromPoint == null) {
                             fromPoint = point;
                         } else if (toPoint == null) {
                             toPoint = point;
-                            model.calculateBestRoute(fromPoint, toPoint);
+
+                            var mode = navigationModeBox.getValue();
+                            this.model.calculateBestRoute(fromPoint, toPoint, mode);
                         } else {
                             fromPoint = point;
                             toPoint = null;
@@ -226,12 +243,17 @@ public class Controller {
                                 e.getY() + screenBounds.getMinY() - 30);
                     }
                 });
+
+        navigationModeBox.setItems(FXCollections.observableArrayList(EdgeRole.values()));
+
+        navigationModeBox.getSelectionModel().select(0);
+        routeErrorLabel.prefWidthProperty().bind(searchPane.widthProperty());
+
         canvas.mapMouseWheelProperty.set(
                 e -> {
                     setZoomAndScale();
                 });
-        canvas.setZoomHandler(model.bounds);
-        setZoomAndScale();
+
         // FIXME: yuck
         categories
                 .getChildren()
@@ -262,9 +284,15 @@ public class Controller {
     }
 
     private void setModel(Model model) {
+        if (this.model != null) {
+            this.model.getRoutePoints().removeListener(routeRedrawListener);
+        }
+
         disableAll();
 
         this.model = model;
+        model.getRoutePoints().addListener(routeRedrawListener);
+        routeDrawing=null;
 
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
@@ -272,11 +300,16 @@ public class Controller {
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
+            middleHBox.setDisable(false);
+            canvas.setZoomHandler(model.bounds);
+            setZoomAndScale();
         }
 
         if (model.supports(Feature.ADDRESS_SEARCH)) {
             searchTextField.init(model);
             searchTextField.setDisable(false);
+            lastDrawnAddress=null;
+
             model
                     .getObservableSearchSuggestions()
                     .addListener(
@@ -287,6 +320,7 @@ public class Controller {
         }
 
         if (model.supports(Feature.PATHFINDING)) {
+            fromToDrawings=null;
             toRouteTextField.init(model);
             fromRouteTextField.init(model);
             toRouteTextField.setDisable(false);
@@ -313,6 +347,9 @@ public class Controller {
                     .bind(Bindings.concat("Nearest road: ", model.nearestRoadProperty()));
             nearestRoadLabel.setVisible(true);
         }
+
+        canvas.giveFocus();
+
     }
 
     public void disableAll() {
@@ -328,6 +365,7 @@ public class Controller {
         fromRouteTextField.setDisable(true);
 
         nearestRoadLabel.setVisible(false);
+        middleHBox.setDisable(true);
     }
 
     public void dispose() {
@@ -336,19 +374,35 @@ public class Controller {
         queryPointTimer.cancel();
     }
 
+    private Address handleSearchInput(SearchTextField textField){
+        var parsedAddress = textField.parseAddress();
+        var result = textField.handleSearch(parsedAddress);
+        if (result == null || result.size() <= 0){
+            return null;
+        }
+        if (result.size() > 1) {
+            routeErrorLabel.setText("More than one address was found. Try being more specific.");
+            routeErrorLabel.setVisible(true);
+
+            return null;
+        }
+        return result.get(0);
+    }
+
     @FXML
     public void handleSearchClick() {
-        var result = searchTextField.handleSearch();
-        if (result == null) return; // TODO: handle exception and show message?
-        if (result.size() > 1) {
-            // TODO: popup message
-        } else if (result.size() < 1) {
+        var result = handleSearchInput(searchTextField);
+        if(result == null){
+            routeErrorLabel.setText("Please enter valid search address." +
+                System.lineSeparator() +
+                "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
+            routeErrorLabel.setVisible(true);
 
+            return;
         }
-        var address = result.get(0);
 
         Point point =
-                Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
+                Point.geoToMap(new Point(result.lon(), result.lat()));
         zoomOn(point);
         var drawing = canvas.getRenderer().draw(Vector2D.create(point), DrawableEnum.ADDRESS);
         if (lastDrawnAddress != null) {
@@ -356,24 +410,43 @@ public class Controller {
         }
         lastDrawnAddress = drawing;
 
-        searchTextField.clear(); // TODO: find ud af om den skal bruges
+        searchTextField.clear();
     }
 
     @FXML
-    public void handleInFocus() {
-        searchTextField.showHistory();
+    public void handleSearchInFocus() {
+        searchTextField.showCurrentAddresses();
+    }
+
+    @FXML
+    public void handleToInFocus() {
+        toRouteTextField.showCurrentAddresses();
+    }
+
+    @FXML
+    public void handleFromInFocus() {
+        fromRouteTextField.showCurrentAddresses();
     }
 
     @FXML
     public void handleRouteClick() {
+        var parsedAddress = searchTextField.parseAddress();
 
-        if (fromRouteTextField.handleSearch() == null || toRouteTextField.handleSearch() == null) {
+        var fromRouteResult = handleSearchInput(fromRouteTextField);
+        var toRouteResult = handleSearchInput(toRouteTextField);
+
+        if (fromRouteResult == null || toRouteResult == null) {
+            routeErrorLabel.setText("Please enter valid from and to addresses." +
+                System.lineSeparator() +
+                "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
+            routeErrorLabel.setVisible(true);
+
             return;
         }
         routeBetweenAddresses(
-                fromRouteTextField.handleSearch().get(0),
-                toRouteTextField.handleSearch().get(0),
-                EdgeRole.CAR);
+                fromRouteResult,
+                toRouteResult,
+                navigationModeBox.getValue());
     }
 
     @FXML
@@ -457,6 +530,11 @@ public class Controller {
         pointOfInterestMode = true;
     }
 
+    @FXML
+    public void handleInstructions(){
+        model.getInstructionsFromDijkstra();
+    }
+
     public void openMap() throws Exception {
         var diag = new FileChooser();
         diag.setTitle("Open map file");
@@ -525,22 +603,35 @@ public class Controller {
 
     @FXML
     public void handleFromKeyTyped(KeyEvent event) {
+        routeErrorLabel.setVisible(false);
+
         var result = handleKeyTyped(event);
-        if (result == null) return;
+        if (result == null){
+            model.setFromSuggestions(Collections.emptyList());
+            return;
+        }
         model.setFromSuggestions(result);
     }
 
     @FXML
     public void handleToKeyTyped(KeyEvent event) {
+        routeErrorLabel.setVisible(false);
+
         var result = handleKeyTyped(event);
-        if (result == null) return;
+        if (result == null){
+            model.setToSuggestions(Collections.emptyList());
+            return;
+        }
         model.setToSuggestions(result);
     }
 
     @FXML
     public void handleSearchKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
-        if (result == null) return;
+        if (result == null){
+            model.setSearchSuggestions(Collections.emptyList());
+            return;
+        };
         model.setSearchSuggestions(result);
     }
 
@@ -554,13 +645,19 @@ public class Controller {
     }
 
     private void routeBetweenAddresses(Address addressFrom, Address addressTo, EdgeRole mode) {
-        Point from = new Point((float) addressFrom.node().lon(), (float) addressFrom.node().lat());
-        Point to = new Point((float) addressTo.node().lon(), (float) addressTo.node().lat());
+        Point from = new Point(addressFrom.lon(), addressFrom.lat());
+        Point to = new Point(addressTo.lon(), addressTo.lat());
 
-        Point dijkstraFrom = model.getNearestPoint(from);
-        Point dijkstraTo = model.getNearestPoint(to);
 
-        model.calculateBestRoute(dijkstraFrom, dijkstraTo);
+        var hasRoute = model.calculateBestRoute(from, to, mode);
+
+        if (!hasRoute) {
+            routeErrorLabel.setText("No route could be found.");
+            routeErrorLabel.setVisible(true);
+        }
+        else{
+            zoomOn(Point.geoToMap(from));
+        }
     }
 
     private void setZoomAndScale() {
