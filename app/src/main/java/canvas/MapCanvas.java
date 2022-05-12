@@ -26,6 +26,7 @@ import javafx.util.Duration;
 import java.sql.Time;
 import java.time.Clock;
 import java.util.Timer;
+import java.util.TimerTask;
 
 public class MapCanvas extends Region implements MouseListener {
     final Affine transform = new Affine();
@@ -37,7 +38,6 @@ public class MapCanvas extends Region implements MouseListener {
     private Point2D lastMouse;
     private CanvasFocusListener canvasFocusListener;
     private ZoomHandler zoomHandler;
-    private float zoomspeed = 10;
 
     private final ChangeListener<Number> HEIGHT_LISTENER =
             (observable, oldValue, newValue) ->
@@ -173,8 +173,9 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
     public void zoomTo(Point point) {
-        setZoom(25);
+        System.out.println("hey");
         center(point);
+        setZoom(25);
     }
 
     public void zoomTo(Point point, float zoom) {
@@ -182,24 +183,29 @@ public class MapCanvas extends Region implements MouseListener {
         center(point);
     }
 
-    public void setZoom(float zoom) {
+    public void smoothZoom(float zoom){
+        float delay = 500;
+        float frames = 60;
 
-        var startTime= System.nanoTime();
-        var time=(zoom-transform.getMxx())*zoomspeed;
-        var distance=zoom-transform.getMxx();
+        var distance=Math.abs(zoom-transform.getMxx());
+        var time = frames*delay ;
+        System.out.println(time);
 
-        float lastTime = System.nanoTime();
-        while (System.nanoTime()-startTime<time){
-            System.out.println("here");
-
-            var change = distance/time*(System.nanoTime()-lastTime);
-            lastTime=System.nanoTime();
-            transform.prependScale(change, change);
-
-        }
+        Timer timer = new Timer();
+        TimerTask zoomTimer = new ZoomTimer(transform,zoom,(float) distance/frames,timer);
+        timer.scheduleAtFixedRate(zoomTimer, 0L, (long) delay);
 
         //transform.setMxx(zoom);
         //transform.setMyy(zoom);
+    }
+
+    public void setZoom(float zoom) {
+
+        transform.setMxx(zoom);
+        transform.setMyy(zoom);
+
+
+
     }
 
     public void zoomChange(boolean positive) {

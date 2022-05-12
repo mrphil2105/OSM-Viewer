@@ -367,6 +367,7 @@ public class Controller {
 
         Point point =
                 Point.geoToMap(new Point(result.lon(), result.lat()));
+        System.out.println("hey");
         zoomOn(point);
         var drawing = Drawing.create(Vector2D.create(point), Drawable.ADDRESS);
         canvas.getRenderer().draw(drawing);
@@ -447,6 +448,7 @@ public class Controller {
     }
 
     public void zoomOn(Point point) {
+        System.out.println("hey");
         canvas.zoomTo(point);
     }
 
