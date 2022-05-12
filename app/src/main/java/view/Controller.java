@@ -250,9 +250,7 @@ public class Controller {
                     }
                 });
 
-        var roles = FXCollections.observableArrayList(EdgeRole.values());
-        roles.remove(EdgeRole.TRAFFIC_SIGNAL);
-        navigationModeBox.setItems(roles);
+        navigationModeBox.setItems(FXCollections.observableArrayList(EdgeRole.values()));
 
         navigationModeBox.getSelectionModel().select(0);
         routeErrorLabel.prefWidthProperty().bind(searchPane.widthProperty());

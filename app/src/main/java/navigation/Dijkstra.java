@@ -2,7 +2,6 @@ package navigation;
 
 import static osm.elements.OSMTag.Key.*;
 
-import collections.RefList;
 import collections.enumflags.EnumFlags;
 import collections.spatial.LinearSearchTwoDTree;
 import collections.spatial.SpatialTree;
@@ -16,7 +15,6 @@ import util.DistanceUtils;
 
 public class Dijkstra implements OSMObserver, Serializable {
     private transient Rect bounds;
-    private final transient RefList trafficLightNodes;
 
     private final Graph graph;
     private SpatialTree<Object> carTree;
@@ -31,7 +29,6 @@ public class Dijkstra implements OSMObserver, Serializable {
     private transient EdgeRole mode;
 
     public Dijkstra() {
-        trafficLightNodes = new RefList();
         graph = new Graph();
 
         mode = EdgeRole.CAR;
@@ -44,13 +41,6 @@ public class Dijkstra implements OSMObserver, Serializable {
         carTree = new LinearSearchTwoDTree<>(1000, bounds);
         bikeTree = new LinearSearchTwoDTree<>(1000, bounds);
         walkTree = new LinearSearchTwoDTree<>(1000, bounds);
-    }
-
-    @Override
-    public void onNode(OSMNode node) {
-        if (node.tags().stream().anyMatch(t -> t.key() == HIGHWAY && t.value().equals("traffic_signals"))) {
-            trafficLightNodes.add(node.id());
-        }
     }
 
     @Override
@@ -103,10 +93,6 @@ public class Dijkstra implements OSMObserver, Serializable {
             var secondVertex = coordinatesToLong(secondPoint);
             var distance = (float)DistanceUtils.calculateEarthDistance(firstPoint, secondPoint);
 
-            if (trafficLightNodes.contains(firstNode.id()) || trafficLightNodes.contains(secondNode.id())) {
-                edgeRoles.set(EdgeRole.TRAFFIC_SIGNAL);
-            }
-
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
                 var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles);
                 graph.addEdge(edge);
@@ -123,12 +109,7 @@ public class Dijkstra implements OSMObserver, Serializable {
                         case CAR -> carTree;
                         case BIKE -> bikeTree;
                         case WALK -> walkTree;
-                        case TRAFFIC_SIGNAL -> null;
                     };
-
-                    if (tree == null) {
-                        continue;
-                    }
 
                     tree.insert(firstPoint, null);
                     tree.insert(secondPoint, null);
@@ -157,10 +138,6 @@ public class Dijkstra implements OSMObserver, Serializable {
     }
 
     public List<Point> shortestPath(Point from, Point to, EdgeRole mode) {
-        if (mode == EdgeRole.TRAFFIC_SIGNAL) {
-            throw new IllegalArgumentException("The mode for pathfinding cannot be 'TRAFFIC_SIGNAL'.");
-        }
-
         this.mode = mode;
 
         distTo = new HashMap<>();
@@ -172,7 +149,6 @@ public class Dijkstra implements OSMObserver, Serializable {
             case CAR -> carTree;
             case BIKE -> bikeTree;
             case WALK -> walkTree;
-            case TRAFFIC_SIGNAL -> null;
         };
 
         var fromResult = tree.nearest(from);
@@ -240,25 +216,6 @@ public class Dijkstra implements OSMObserver, Serializable {
 
         if (mode == EdgeRole.CAR) {
             weight /= edge.maxSpeed();
-        }
-
-        if (edge.hasRole(EdgeRole.TRAFFIC_SIGNAL)) {
-            var trafficSignalModifier = switch (mode) {
-                // According to this source (https://transportist.org/2018/03/06/how-much-time-is-spent-at-traffic-signals/),
-                // one stop at a traffic light takes on average 15 seconds, so we add that to the weight.
-                case CAR -> 15d / 3600;
-                // Average biking speed is about 27 km/h (https://www.declinemagazine.com/mtb/average-cycling-speed-by-age/).
-                case BIKE -> 15d / 3600 * 27;
-                // Average walking speed is 5 km/h (https://www.business-standard.com/article/current-affairs/fit-proper-what-is-the-ideal-walking-speed-for-you-115100900029_1.html).
-                case WALK -> 15d / 3600 * 5;
-                case TRAFFIC_SIGNAL -> 0;
-            };
-
-            // When edges with TRAFFIC_SIGNAL get added, two are added, one before the traffic signal and one after.
-            // So we need to divide the added weight by two.
-            trafficSignalModifier /= 2;
-
-            weight += trafficSignalModifier;
         }
 
         return weight;
