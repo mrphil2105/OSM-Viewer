@@ -7,12 +7,15 @@ import collections.lists.IntList;
 import earcut4j.Earcut;
 import geometry.Line;
 import geometry.Vector2D;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/** A Drawing represents drawn elements in a format that can be easily passed to OpenGL */
+/**
+ * A Drawing represents drawn elements in a format that can be easily passed to OpenGL
+ */
 public class Drawing extends Entity implements Serializable {
     private transient IntList indices;
     private transient FloatList vertices;
@@ -37,17 +40,6 @@ public class Drawing extends Entity implements Serializable {
         this.id = id;
     }
 
-    // Ugly quick fix
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public void clear() {
-        indices.truncate(indices.size());
-        vertices.truncate(vertices.size());
-        drawables.truncate(drawables.size());
-    }
-
     public static Drawing create(Vector2D point, Drawable drawable) {
         return create(point, drawable, 0);
     }
@@ -66,6 +58,17 @@ public class Drawing extends Entity implements Serializable {
         var drawing = new Drawing();
         drawing.draw(points, drawable, offset);
         return drawing;
+    }
+
+    // Ugly quick fix
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void clear() {
+        indices.truncate(indices.size());
+        vertices.truncate(vertices.size());
+        drawables.truncate(drawables.size());
     }
 
     public void draw(Drawing drawing) {
@@ -99,7 +102,8 @@ public class Drawing extends Entity implements Serializable {
         for (double i = 0; i < Math.PI * 2; i += Math.PI / 15) {
             points.add(
                     Vector2D.create(
-                            point.x() + Math.cos(i) * drawable.size(), point.y() + Math.sin(i) * drawable.size()));
+                            point.x() + Math.cos(i) * drawable.size(),
+                            point.y() + Math.sin(i) * drawable.size()));
         }
 
         draw(points, drawable, offset);
@@ -246,7 +250,9 @@ public class Drawing extends Entity implements Serializable {
         indices().add(size - 1);
     }
 
-    /** Add a vertex with a color and layer into the correct position in `vertices` and `colors` */
+    /**
+     * Add a vertex with a color and layer into the correct position in `vertices` and `colors`
+     */
     private void addVertex(Vector2D vertex, Drawable drawable) {
         vertices().add((float) vertex.x());
         vertices().add((float) vertex.y());

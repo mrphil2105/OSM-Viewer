@@ -6,11 +6,11 @@ public class AddressBuilder implements Serializable {
     private String street, house, postcode, city;
     private float lat, lon;
 
-    public String getStreet(){
+    public String getStreet() {
         return street;
     }
 
-    public String getCity(){
+    public String getCity() {
         return city;
     }
 
@@ -22,7 +22,6 @@ public class AddressBuilder implements Serializable {
         this.house = house;
     }
 
-
     public void postcode(String postcode) {
         this.postcode = postcode;
     }
@@ -31,10 +30,11 @@ public class AddressBuilder implements Serializable {
         this.city = city;
     }
 
-    public void lat(float lat){
+    public void lat(float lat) {
         this.lat = lat;
     }
-    public void lon(float lon){
+
+    public void lon(float lon) {
         this.lon = lon;
     }
 

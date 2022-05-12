@@ -2,11 +2,9 @@ package canvas;
 
 import collections.grid.Grid;
 import com.jogamp.opengl.*;
-import drawing.Drawable;
 import drawing.DrawableEnum;
 import io.PolygonsReader;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
+
 import java.nio.IntBuffer;
 import java.util.TreeMap;
 
@@ -91,7 +89,11 @@ public class Model {
                     }
 
                     var partialBaseChunk = reader.getBaseChunk();
-                    baseChunk = new Chunk(partialBaseChunk.getTotalIndices(), partialBaseChunk.getTotalVertices(), partialBaseChunk.getTotalDrawables());
+                    baseChunk =
+                            new Chunk(
+                                    partialBaseChunk.getTotalIndices(),
+                                    partialBaseChunk.getTotalVertices(),
+                                    partialBaseChunk.getTotalDrawables());
                     baseChunk.init(glAutoDrawable);
                     baseChunk.add(partialBaseChunk);
 

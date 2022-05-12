@@ -1,10 +1,11 @@
 package drawing;
 
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import javafx.scene.paint.Color;
 import osm.elements.OSMElement;
 import osm.elements.OSMTag;
+
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public enum DrawableEnum implements Drawable {
     BASE(Shape.FILL, Color.web("#f2efe9"), 0, Category.COAST, 0),
@@ -89,31 +90,6 @@ public enum DrawableEnum implements Drawable {
     private final double size;
     private final Category category;
     private final int detail;
-
-    @Override
-    public Shape shape() {
-        return shape;
-    }
-
-    @Override
-    public Color color() {
-        return color;
-    }
-
-    @Override
-    public double size() {
-        return size;
-    }
-
-    @Override
-    public Category category() {
-        return category;
-    }
-
-    @Override
-    public int detail() {
-        return detail;
-    }
 
     DrawableEnum(Shape shape, Color color, double size, Category category, int detail) {
         this.shape = shape;
@@ -249,5 +225,30 @@ public enum DrawableEnum implements Drawable {
             };
             default -> _default(tag);
         };
+    }
+
+    @Override
+    public Shape shape() {
+        return shape;
+    }
+
+    @Override
+    public Color color() {
+        return color;
+    }
+
+    @Override
+    public double size() {
+        return size;
+    }
+
+    @Override
+    public Category category() {
+        return category;
+    }
+
+    @Override
+    public int detail() {
+        return detail;
     }
 }

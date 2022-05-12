@@ -1,19 +1,20 @@
 package navigation;
 
-import static osm.elements.OSMTag.Key.HIGHWAY;
-import static osm.elements.OSMTag.Key.NAME;
-
 import collections.spatial.LinearSearchTwoDTree;
 import collections.spatial.SpatialTree;
 import geometry.Point;
 import geometry.Rect;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.util.Pair;
 import osm.OSMObserver;
 import osm.elements.OSMTag;
 import osm.elements.OSMWay;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static osm.elements.OSMTag.Key.HIGHWAY;
+import static osm.elements.OSMTag.Key.NAME;
 
 public class NearestNeighbor implements OSMObserver, Serializable {
     private transient Rect bounds;

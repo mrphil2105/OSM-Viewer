@@ -3,15 +3,15 @@ package io;
 import canvas.Chunk;
 import geometry.Point;
 import geometry.Rect;
-import javafx.util.Pair;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Reads a stream written by a PolygonsWriter. The result is an iterable of PartialChunks, which are read
- * on demand instead of in bulk.
+ * Reads a stream written by a PolygonsWriter. The result is an iterable of PartialChunks, which are
+ * read on demand instead of in bulk.
  */
 public class PolygonsReader extends StreamingReader<PartialChunk> {
     private Map<Float, Map<Point, Chunk>> chunks = null;
@@ -22,7 +22,9 @@ public class PolygonsReader extends StreamingReader<PartialChunk> {
         super(in);
     }
 
-    /** If not read already, read the header written by the PolygonsWriter */
+    /**
+     * If not read already, read the header written by the PolygonsWriter
+     */
     private void readHeader() {
         if (chunks != null) return;
 
@@ -40,10 +42,7 @@ public class PolygonsReader extends StreamingReader<PartialChunk> {
 
                 for (int j = 0; j < chunkCount; j++) {
                     var p = (Point) stream.readUnshared();
-                    var chunk = new Chunk(
-                            stream.readInt(),
-                            stream.readInt(),
-                            stream.readInt());
+                    var chunk = new Chunk(stream.readInt(), stream.readInt(), stream.readInt());
 
                     map.put(p, chunk);
                 }
@@ -53,7 +52,7 @@ public class PolygonsReader extends StreamingReader<PartialChunk> {
 
             // Wrap in another stream to read the 4-byte object stream header
             setStream(new ObjectInputStream(stream));
-        } catch (IOException | ClassNotFoundException  e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

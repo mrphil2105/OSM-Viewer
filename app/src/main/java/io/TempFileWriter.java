@@ -8,8 +8,8 @@ import java.io.*;
  * continuously.
  */
 public abstract class TempFileWriter implements Writer {
-    private final File file;
     protected final ObjectOutputStream stream;
+    private final File file;
 
     public TempFileWriter() throws IOException {
         file = File.createTempFile("osm", "");

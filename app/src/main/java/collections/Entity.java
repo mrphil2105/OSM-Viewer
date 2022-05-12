@@ -3,6 +3,27 @@ package collections;
 import java.io.Serializable;
 
 public abstract class Entity implements Comparable<Entity>, Serializable {
+    public static Entity withIdStatic(long id) {
+        IdEntity.instance.id = id;
+        return IdEntity.instance;
+    }
+
+    public static Entity withId(long id) {
+        return new IdEntity(id);
+    }
+
+    public abstract long id();
+
+    @Override
+    public int compareTo(Entity other) {
+        return Long.compare(id(), other.id());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Entity e && e.id() == id();
+    }
+
     private static class IdEntity extends Entity {
         private static final IdEntity instance = new IdEntity(0);
 
@@ -16,26 +37,5 @@ public abstract class Entity implements Comparable<Entity>, Serializable {
         public long id() {
             return id;
         }
-    }
-
-    public abstract long id();
-
-    public static Entity withIdStatic(long id) {
-        IdEntity.instance.id = id;
-        return IdEntity.instance;
-    }
-
-    public static Entity withId(long id) {
-        return new IdEntity(id);
-    }
-
-    @Override
-    public int compareTo(Entity other) {
-        return Long.compare(id(), other.id());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof Entity e && e.id() == id();
     }
 }

@@ -2,11 +2,6 @@ package io;
 
 import features.Feature;
 import features.FeatureSet;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.zip.ZipFile;
 import javafx.application.Platform;
 import javafx.scene.control.ProgressBar;
 import javafx.util.Pair;
@@ -18,6 +13,12 @@ import org.apache.commons.compress.utils.IOUtils;
 import osm.OSMObserver;
 import osm.OSMReader;
 import osm.elements.OSMBounds;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.zip.ZipFile;
 
 // TODO: Use a custom exception type instead of RuntimeException for when parsing fails.
 public class FileParser {
@@ -71,8 +72,7 @@ public class FileParser {
     private static void createMapFromWriters(File outfile, List<Pair<String, Writer>> pairs)
             throws IOException {
         try (var tarStream =
-                new TarArchiveOutputStream(
-                        new BufferedOutputStream(new FileOutputStream(outfile)))) {
+                     new TarArchiveOutputStream(new BufferedOutputStream(new FileOutputStream(outfile)))) {
             for (var pair : pairs) {
                 var file = writeToFile(pair.getValue());
                 var entry = tarStream.createArchiveEntry(file, pair.getKey());

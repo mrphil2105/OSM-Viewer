@@ -9,9 +9,9 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 
 public class Grid<E> implements Iterable<E> {
+    public final float cellSize;
     final E[][] grid;
     private final Point topLeft;
-    public final float cellSize;
 
     @SuppressWarnings("unchecked")
     public Grid(Rect bounds, float cellSize, Function<Point, E> init) {
@@ -62,8 +62,7 @@ public class Grid<E> implements Iterable<E> {
     }
 
     public QueryResult<E> range(double top, double left, double bottom, double right) {
-        return new QueryResult<>(
-                this, toX(left), toY(top), toX(right), toY(bottom));
+        return new QueryResult<>(this, toX(left), toY(top), toX(right), toY(bottom));
     }
 
     public int size() {

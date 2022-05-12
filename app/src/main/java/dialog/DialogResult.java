@@ -1,3 +1,4 @@
 package dialog;
 
-public interface DialogResult {}
+public interface DialogResult {
+}

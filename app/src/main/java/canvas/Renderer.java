@@ -4,7 +4,17 @@ import collections.Entity;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
-import drawing.*;
+import drawing.Drawable;
+import drawing.DrawableDetailWrapper;
+import drawing.DrawableEnum;
+import drawing.DrawingManager;
+import geometry.Vector2D;
+import javafx.scene.paint.Color;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.MatrixType;
+import javafx.util.Pair;
+import shaders.Location;
+import shaders.ShaderProgram;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -13,28 +23,7 @@ import java.nio.IntBuffer;
 import java.util.List;
 import java.util.TreeMap;
 
-import geometry.Vector2D;
-import javafx.scene.paint.Color;
-import javafx.scene.transform.Affine;
-import javafx.scene.transform.MatrixType;
-import javafx.util.Pair;
-import org.apache.commons.compress.harmony.pack200.NewAttribute;
-import shaders.Location;
-import shaders.ShaderProgram;
-
 public class Renderer implements GLEventListener {
-    public enum Shader {
-        DEFAULT("shaders/default.frag"),
-        MONOCHROME("shaders/monochrome.frag"),
-        PARTY("shaders/party.frag");
-
-        public final String filename;
-
-        Shader(String filename) {
-            this.filename = filename;
-        }
-    }
-
     private final Color clear = DrawableEnum.WATER.color();
     private final Model model;
     private final MapCanvas canvas;
@@ -52,7 +41,7 @@ public class Renderer implements GLEventListener {
     /**
      * Add a drawing to the renderer, causing it to be rendered from the next frame onwards.
      *
-     * @param points The points to draw.
+     * @param points   The points to draw.
      * @param drawable The Drawable describing the points.
      * @return An entity that can be used with `clear` to later remove this drawing from the renderer.
      */
@@ -97,7 +86,9 @@ public class Renderer implements GLEventListener {
         return Entity.withId(id);
     }
 
-    /** Clear all drawings from the renderer. */
+    /**
+     * Clear all drawings from the renderer.
+     */
     public void clear() {
         for (var pair : drawingChunks.values()) {
             pair.getKey().clear();
@@ -128,18 +119,24 @@ public class Renderer implements GLEventListener {
                 .invoke(
                         true,
                         glAutoDrawable -> {
-                            chunk.indices().set(
-                                    IntBuffer.wrap(info.drawing().indices().getArray()),
-                                    info.indicesStart(),
-                                    info.drawing().indices().size());
-                            chunk.vertices().set(
-                                    FloatBuffer.wrap(info.drawing().vertices().getArray()),
-                                    info.verticesStart(),
-                                    info.drawing().vertices().size());
-                            chunk.drawables().set(
-                                    ByteBuffer.wrap(info.drawing().drawables().getArray()),
-                                    info.drawablesStart(),
-                                    info.drawing().drawables().size());
+                            chunk
+                                    .indices()
+                                    .set(
+                                            IntBuffer.wrap(info.drawing().indices().getArray()),
+                                            info.indicesStart(),
+                                            info.drawing().indices().size());
+                            chunk
+                                    .vertices()
+                                    .set(
+                                            FloatBuffer.wrap(info.drawing().vertices().getArray()),
+                                            info.verticesStart(),
+                                            info.drawing().vertices().size());
+                            chunk
+                                    .drawables()
+                                    .set(
+                                            ByteBuffer.wrap(info.drawing().drawables().getArray()),
+                                            info.drawablesStart(),
+                                            info.drawing().drawables().size());
                             return true;
                         });
     }
@@ -172,23 +169,23 @@ public class Renderer implements GLEventListener {
 
     private FloatBuffer affineToBuffer(Affine affine) {
         return FloatBuffer.wrap(
-                new float[] {
-                    (float) affine.getMxx(),
-                    (float) affine.getMyx(),
-                    (float) affine.getMzx(),
-                    0,
-                    (float) affine.getMxy(),
-                    (float) affine.getMyy(),
-                    (float) affine.getMzy(),
-                    0,
-                    (float) affine.getMzx(),
-                    (float) affine.getMzy(),
-                    (float) affine.getMzz(),
-                    0,
-                    (float) affine.getTx(),
-                    (float) affine.getTy(),
-                    (float) affine.getTz(),
-                    1
+                new float[]{
+                        (float) affine.getMxx(),
+                        (float) affine.getMyx(),
+                        (float) affine.getMzx(),
+                        0,
+                        (float) affine.getMxy(),
+                        (float) affine.getMyy(),
+                        (float) affine.getMzy(),
+                        0,
+                        (float) affine.getMzx(),
+                        (float) affine.getMzy(),
+                        (float) affine.getMzz(),
+                        0,
+                        (float) affine.getTx(),
+                        (float) affine.getTy(),
+                        (float) affine.getTz(),
+                        1
                 });
     }
 
@@ -285,7 +282,8 @@ public class Renderer implements GLEventListener {
         gl.glUseProgram(0);
     }
 
-    // TODO: If we had some more time I'd set this up to use VAOs, then this method would only be two or three lines <3. I didn't know about those when we started the project though.
+    // TODO: If we had some more time I'd set this up to use VAOs, then this method would only be two
+    // or three lines <3. I didn't know about those when we started the project though.
     private void draw(GL3 gl, Chunk chunk, FloatBuffer transform, float time) {
         chunk.indices().bind();
 
@@ -294,8 +292,7 @@ public class Renderer implements GLEventListener {
 
         // Tell OpenGL about our projection matrix.
         // We need this in the vertex shader to position our vertices correctly.
-        gl.glUniformMatrix4fv(
-                shaderProgram.getLocation(Location.PROJECTION), 1, false, transform);
+        gl.glUniformMatrix4fv(shaderProgram.getLocation(Location.PROJECTION), 1, false, transform);
 
         gl.glActiveTexture(GL3.GL_TEXTURE0);
         gl.glBindTexture(GL3.GL_TEXTURE_1D, model.getTex(Model.TexType.COLOR_MAP));
@@ -330,21 +327,33 @@ public class Renderer implements GLEventListener {
         // Recalculate orthographic projection matrix
         projection =
                 new Affine(
-                        new double[] {
-                            2 / (right - left),
-                            0,
-                            0,
-                            -(right + left) / (right - left),
-                            0,
-                            2 / (top - bottom),
-                            0,
-                            -(top + bottom) / (top - bottom),
-                            0,
-                            0,
-                            -2 / (far - near),
-                            (far + near) / (far - near),
+                        new double[]{
+                                2 / (right - left),
+                                0,
+                                0,
+                                -(right + left) / (right - left),
+                                0,
+                                2 / (top - bottom),
+                                0,
+                                -(top + bottom) / (top - bottom),
+                                0,
+                                0,
+                                -2 / (far - near),
+                                (far + near) / (far - near),
                         },
                         MatrixType.MT_3D_3x4,
                         0);
+    }
+
+    public enum Shader {
+        DEFAULT("shaders/default.frag"),
+        MONOCHROME("shaders/monochrome.frag"),
+        PARTY("shaders/party.frag");
+
+        public final String filename;
+
+        Shader(String filename) {
+            this.filename = filename;
+        }
     }
 }

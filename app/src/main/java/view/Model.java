@@ -8,9 +8,6 @@ import geometry.Point;
 import geometry.Rect;
 import io.PolygonsReader;
 import io.ReadResult;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -23,22 +20,23 @@ import navigation.EdgeRole;
 import navigation.NearestNeighbor;
 import pointsOfInterest.PointOfInterest;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Model {
     public final Rect bounds;
-    private AddressDatabase addresses;
     private final ObservableList<PointOfInterest> pointsOfInterest;
-    private NearestNeighbor nearestNeighbor;
     private final StringProperty nearestRoad = new SimpleStringProperty("none");
-    private Dijkstra dijkstra;
     private final ObservableList<Point> routePoints = FXCollections.observableArrayList();
-    private  Pair<Point,Point> fromToPoints;
     private final FeatureSet features;
-
-    public canvas.Model canvasModel;
-
     private final ObservableList<Address> searchSuggestions = FXCollections.observableArrayList();
     private final ObservableList<Address> toSuggestions = FXCollections.observableArrayList();
     private final ObservableList<Address> fromSuggestions = FXCollections.observableArrayList();
+    public canvas.Model canvasModel;
+    private AddressDatabase addresses;
+    private NearestNeighbor nearestNeighbor;
+    private Dijkstra dijkstra;
+    private Pair<Point, Point> fromToPoints;
 
     public Model(ReadResult result, ProgressBar bar) {
         bounds = result.bounds().getRect();
@@ -88,8 +86,8 @@ public class Model {
         nearestRoadProperty().set(road);
     }
 
-    public void getInstructionsFromDijkstra(){
-            dijkstra.getInstructions();
+    public void getInstructionsFromDijkstra() {
+        dijkstra.getInstructions();
     }
 
     public ObservableList<Point> getRoutePoints() {
@@ -99,8 +97,6 @@ public class Model {
     public boolean calculateBestRoute(Point from, Point to, EdgeRole mode) {
         var shortestPath = dijkstra.shortestPath(from, to, mode);
 
-
-
         if (shortestPath == null) {
             routePoints.clear();
             System.out.println("No path between " + from + " and " + to + ".");
@@ -108,7 +104,7 @@ public class Model {
             return false;
         }
 
-        setFromToPoints(new Pair<>(Point.geoToMap(from),Point.geoToMap(to)));
+        setFromToPoints(new Pair<>(Point.geoToMap(from), Point.geoToMap(to)));
 
         var routePoints = shortestPath.stream().map(Point::geoToMap).toList();
         this.routePoints.setAll(routePoints);
@@ -155,5 +151,4 @@ public class Model {
     public void setFromToPoints(Pair<Point, Point> fromToPoints) {
         this.fromToPoints = fromToPoints;
     }
-
 }

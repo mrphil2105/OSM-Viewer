@@ -9,18 +9,16 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 public class Chunk {
-    private VBOWrapper indices;
-    private VBOWrapper vertices;
-    private VBOWrapper drawables;
-    public int count;
-
-    private int curIndex;
-    private int curVertex;
-    private int curDrawable;
-
     private final int totalIndices;
     private final int totalVertices;
     private final int totalDrawables;
+    public int count;
+    private VBOWrapper indices;
+    private VBOWrapper vertices;
+    private VBOWrapper drawables;
+    private int curIndex;
+    private int curVertex;
+    private int curDrawable;
 
     public Chunk(int totalIndices, int totalVertices, int totalDrawables) {
         this.totalIndices = totalIndices;
@@ -31,7 +29,8 @@ public class Chunk {
     }
 
     public void init(GLAutoDrawable glAutoDrawable) {
-        indices = new VBOWrapper(glAutoDrawable, GL3.GL_ELEMENT_ARRAY_BUFFER, totalIndices * Integer.BYTES);
+        indices =
+                new VBOWrapper(glAutoDrawable, GL3.GL_ELEMENT_ARRAY_BUFFER, totalIndices * Integer.BYTES);
         vertices = new VBOWrapper(glAutoDrawable, GL3.GL_ARRAY_BUFFER, totalVertices * Float.BYTES);
         drawables = new VBOWrapper(glAutoDrawable, GL3.GL_ARRAY_BUFFER, totalDrawables * Byte.BYTES);
     }
@@ -62,8 +61,16 @@ public class Chunk {
 
             // Upload to VBOs
             indices().set(IntBuffer.wrap(iArray), curIndex, drawing.indices().size());
-            vertices().set(FloatBuffer.wrap(drawing.vertices().getArray()), curVertex, drawing.vertices().size());
-            drawables().set(ByteBuffer.wrap(drawing.drawables().getArray()), curDrawable, drawing.drawables().size());
+            vertices()
+                    .set(
+                            FloatBuffer.wrap(drawing.vertices().getArray()),
+                            curVertex,
+                            drawing.vertices().size());
+            drawables()
+                    .set(
+                            ByteBuffer.wrap(drawing.drawables().getArray()),
+                            curDrawable,
+                            drawing.drawables().size());
 
             curIndex += drawing.indices().size();
             curVertex += drawing.vertices().size();

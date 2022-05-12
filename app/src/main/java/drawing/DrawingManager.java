@@ -2,13 +2,11 @@ package drawing;
 
 import collections.Entity;
 import geometry.Vector2D;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class DrawingManager {
-    public record DrawingInfo(
-            Drawing drawing, int indicesStart, int verticesStart, int drawablesStart) {}
-
     private final List<DrawingInfo> drawings = new ArrayList<>();
     private final Drawing drawing = new Drawing();
 
@@ -60,7 +58,9 @@ public class DrawingManager {
         return info;
     }
 
-    /** Remove all drawings, but retain allocated memory. */
+    /**
+     * Remove all drawings, but retain allocated memory.
+     */
     public void clear() {
         drawings.clear();
         drawing.clear();
@@ -121,5 +121,9 @@ public class DrawingManager {
      */
     public Drawing drawing() {
         return drawing;
+    }
+
+    public record DrawingInfo(
+            Drawing drawing, int indicesStart, int verticesStart, int drawablesStart) {
     }
 }

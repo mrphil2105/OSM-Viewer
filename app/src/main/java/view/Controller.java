@@ -10,14 +10,10 @@ import dialog.CreateMapDialog;
 import dialog.LoadingDialog;
 import drawing.Drawable;
 import drawing.DrawableEnum;
-import drawing.Drawing;
 import features.Feature;
 import geometry.Point;
 import geometry.Vector2D;
 import io.FileParser;
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -29,14 +25,10 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.util.Pair;
 import navigation.EdgeRole;
@@ -44,9 +36,13 @@ import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
 import pointsOfInterest.PointsOfInterestVBox;
 
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class Controller {
-    private Model model;
     private final Timer queryPointTimer = new Timer();
+    private Model model;
     private TimerTask queryPointTimerTask;
     private Point fromPoint, toPoint;
     private Entity routeDrawing;
@@ -55,99 +51,103 @@ public class Controller {
     private Tooltip addPointOfInterestText;
     private Entity lastDrawnAddress;
 
-    @FXML private MapCanvas canvas;
+    @FXML
+    private MapCanvas canvas;
+    private final ListChangeListener<? super Point> routeRedrawListener =
+            listener -> {
+                while (listener.next()) {
+                }
 
-    @FXML private Button searchButton;
+                if (!listener.wasAdded()) {
+                    return;
+                }
 
-    @FXML private Scene scene;
+                var renderer = canvas.getRenderer();
+                if (routeDrawing != null) renderer.clear(routeDrawing);
 
-    @FXML private Button addPointOfInterest;
+                var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
 
-    @FXML private HBox pointsOfInterestHeader;
+                routeDrawing = renderer.draw(vectors, DrawableEnum.ROUTE);
 
-    @FXML private VBox categories;
+                if (fromToDrawings != null) {
+                    renderer.clear(fromToDrawings.getValue());
+                    renderer.clear(fromToDrawings.getKey());
+                }
 
-    @FXML private GridPane searchPane;
+                var fromPoint = model.getFromToPoints().getKey();
+                var toPoint = model.getFromToPoints().getValue();
 
-    @FXML private SearchTextField searchTextField;
-
-    @FXML private SearchTextField fromRouteTextField;
-
-    @FXML private SearchTextField toRouteTextField;
-
-    @FXML private Button routeButton;
-
-    @FXML private ComboBox<EdgeRole> navigationModeBox;
-
-    @FXML private Label routeErrorLabel;
-
-    @FXML private RadioButton radioButtonCar;
-
-    @FXML private RadioButton radioButtonBikeOrWalk;
-
-    @FXML private CheckBox checkBoxBuildings;
-
-    @FXML private CheckBox checkBoxHighways;
-
-    @FXML private CheckBox checkBoxWater;
-
-    @FXML private RadioButton radioButtonColorBlind;
-
-    @FXML private RadioButton radioButtonDefaultMode;
-
-    @FXML private RadioButton radioButtonPartyMode;
-
-    @FXML private ToggleGroup groupRoute;
-
-    @FXML private ToggleGroup groupMode;
-
-    @FXML private VBox leftVBox;
-
-    @FXML private VBox rightVBox;
-
-    @FXML private VBox middleVBox;
-
-    @FXML private HBox middleHBox;
-
-    @FXML private Label nearestRoadLabel;
-
-    @FXML private CheckMenuItem nearestRoadDelayItem;
-
-    @FXML private PointsOfInterestVBox pointsOfInterestVBox;
-
-    @FXML private Label scaleBarText;
-
-    @FXML private Label zoomLevelText;
-
-    @FXML private Label fps;
-
-    @FXML private Button instructionsButton;
-
-    private final ListChangeListener<? super Point> routeRedrawListener = listener -> {
-        while (listener.next()) {
-        }
-
-        if (!listener.wasAdded()) {
-            return;
-        }
-
-        var renderer = canvas.getRenderer();
-        if (routeDrawing != null) renderer.clear(routeDrawing);
-
-        var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
-
-        routeDrawing = renderer.draw(vectors, DrawableEnum.ROUTE);
-
-        if (fromToDrawings!=null){
-            renderer.clear(fromToDrawings.getValue());
-            renderer.clear(fromToDrawings.getKey());
-        }
-
-        var fromPoint= model.getFromToPoints().getKey();
-        var toPoint = model.getFromToPoints().getValue();
-
-        fromToDrawings = new Pair<>(renderer.draw(Vector2D.create(fromPoint), DrawableEnum.ADDRESS), renderer.draw(Vector2D.create(toPoint), DrawableEnum.ADDRESS));
-    };
+                fromToDrawings =
+                        new Pair<>(
+                                renderer.draw(Vector2D.create(fromPoint), DrawableEnum.ADDRESS),
+                                renderer.draw(Vector2D.create(toPoint), DrawableEnum.ADDRESS));
+            };
+    @FXML
+    private Button searchButton;
+    @FXML
+    private Scene scene;
+    @FXML
+    private Button addPointOfInterest;
+    @FXML
+    private HBox pointsOfInterestHeader;
+    @FXML
+    private VBox categories;
+    @FXML
+    private GridPane searchPane;
+    @FXML
+    private SearchTextField searchTextField;
+    @FXML
+    private SearchTextField fromRouteTextField;
+    @FXML
+    private SearchTextField toRouteTextField;
+    @FXML
+    private Button routeButton;
+    @FXML
+    private ComboBox<EdgeRole> navigationModeBox;
+    @FXML
+    private Label routeErrorLabel;
+    @FXML
+    private RadioButton radioButtonCar;
+    @FXML
+    private RadioButton radioButtonBikeOrWalk;
+    @FXML
+    private CheckBox checkBoxBuildings;
+    @FXML
+    private CheckBox checkBoxHighways;
+    @FXML
+    private CheckBox checkBoxWater;
+    @FXML
+    private RadioButton radioButtonColorBlind;
+    @FXML
+    private RadioButton radioButtonDefaultMode;
+    @FXML
+    private RadioButton radioButtonPartyMode;
+    @FXML
+    private ToggleGroup groupRoute;
+    @FXML
+    private ToggleGroup groupMode;
+    @FXML
+    private VBox leftVBox;
+    @FXML
+    private VBox rightVBox;
+    @FXML
+    private VBox middleVBox;
+    @FXML
+    private HBox middleHBox;
+    @FXML
+    private Label nearestRoadLabel;
+    @FXML
+    private CheckMenuItem nearestRoadDelayItem;
+    @FXML
+    private PointsOfInterestVBox pointsOfInterestVBox;
+    @FXML
+    private Label scaleBarText;
+    @FXML
+    private Label zoomLevelText;
+    @FXML
+    private Label fps;
+    @FXML
+    private Button instructionsButton;
 
     public void init(Model model) {
         setModel(model);
@@ -192,11 +192,7 @@ public class Controller {
 
                         tf.setOnAction(
                                 a -> {
-                                    addPointOfInterest(
-                                            new PointOfInterest(
-                                                    point.x(),
-                                                    point.y(),
-                                                    tf.getText()));
+                                    addPointOfInterest(new PointOfInterest(point.x(), point.y(), tf.getText()));
                                     cm.hide();
                                 });
 
@@ -292,7 +288,7 @@ public class Controller {
 
         this.model = model;
         model.getRoutePoints().addListener(routeRedrawListener);
-        routeDrawing=null;
+        routeDrawing = null;
 
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
@@ -308,7 +304,7 @@ public class Controller {
         if (model.supports(Feature.ADDRESS_SEARCH)) {
             searchTextField.init(model);
             searchTextField.setDisable(false);
-            lastDrawnAddress=null;
+            lastDrawnAddress = null;
 
             model
                     .getObservableSearchSuggestions()
@@ -320,7 +316,7 @@ public class Controller {
         }
 
         if (model.supports(Feature.PATHFINDING)) {
-            fromToDrawings=null;
+            fromToDrawings = null;
             toRouteTextField.init(model);
             fromRouteTextField.init(model);
             toRouteTextField.setDisable(false);
@@ -349,7 +345,6 @@ public class Controller {
         }
 
         canvas.giveFocus();
-
     }
 
     public void disableAll() {
@@ -374,10 +369,10 @@ public class Controller {
         queryPointTimer.cancel();
     }
 
-    private Address handleSearchInput(SearchTextField textField){
+    private Address handleSearchInput(SearchTextField textField) {
         var parsedAddress = textField.parseAddress();
         var result = textField.handleSearch(parsedAddress);
-        if (result == null || result.size() <= 0){
+        if (result == null || result.size() <= 0) {
             return null;
         }
         if (result.size() > 1) {
@@ -392,17 +387,17 @@ public class Controller {
     @FXML
     public void handleSearchClick() {
         var result = handleSearchInput(searchTextField);
-        if(result == null){
-            routeErrorLabel.setText("Please enter valid search address." +
-                System.lineSeparator() +
-                "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
+        if (result == null) {
+            routeErrorLabel.setText(
+                    "Please enter valid search address."
+                            + System.lineSeparator()
+                            + "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
             routeErrorLabel.setVisible(true);
 
             return;
         }
 
-        Point point =
-                Point.geoToMap(new Point(result.lon(), result.lat()));
+        Point point = Point.geoToMap(new Point(result.lon(), result.lat()));
         zoomOn(point);
         var drawing = canvas.getRenderer().draw(Vector2D.create(point), DrawableEnum.ADDRESS);
         if (lastDrawnAddress != null) {
@@ -436,17 +431,15 @@ public class Controller {
         var toRouteResult = handleSearchInput(toRouteTextField);
 
         if (fromRouteResult == null || toRouteResult == null) {
-            routeErrorLabel.setText("Please enter valid from and to addresses." +
-                System.lineSeparator() +
-                "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
+            routeErrorLabel.setText(
+                    "Please enter valid from and to addresses."
+                            + System.lineSeparator()
+                            + "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
             routeErrorLabel.setVisible(true);
 
             return;
         }
-        routeBetweenAddresses(
-                fromRouteResult,
-                toRouteResult,
-                navigationModeBox.getValue());
+        routeBetweenAddresses(fromRouteResult, toRouteResult, navigationModeBox.getValue());
     }
 
     @FXML
@@ -492,7 +485,8 @@ public class Controller {
 
     public void addPointOfInterest(PointOfInterest point) {
         model.getPointsOfInterest().add(point);
-        point.setDrawing(canvas.getRenderer().draw(Vector2D.create(point.lon(), point.lat()), DrawableEnum.POI));
+        point.setDrawing(
+                canvas.getRenderer().draw(Vector2D.create(point.lon(), point.lat()), DrawableEnum.POI));
         pointsOfInterestVBox.update();
         for (Node n : pointsOfInterestVBox.getChildren()) {
 
@@ -531,7 +525,7 @@ public class Controller {
     }
 
     @FXML
-    public void handleInstructions(){
+    public void handleInstructions() {
         model.getInstructionsFromDijkstra();
     }
 
@@ -606,7 +600,7 @@ public class Controller {
         routeErrorLabel.setVisible(false);
 
         var result = handleKeyTyped(event);
-        if (result == null){
+        if (result == null) {
             model.setFromSuggestions(Collections.emptyList());
             return;
         }
@@ -618,7 +612,7 @@ public class Controller {
         routeErrorLabel.setVisible(false);
 
         var result = handleKeyTyped(event);
-        if (result == null){
+        if (result == null) {
             model.setToSuggestions(Collections.emptyList());
             return;
         }
@@ -628,10 +622,10 @@ public class Controller {
     @FXML
     public void handleSearchKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
-        if (result == null){
+        if (result == null) {
             model.setSearchSuggestions(Collections.emptyList());
             return;
-        };
+        }
         model.setSearchSuggestions(result);
     }
 
@@ -648,14 +642,12 @@ public class Controller {
         Point from = new Point(addressFrom.lon(), addressFrom.lat());
         Point to = new Point(addressTo.lon(), addressTo.lat());
 
-
         var hasRoute = model.calculateBestRoute(from, to, mode);
 
         if (!hasRoute) {
             routeErrorLabel.setText("No route could be found.");
             routeErrorLabel.setVisible(true);
-        }
-        else{
+        } else {
             zoomOn(Point.geoToMap(from));
         }
     }

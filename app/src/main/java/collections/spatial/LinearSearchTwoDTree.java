@@ -41,7 +41,8 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         if (!bounds.contains(point)) {
-            throw new IllegalArgumentException("The specified point is not contained within the bounds of the tree.");
+            throw new IllegalArgumentException(
+                    "The specified point is not contained within the bounds of the tree.");
         }
 
         if (isEmpty()) {
@@ -86,7 +87,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         // The node is an ancestor node, so we traverse the tree normally.
-        var ancestorNode = (AncestorNode<E>)node;
+        var ancestorNode = (AncestorNode<E>) node;
         var isLower = (level & 1) == 0 ? point.y() < ancestorNode.y() : point.x() < ancestorNode.x();
 
         if (isLower) {
@@ -99,7 +100,8 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
     }
 
     private AncestorNode<E> splitLeafNode(Point point, E value, LeafNode<E> node, int level) {
-        // We split the list into two parts, the left and right having "smaller" and "greater" points respectively.
+        // We split the list into two parts, the left and right having "smaller" and "greater" points
+        // respectively.
         // This allows the new point to be a parent node for the two leaf nodes.
         var leftPoints = new ArrayList<Point>();
         var leftValues = new ArrayList<E>();
@@ -122,21 +124,30 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         if (leftPoints.isEmpty() || rightPoints.isEmpty()) {
-            // We would have created a child node with no points, which is not supported, so we wait for a new point.
+            // We would have created a child node with no points, which is not supported, so we wait for a
+            // new point.
             return null;
         }
 
         var ancestorNode = new AncestorNode<>(point, value, node.rect);
-        ancestorNode.left = new LeafNode<>(leftPoints, leftValues, new Rect(
-            node.rect.top(),
-            node.rect.left(),
-            (level & 1) == 0 ? point.y() : node.rect.bottom(),
-            (level & 1) != 0 ? point.x() : node.rect.right()));
-        ancestorNode.right = new LeafNode<>(rightPoints, rightValues, new Rect(
-            (level & 1) == 0 ? point.y() : node.rect.top(),
-            (level & 1) != 0 ? point.x() : node.rect.left(),
-            node.rect.bottom(),
-            node.rect.right()));
+        ancestorNode.left =
+                new LeafNode<>(
+                        leftPoints,
+                        leftValues,
+                        new Rect(
+                                node.rect.top(),
+                                node.rect.left(),
+                                (level & 1) == 0 ? point.y() : node.rect.bottom(),
+                                (level & 1) != 0 ? point.x() : node.rect.right()));
+        ancestorNode.right =
+                new LeafNode<>(
+                        rightPoints,
+                        rightValues,
+                        new Rect(
+                                (level & 1) == 0 ? point.y() : node.rect.top(),
+                                (level & 1) != 0 ? point.x() : node.rect.left(),
+                                node.rect.bottom(),
+                                node.rect.right()));
 
         return ancestorNode;
     }
@@ -160,7 +171,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
             return false;
         }
 
-        var ancestorNode = (AncestorNode<E>)node;
+        var ancestorNode = (AncestorNode<E>) node;
         var isLower = (level & 1) == 0 ? point.y() < ancestorNode.y() : point.x() < ancestorNode.x();
 
         if (isLower) {
@@ -186,7 +197,8 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         return nearest(query, root, champ, best, 1);
     }
 
-    private QueryResult<E> nearest(Point query, Node<E> node, QueryResult<E> champ, DistanceResult<E> best, int level) {
+    private QueryResult<E> nearest(
+            Point query, Node<E> node, QueryResult<E> champ, DistanceResult<E> best, int level) {
         // Check if the distance from the query point to the nearest point of
         // the node rectangle is greater than the current best distance.
         if (node == null || best.distance < node.rect.distanceSquaredTo(query)) {
@@ -194,7 +206,8 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         // Set an actual best distance when we recur.
-        best = new DistanceResult<>(champ.point().distanceSquaredTo(query), champ.point(), champ.value());
+        best =
+                new DistanceResult<>(champ.point().distanceSquaredTo(query), champ.point(), champ.value());
         var dist = node.distanceSquaredTo(query);
 
         // Check if the distance from the query point to the traversed point is less than
@@ -209,26 +222,29 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
             return champ;
         }
 
-        var ancestorNode = (AncestorNode<E>)node;
+        var ancestorNode = (AncestorNode<E>) node;
         var isLower = (level & 1) == 0 ? query.y() < ancestorNode.y() : query.x() < ancestorNode.x();
 
         if (isLower) {
             champ = nearest(query, ancestorNode.left, champ, best, level + 1);
 
             // Decide if we need to go down and check the other child.
-            // Compare the distance from the query point to the nearest point of the ancestorNode rectangle
+            // Compare the distance from the query point to the nearest point of the ancestorNode
+            // rectangle
             // against the distance from the query point to the current champion point.
             // If it is smaller, there could potentially be a point that is closer to the query point
             // than the current champion point.
-            if (ancestorNode.right != null &&
-                ancestorNode.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
+            if (ancestorNode.right != null
+                    && ancestorNode.right.rect.distanceSquaredTo(query)
+                    < champ.point().distanceSquaredTo(query)) {
                 champ = nearest(query, ancestorNode.right, champ, best, level + 1);
             }
         } else {
             champ = nearest(query, ancestorNode.right, champ, best, level + 1);
 
-            if (ancestorNode.left != null &&
-                ancestorNode.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
+            if (ancestorNode.left != null
+                    && ancestorNode.left.rect.distanceSquaredTo(query)
+                    < champ.point().distanceSquaredTo(query)) {
                 champ = nearest(query, ancestorNode.left, champ, best, level + 1);
             }
         }
@@ -267,7 +283,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
             return;
         }
 
-        var ancestorNode = (AncestorNode<E>)node;
+        var ancestorNode = (AncestorNode<E>) node;
 
         if (query.contains(ancestorNode.point)) {
             var result = new QueryResult<>(ancestorNode.point, ancestorNode.value);
@@ -278,7 +294,7 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
         range(query, ancestorNode.right, results);
     }
 
-    private static abstract class Node<E> implements Serializable {
+    private abstract static class Node<E> implements Serializable {
         protected Rect rect;
 
         public Node(Rect rect) {
@@ -373,7 +389,8 @@ public class LinearSearchTwoDTree<E> implements SpatialTree<E>, Serializable {
                 }
             }
 
-            // 'bestIndex' should not be -1 here, as there should always be at least one point in the list.
+            // 'bestIndex' should not be -1 here, as there should always be at least one point in the
+            // list.
             assert bestIndex != -1;
 
             var point = points.get(bestIndex);

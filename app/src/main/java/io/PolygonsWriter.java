@@ -5,24 +5,34 @@ import drawing.*;
 import geometry.Point;
 import geometry.Rect;
 import geometry.Vector2D;
-import java.io.*;
-import java.util.*;
+import osm.elements.OSMRelation;
+import osm.elements.OSMWay;
+import osm.elements.SlimOSMNode;
+import osm.elements.SlimOSMWay;
 
-import osm.elements.*;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-/** Writes Drawings to a file as they are finished */
+/**
+ * Writes Drawings to a file as they are finished
+ */
 public class PolygonsWriter extends TempFileWriter {
     private static final int MAX_SIZE = 100 * 1024 * 1024; // Max size on heap before flushing chunks
     private static final float CELL_SIZE = 0.05f;
     private static final int GRIDS = 3;
 
     private final List<Vector2D> points = new ArrayList<>();
-    private int maxChunkSize;
     private final PartialChunk baseChunk = new PartialChunk(null, 0);
     private final List<Grid<PartialChunk>> grids = new ArrayList<>();
+    private int maxChunkSize;
     private Rect bounds;
 
-    public PolygonsWriter() throws IOException {}
+    public PolygonsWriter() throws IOException {
+    }
 
     @Override
     public void writeTo(OutputStream out) throws IOException {
@@ -59,14 +69,15 @@ public class PolygonsWriter extends TempFileWriter {
         }
         maxChunkSize = MAX_SIZE / total;
 
-        baseChunk.add(Drawing.create(
-                List.of(
-                        Vector2D.create(Point.geoToMap(bounds.getTopLeft())),
-                        Vector2D.create(Point.geoToMap(bounds.getTopRight())),
-                        Vector2D.create(Point.geoToMap(bounds.getBottomRight())),
-                        Vector2D.create(Point.geoToMap(bounds.getBottomLeft())),
-                        Vector2D.create(Point.geoToMap(bounds.getTopLeft()))),
-                DrawableEnum.BOUNDS));
+        baseChunk.add(
+                Drawing.create(
+                        List.of(
+                                Vector2D.create(Point.geoToMap(bounds.getTopLeft())),
+                                Vector2D.create(Point.geoToMap(bounds.getTopRight())),
+                                Vector2D.create(Point.geoToMap(bounds.getBottomRight())),
+                                Vector2D.create(Point.geoToMap(bounds.getBottomLeft())),
+                                Vector2D.create(Point.geoToMap(bounds.getTopLeft()))),
+                        DrawableEnum.BOUNDS));
     }
 
     @Override
@@ -100,7 +111,10 @@ public class PolygonsWriter extends TempFileWriter {
 
     private void drawNodes(Iterable<SlimOSMNode> iter, Drawable drawable) {
         // Transform nodes to points and get bounding box
-        double top = Double.POSITIVE_INFINITY, left = Double.POSITIVE_INFINITY, bottom = Double.NEGATIVE_INFINITY, right = Double.NEGATIVE_INFINITY;
+        double top = Double.POSITIVE_INFINITY,
+                left = Double.POSITIVE_INFINITY,
+                bottom = Double.NEGATIVE_INFINITY,
+                right = Double.NEGATIVE_INFINITY;
         for (var node : iter) {
             points.add(Vector2D.create(Point.geoToMapX(node.lon()), Point.geoToMapY(node.lat())));
             if (node.lon() < left) left = node.lon();
@@ -109,9 +123,11 @@ public class PolygonsWriter extends TempFileWriter {
             if (node.lat() > bottom) bottom = node.lat();
         }
 
-        // If the element spans many cells, or it has high detail, we add it to the base instead of duplicating it across them all.
+        // If the element spans many cells, or it has high detail, we add it to the base instead of
+        // duplicating it across them all.
         var size = (right - left) + (bottom - top);
-        if ((size > 2 * CELL_SIZE || drawable.detail() >= GRIDS - 1 && size > 0.3 * CELL_SIZE) && drawable.shape() == Drawable.Shape.FILL) {
+        if ((size > 2 * CELL_SIZE || drawable.detail() >= GRIDS - 1 && size > 0.3 * CELL_SIZE)
+                && drawable.shape() == Drawable.Shape.FILL) {
             var drawing = Drawing.create(points, drawable);
             baseChunk.add(drawing);
         } else {

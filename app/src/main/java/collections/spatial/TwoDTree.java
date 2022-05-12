@@ -1,12 +1,12 @@
 package collections.spatial;
 
-import canvas.Renderer;
 import drawing.Drawable;
 import drawing.DrawableEnum;
 import drawing.Drawing;
 import geometry.Point;
 import geometry.Rect;
 import geometry.Vector2D;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,8 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
         }
 
         if (!bounds.contains(point)) {
-            throw new IllegalArgumentException("The specified point is not contained within the bounds of the tree.");
+            throw new IllegalArgumentException(
+                    "The specified point is not contained within the bounds of the tree.");
         }
 
         if (isEmpty()) {
@@ -75,21 +76,23 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
             node.left = insert(point, value, node.left, level + 1);
 
             if (node.left.rect == null) {
-                node.left.rect = new Rect(
-                    node.rect.top(),
-                    node.rect.left(),
-                    (level & 1) == 0 ? node.y() : node.rect.bottom(),
-                    (level & 1) != 0 ? node.x() : node.rect.right());
+                node.left.rect =
+                        new Rect(
+                                node.rect.top(),
+                                node.rect.left(),
+                                (level & 1) == 0 ? node.y() : node.rect.bottom(),
+                                (level & 1) != 0 ? node.x() : node.rect.right());
             }
         } else {
             node.right = insert(point, value, node.right, level + 1);
 
             if (node.right.rect == null) {
-                node.right.rect = new Rect(
-                    (level & 1) == 0 ? node.y() : node.rect.top(),
-                    (level & 1) != 0 ? node.x() : node.rect.left(),
-                    node.rect.bottom(),
-                    node.rect.right());
+                node.right.rect =
+                        new Rect(
+                                (level & 1) == 0 ? node.y() : node.rect.top(),
+                                (level & 1) != 0 ? node.x() : node.rect.left(),
+                                node.rect.bottom(),
+                                node.rect.right());
             }
         }
 
@@ -164,15 +167,15 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
             // against the distance from the query point to the current champion point.
             // If it is smaller, there could potentially be a point that is closer to the query point
             // than the current champion point.
-            if (node.right != null &&
-                    node.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
+            if (node.right != null
+                    && node.right.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                 champ = nearest(query, node.right, champ, best, level + 1);
             }
         } else {
             champ = nearest(query, node.right, champ, best, level + 1);
 
-            if (node.left != null &&
-                    node.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
+            if (node.left != null
+                    && node.left.rect.distanceSquaredTo(query) < champ.point().distanceSquaredTo(query)) {
                 champ = nearest(query, node.left, champ, best, level + 1);
             }
         }
