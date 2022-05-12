@@ -182,8 +182,6 @@ public class Controller {
                             toPoint = null;
                         }
 
-
-
                         return;
                     }
 
@@ -306,6 +304,7 @@ public class Controller {
 
         this.model = model;
         model.getRoutePoints().addListener(routeRedrawListener);
+        routeDrawing=null;
 
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
@@ -319,6 +318,8 @@ public class Controller {
         if (model.supports(Feature.ADDRESS_SEARCH)) {
             searchTextField.init(model);
             searchTextField.setDisable(false);
+            lastDrawnAddress=null;
+
             model
                     .getObservableSearchSuggestions()
                     .addListener(
@@ -329,6 +330,7 @@ public class Controller {
         }
 
         if (model.supports(Feature.PATHFINDING)) {
+            fromToDrawings=null;
             toRouteTextField.init(model);
             fromRouteTextField.init(model);
             toRouteTextField.setDisable(false);
@@ -619,7 +621,7 @@ public class Controller {
 
         var result = handleKeyTyped(event);
         if (result == null){
-            model.setFromSuggestions(Collections.emptyList());
+            model.setToSuggestions(Collections.emptyList());
             return;
         }
         model.setToSuggestions(result);
