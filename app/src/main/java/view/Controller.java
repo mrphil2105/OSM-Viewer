@@ -38,6 +38,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
+import javafx.util.Pair;
 import navigation.EdgeRole;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
@@ -49,6 +50,7 @@ public class Controller {
     private TimerTask queryPointTimerTask;
     private Point fromPoint, toPoint;
     private Drawing routeDrawing;
+    private Pair<Drawing,Drawing> fromToDrawings;
     private boolean pointOfInterestMode = false;
     private Tooltip addPointOfInterestText;
     private Drawing lastDrawnAddress;
@@ -134,6 +136,20 @@ public class Controller {
         routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
 
         renderer.draw(routeDrawing);
+
+        if (fromToDrawings!=null){
+            renderer.clear(fromToDrawings.getValue());
+            renderer.clear(fromToDrawings.getKey());
+        }
+
+        var fromPoint= model.getFromToPoints().getKey();
+        var toPoint = model.getFromToPoints().getValue();
+
+        fromToDrawings=new Pair<>(Drawing.create( Vector2D.create(fromPoint),Drawable.ADDRESS) , Drawing.create( Vector2D.create(toPoint),Drawable.ADDRESS));
+
+        renderer.draw(fromToDrawings.getValue());
+        renderer.draw(fromToDrawings.getKey());
+
     };
 
     public void init(Model model) {
@@ -156,6 +172,7 @@ public class Controller {
                             fromPoint = point;
                         } else if (toPoint == null) {
                             toPoint = point;
+
                             var mode = navigationModeBox.getValue();
                             this.model.calculateBestRoute(fromPoint, toPoint, mode);
                         } else {
@@ -285,10 +302,12 @@ public class Controller {
 
         this.model = model;
         model.getRoutePoints().addListener(routeRedrawListener);
+        routeDrawing=null;
 
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
             canvas.setVisible(true);
+
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
@@ -297,6 +316,8 @@ public class Controller {
         if (model.supports(Feature.ADDRESS_SEARCH)) {
             searchTextField.init(model);
             searchTextField.setDisable(false);
+            lastDrawnAddress=null;
+
             model
                     .getObservableSearchSuggestions()
                     .addListener(
@@ -307,6 +328,7 @@ public class Controller {
         }
 
         if (model.supports(Feature.PATHFINDING)) {
+            fromToDrawings=null;
             toRouteTextField.init(model);
             fromRouteTextField.init(model);
             toRouteTextField.setDisable(false);
@@ -597,7 +619,7 @@ public class Controller {
 
         var result = handleKeyTyped(event);
         if (result == null){
-            model.setFromSuggestions(Collections.emptyList());
+            model.setToSuggestions(Collections.emptyList());
             return;
         }
         model.setToSuggestions(result);
@@ -626,11 +648,15 @@ public class Controller {
         Point from = new Point(addressFrom.lon(), addressFrom.lat());
         Point to = new Point(addressTo.lon(), addressTo.lat());
 
+
         var hasRoute = model.calculateBestRoute(from, to, mode);
 
         if (!hasRoute) {
             routeErrorLabel.setText("No route could be found.");
             routeErrorLabel.setVisible(true);
+        }
+        else{
+            zoomOn(Point.geoToMap(from));
         }
     }
 

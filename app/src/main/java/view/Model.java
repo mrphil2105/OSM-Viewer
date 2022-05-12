@@ -17,6 +17,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ProgressBar;
+import javafx.util.Pair;
 import navigation.Dijkstra;
 import navigation.EdgeRole;
 import navigation.NearestNeighbor;
@@ -30,6 +31,7 @@ public class Model {
     private final StringProperty nearestRoad = new SimpleStringProperty("none");
     private Dijkstra dijkstra;
     private final ObservableList<Point> routePoints = FXCollections.observableArrayList();
+    private  Pair<Point,Point> fromToPoints;
     private final FeatureSet features;
 
     public canvas.Model canvasModel;
@@ -92,12 +94,16 @@ public class Model {
     public boolean calculateBestRoute(Point from, Point to, EdgeRole mode) {
         var shortestPath = dijkstra.shortestPath(from, to, mode);
 
+
+
         if (shortestPath == null) {
             routePoints.clear();
             System.out.println("No path between " + from + " and " + to + ".");
 
             return false;
         }
+
+        setFromToPoints(new Pair<>(Point.geoToMap(from),Point.geoToMap(to)));
 
         var routePoints = shortestPath.stream().map(Point::geoToMap).toList();
         this.routePoints.setAll(routePoints);
@@ -136,4 +142,13 @@ public class Model {
     public void setFromSuggestions(List<Address> suggestions) {
         this.fromSuggestions.setAll(suggestions);
     }
+
+    public Pair<Point, Point> getFromToPoints() {
+        return fromToPoints;
+    }
+
+    public void setFromToPoints(Pair<Point, Point> fromToPoints) {
+        this.fromToPoints = fromToPoints;
+    }
+
 }
