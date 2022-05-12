@@ -115,6 +115,9 @@ public class MapCanvas extends Region implements MouseListener {
             if (canvasFocusListener != null) window.removeWindowListener(canvasFocusListener);
         }
 
+        heightProperty().removeListener(HEIGHT_LISTENER);
+        widthProperty().removeListener(WIDTH_LISTENER);
+
         if (animator != null) animator.stop();
 
         if (fpsUpdater != null) fpsUpdater.stop();
