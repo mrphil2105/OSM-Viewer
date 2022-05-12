@@ -33,19 +33,15 @@ public class QueryResult<E> implements Iterable<E> {
 
             @Override
             public E next() {
-                E e;
+                if (!hasNext()) throw new NoSuchElementException();
 
-                do {
-                    if (!hasNext()) throw new NoSuchElementException();
+                var e = grid.gridGet(x, y);
 
-                    e = grid.gridGet(x, y);
-
-                    x++;
-                    if (x > ex) {
-                        x = sx;
-                        y++;
-                    }
-                } while (e == null);
+                x++;
+                if (x > ex) {
+                    x = sx;
+                    y++;
+                }
 
                 return e;
             }

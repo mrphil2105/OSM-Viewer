@@ -1,8 +1,12 @@
 package collections;
 
-public abstract class Entity implements Comparable<Entity> {
+import java.io.Serializable;
+
+public abstract class Entity implements Comparable<Entity>, Serializable {
     private static class IdEntity extends Entity {
-        private final long id;
+        private static final IdEntity instance = new IdEntity(0);
+
+        private long id;
 
         private IdEntity(long id) {
             this.id = id;
@@ -15,6 +19,11 @@ public abstract class Entity implements Comparable<Entity> {
     }
 
     public abstract long id();
+
+    public static Entity withIdStatic(long id) {
+        IdEntity.instance.id = id;
+        return IdEntity.instance;
+    }
 
     public static Entity withId(long id) {
         return new IdEntity(id);

@@ -4,11 +4,12 @@ import Search.Address;
 import Search.SearchTextField;
 import canvas.MapCanvas;
 import canvas.Renderer;
+import collections.Entity;
 import com.jogamp.newt.event.MouseEvent;
 import dialog.CreateMapDialog;
 import dialog.LoadingDialog;
-import drawing.Category;
 import drawing.Drawable;
+import drawing.DrawableEnum;
 import drawing.Drawing;
 import features.Feature;
 import geometry.Point;
@@ -48,10 +49,10 @@ public class Controller {
     private final Timer queryPointTimer = new Timer();
     private TimerTask queryPointTimerTask;
     private Point fromPoint, toPoint;
-    private Drawing routeDrawing;
+    private Entity routeDrawing;
     private boolean pointOfInterestMode = false;
     private Tooltip addPointOfInterestText;
-    private Drawing lastDrawnAddress;
+    private Entity lastDrawnAddress;
 
     @FXML private MapCanvas canvas;
 
@@ -133,9 +134,8 @@ public class Controller {
                                     if (routeDrawing != null) renderer.clear(routeDrawing);
 
                                     var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
-                                    routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
 
-                                    renderer.draw(routeDrawing);
+                                    routeDrawing = renderer.draw(vectors, DrawableEnum.ROUTE);
                                 });
 
         fps.textProperty().bind(canvas.fpsProperty.asString("FPS: %.1f"));
@@ -179,8 +179,7 @@ public class Controller {
                                             new PointOfInterest(
                                                     point.x(),
                                                     point.y(),
-                                                    tf.getText(),
-                                                    Drawing.create(Vector2D.create(point), Drawable.POI)));
+                                                    tf.getText()));
                                     cm.hide();
                                 });
 
@@ -237,7 +236,7 @@ public class Controller {
         categories
                 .getChildren()
                 .addAll(
-                        Arrays.stream(Category.values())
+                        Arrays.stream(Drawable.Category.values())
                                 .map(
                                         c -> {
                                             var cb = new CheckBox(c.toString());
@@ -351,8 +350,7 @@ public class Controller {
         Point point =
                 Point.geoToMap(new Point((float) address.node().lon(), (float) address.node().lat()));
         zoomOn(point);
-        var drawing = Drawing.create(Vector2D.create(point), Drawable.ADDRESS);
-        canvas.getRenderer().draw(drawing);
+        var drawing = canvas.getRenderer().draw(Vector2D.create(point), DrawableEnum.ADDRESS);
         if (lastDrawnAddress != null) {
             canvas.getRenderer().clear(lastDrawnAddress);
         }
@@ -421,7 +419,7 @@ public class Controller {
 
     public void addPointOfInterest(PointOfInterest point) {
         model.getPointsOfInterest().add(point);
-        canvas.getRenderer().draw(point.drawing());
+        point.setDrawing(canvas.getRenderer().draw(Vector2D.create(point.lon(), point.lat()), DrawableEnum.POI));
         pointsOfInterestVBox.update();
         for (Node n : pointsOfInterestVBox.getChildren()) {
 
@@ -437,7 +435,7 @@ public class Controller {
                         .setOnAction(
                                 e -> {
                                     model.getPointsOfInterest().remove(hBox.getPointOfInterest());
-                                    canvas.getRenderer().clear(hBox.getPointOfInterest().drawing());
+                                    canvas.getRenderer().clear(hBox.getPointOfInterest().getDrawing());
                                     pointsOfInterestVBox.update();
                                 });
             }

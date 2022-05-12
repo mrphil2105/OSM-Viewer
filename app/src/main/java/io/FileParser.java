@@ -20,7 +20,7 @@ import osm.OSMReader;
 import osm.elements.OSMBounds;
 
 // TODO: Use a custom exception type instead of RuntimeException for when parsing fails.
-public class FileParser implements IOConstants {
+public class FileParser {
     public static final String EXT = ".map";
     private static final String FEATURES = "FEATURES";
     private static final String BOUNDS = "BOUNDS";
@@ -72,7 +72,7 @@ public class FileParser implements IOConstants {
             throws IOException {
         try (var tarStream =
                 new TarArchiveOutputStream(
-                        new BufferedOutputStream(new FileOutputStream(outfile), BUFFER_SIZE))) {
+                        new BufferedOutputStream(new FileOutputStream(outfile)))) {
             for (var pair : pairs) {
                 var file = writeToFile(pair.getValue());
                 var entry = tarStream.createArchiveEntry(file, pair.getKey());
@@ -128,7 +128,7 @@ public class FileParser implements IOConstants {
             size = file.length();
         }
 
-        stream = new BufferedInputStream(stream, BUFFER_SIZE);
+        stream = new BufferedInputStream(stream);
 
         if (bar != null) stream = new ProgressBarInputStream(stream, bar, size);
 

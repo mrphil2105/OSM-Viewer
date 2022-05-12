@@ -7,7 +7,7 @@ import com.jogamp.newt.event.MouseListener;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
-import drawing.Category;
+import drawing.Drawable;
 import geometry.Point;
 import geometry.Rect;
 import javafx.animation.Animation;
@@ -51,7 +51,7 @@ public class MapCanvas extends Region implements MouseListener {
 
     public final FloatProperty fpsProperty = new SimpleFloatProperty();
 
-    public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
+    public final ObservableEnumFlags<Drawable.Category> categories = new ObservableEnumFlags<>();
     private Timeline fpsUpdater;
 
     public void setModel(Model model) {
@@ -264,5 +264,27 @@ public class MapCanvas extends Region implements MouseListener {
         if (prop.get() != null) {
             prop.get().handle(event);
         }
+    }
+
+    /**
+     * Get the currently shown area as a lat/lon rect.
+     * @return Rect of lat/lon area shown by the canvas.
+     */
+    public Rect screenBounds() {
+        return new Rect(Point.mapToGeo(canvasToMap(new Point(0, (float) getHeight()))), Point.mapToGeo(canvasToMap(new Point((float) getWidth(), 0))));
+    }
+
+    /**
+     * Get all currently shown chunks.
+     * @return All chunks currently on screen.
+     */
+    public Iterable<Chunk> getChunks() {
+        return model.getChunks(chunkSize()).range(screenBounds());
+    }
+
+    public float chunkSize() {
+        var left = Point.mapToGeo(canvasToMap(new Point(0, 0)));
+        var right = Point.mapToGeo(canvasToMap(new Point((float) getWidth(), 0)));
+        return  (right.x() - left.x()) / 2; // 2 is how many chunks we want on the x-axis
     }
 }

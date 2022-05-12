@@ -2,20 +2,24 @@ package collections.grid;
 
 import geometry.Point;
 import geometry.Rect;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-public class Grid<E> {
+public class Grid<E> implements Iterable<E> {
     final E[][] grid;
-    private final Rect bounds;
-    private final int cellSize;
+    private final Point topLeft;
+    public final float cellSize;
 
     @SuppressWarnings("unchecked")
-    public Grid(Rect bounds, int cellSize, Function<Point, E> init) {
-        this.bounds = bounds;
+    public Grid(Rect bounds, float cellSize, Function<Point, E> init) {
+        this.topLeft = bounds.getTopLeft();
         this.cellSize = cellSize;
 
-        int width = ((int) bounds.width()) / cellSize + 1;
-        int height = ((int) bounds.height()) / cellSize + 1;
+        int width = toX(bounds.right()) + 1;
+        int height = toY(bounds.bottom()) + 1;
 
         grid = (E[][]) new Object[height][width];
 
@@ -23,6 +27,22 @@ public class Grid<E> {
             for (int x = 0; x < width; x++) {
                 grid[y][x] = init.apply(new Point(x, y));
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Grid(Rect bounds, float cellSize, Map<Point, E> map) {
+        this.topLeft = bounds.getTopLeft();
+        this.cellSize = cellSize;
+
+        int width = toX(bounds.right()) + 1;
+        int height = toY(bounds.bottom()) + 1;
+
+        grid = (E[][]) new Object[height][width];
+
+        for (var entry : map.entrySet()) {
+            var p = entry.getKey();
+            grid[(int) p.y()][(int) p.x()] = entry.getValue();
         }
     }
 
@@ -38,21 +58,56 @@ public class Grid<E> {
     }
 
     public QueryResult<E> range(Rect query) {
+        return range(query.top(), query.left(), query.bottom(), query.right());
+    }
+
+    public QueryResult<E> range(double top, double left, double bottom, double right) {
         return new QueryResult<>(
-                this, toX(query.left()), toY(query.top()), toX(query.right()), toY(query.bottom()));
+                this, toX(left), toY(top), toX(right), toY(bottom));
+    }
+
+    public int size() {
+        return grid.length * grid[0].length;
     }
 
     private int toX(double x) {
-        return (int) Math.floor((x - bounds.left()) / cellSize);
+        return (int) Math.floor((x - topLeft.x()) / cellSize);
     }
 
     private int toY(double y) {
-        return (int) Math.floor((y - bounds.top()) / cellSize);
+        return (int) Math.floor((y - topLeft.y()) / cellSize);
     }
 
     E gridGet(int x, int y) {
         if (x < 0 || y < 0 || y >= grid.length || x >= grid[0].length) return null;
 
         return grid[y][x];
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return new Iterator<>() {
+            private int i = 0;
+            private int j = 0;
+
+            @Override
+            public boolean hasNext() {
+                return grid.length > 0 && j < grid[i].length;
+            }
+
+            @Override
+            public E next() {
+                if (!hasNext()) throw new NoSuchElementException();
+
+                E e = grid[i++][j];
+
+                if (i == grid.length) {
+                    i = 0;
+                    j++;
+                }
+
+                return e;
+            }
+        };
     }
 }

@@ -20,10 +20,7 @@ public class NearestNeighbor implements OSMObserver, Serializable {
 
     @Override
     public void onBounds(Rect bounds) {
-        twoDTree = new TwoDTree<>(bounds.left(),
-            bounds.top(),
-            bounds.right(),
-            bounds.bottom());
+        twoDTree = new TwoDTree<>(bounds.left(), bounds.top(), bounds.right(), bounds.bottom());
     }
 
     @Override
@@ -43,7 +40,7 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         }
 
         for (var node : way.nodes()) {
-            var point = new Point((float)node.lon(), (float)node.lat());
+            var point = new Point((float) node.lon(), (float) node.lat());
             var pair = new Pair<>(point, name);
             nodeCache.add(pair);
         }
@@ -69,9 +66,11 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     }
 
     private void addToTree(List<Pair<Point, String>> nodes, int level) {
-        nodes.sort((first, second) -> (level & 1) == 0 ?
-            Float.compare(first.getKey().x(), second.getKey().x()) :
-            Float.compare(first.getKey().y(), second.getKey().y()));
+        nodes.sort(
+                (first, second) ->
+                        (level & 1) == 0
+                                ? Float.compare(first.getKey().x(), second.getKey().x())
+                                : Float.compare(first.getKey().y(), second.getKey().y()));
 
         var halfSize = nodes.size() / 2;
         var median = nodes.get(halfSize);

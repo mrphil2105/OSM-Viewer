@@ -2,11 +2,10 @@ package navigation;
 
 import static osm.elements.OSMTag.Key.*;
 
-import java.io.Serializable;
-import java.util.*;
-
 import collections.enumflags.EnumFlags;
 import geometry.Point;
+import java.io.Serializable;
+import java.util.*;
 import osm.OSMObserver;
 import osm.elements.*;
 
@@ -44,13 +43,16 @@ public class Dijkstra implements OSMObserver, Serializable {
             return;
         }
 
-        int maxSpeed = tags.stream()
-            .filter(t -> t.key() == MAXSPEED &&
-                !t.value().equals("signals") &&
-                !t.value().equals("none"))
-            .map(t -> Integer.parseInt(t.value()))
-            .findFirst()
-            .orElse(getExpectedMaxSpeed(way));
+        int maxSpeed =
+                tags.stream()
+                        .filter(
+                                t ->
+                                        t.key() == MAXSPEED
+                                                && !t.value().equals("signals")
+                                                && !t.value().equals("none"))
+                        .map(t -> Integer.parseInt(t.value()))
+                        .findFirst()
+                        .orElse(getExpectedMaxSpeed(way));
 
         var direction = determineDirection(way);
 
@@ -64,8 +66,8 @@ public class Dijkstra implements OSMObserver, Serializable {
         for (int i = 1; i < nodes.length; i++) {
             var secondNode = nodes[i];
 
-            var firstVertex = coordinatesToLong((float)firstNode.lon(), (float)firstNode.lat());
-            var secondVertex = coordinatesToLong((float)secondNode.lon(), (float)secondNode.lat());
+            var firstVertex = coordinatesToLong((float) firstNode.lon(), (float) firstNode.lat());
+            var secondVertex = coordinatesToLong((float) secondNode.lon(), (float) secondNode.lat());
             var distance = calculateDistance(firstNode, secondNode);
 
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
@@ -86,12 +88,12 @@ public class Dijkstra implements OSMObserver, Serializable {
         var lonBits = Float.floatToIntBits(lon);
         var latBits = Float.floatToIntBits(lat);
 
-        return (((long)lonBits) << 32) | (latBits & 0xFFFFFFFFL);
+        return (((long) lonBits) << 32) | (latBits & 0xFFFFFFFFL);
     }
 
     private static Point longToCoordinates(long value) {
-        var lonBits = (int)(value >>> 32);
-        var latBits = (int)(value & 0xFFFFFFFFL);
+        var lonBits = (int) (value >>> 32);
+        var latBits = (int) (value & 0xFFFFFFFFL);
 
         var lon = Float.intBitsToFloat(lonBits);
         var lat = Float.intBitsToFloat(latBits);
@@ -187,10 +189,11 @@ public class Dijkstra implements OSMObserver, Serializable {
             heuristic /= 130;
         }
 
-        return (float)heuristic;
+        return (float) heuristic;
     }
 
-    private static List<Long> extractPath(long sourceVertex, long targetVertex, Map<Long, Edge> edgeTo) {
+    private static List<Long> extractPath(
+            long sourceVertex, long targetVertex, Map<Long, Edge> edgeTo) {
         var path = new ArrayList<Long>();
 
         long from = coordinatesToLong(Float.NaN, Float.NaN);
@@ -253,12 +256,14 @@ public class Dijkstra implements OSMObserver, Serializable {
 
         var edgeRoles = new EnumFlags<EdgeRole>(false);
 
-        boolean isCycleway = way.tags()
-            .stream()
-            .anyMatch(t -> t.key() == CYCLEWAY ||
-                t.key() == CYCLEWAY_LEFT ||
-                t.key() == CYCLEWAY_RIGHT ||
-                t.key() == CYCLEWAY_BOTH);
+        boolean isCycleway =
+                way.tags().stream()
+                        .anyMatch(
+                                t ->
+                                        t.key() == CYCLEWAY
+                                                || t.key() == CYCLEWAY_LEFT
+                                                || t.key() == CYCLEWAY_RIGHT
+                                                || t.key() == CYCLEWAY_BOTH);
 
         if (isCycleway) {
             edgeRoles.set(EdgeRole.BIKE);
@@ -272,18 +277,18 @@ public class Dijkstra implements OSMObserver, Serializable {
 
         switch (highwayTag.value()) {
             case "motorway",
-                "trunk",
-                "primary",
-                "secondary",
-                "tertiary",
-                "unclassified",
-                "residential",
-                "motorway_link",
-                "trunk_link",
-                "primary_link",
-                "secondary_link",
-                "tertiary_link",
-                "living_street" -> edgeRoles.set(EdgeRole.CAR);
+                    "trunk",
+                    "primary",
+                    "secondary",
+                    "tertiary",
+                    "unclassified",
+                    "residential",
+                    "motorway_link",
+                    "trunk_link",
+                    "primary_link",
+                    "secondary_link",
+                    "tertiary_link",
+                    "living_street" -> edgeRoles.set(EdgeRole.CAR);
             case "cycleway" -> edgeRoles.set(EdgeRole.BIKE);
             case "footway" -> edgeRoles.set(EdgeRole.WALK);
         }
@@ -314,7 +319,7 @@ public class Dijkstra implements OSMObserver, Serializable {
         var x2 = secondNode.lon();
         var y2 = secondNode.lat();
 
-        return (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+        return (float) Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
     private record Node(long vertex, float weight) implements Comparable<Node>, Serializable {
@@ -325,6 +330,9 @@ public class Dijkstra implements OSMObserver, Serializable {
     }
 
     private enum Direction {
-        SINGLE, BOTH, REVERSE, UNKNOWN
+        SINGLE,
+        BOTH,
+        REVERSE,
+        UNKNOWN
     }
 }

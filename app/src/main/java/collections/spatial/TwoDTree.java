@@ -2,6 +2,7 @@ package collections.spatial;
 
 import canvas.Renderer;
 import drawing.Drawable;
+import drawing.DrawableEnum;
 import drawing.Drawing;
 import geometry.Point;
 import geometry.Rect;
@@ -258,18 +259,12 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
         range(query, node.right, results);
     }
 
-    public void draw(Renderer renderer) {
-        var drawing = new Drawing();
-        addToDrawing(root, 1, drawing);
-        renderer.draw(drawing);
-    }
-
     private void addToDrawing(Node<E> node, int level, Drawing drawing) {
         if (node == null) {
             return;
         }
 
-        drawing.draw(Drawing.create(Vector2D.create(node.x(), node.y()), Drawable.POINT));
+        drawing.draw(Drawing.create(Vector2D.create(node.x(), node.y()), DrawableEnum.POINT));
 
         var x1 = node.rect.left();
         var x2 = node.rect.right();
@@ -280,11 +275,11 @@ public class TwoDTree<E> implements SpatialTree<E>, Serializable {
 
         if ((level & 1) == 0) {
             y1 = y2 = node.y();
-            drawable = Drawable.PARTITION_HORIZONTAL;
+            drawable = DrawableEnum.PARTITION_HORIZONTAL;
 
         } else {
             x1 = x2 = node.x();
-            drawable = Drawable.PARTITION_VERTICAL;
+            drawable = DrawableEnum.PARTITION_VERTICAL;
         }
 
         var point1 = Vector2D.create(x1, y1);

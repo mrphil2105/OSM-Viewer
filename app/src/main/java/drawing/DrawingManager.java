@@ -44,6 +44,10 @@ public class DrawingManager {
         return draw(Drawing.create(points, drawable, offset));
     }
 
+    public DrawingInfo draw(Vector2D point, Drawable drawable) {
+        return draw(Drawing.create(point, drawable));
+    }
+
     /**
      * Add a drawing to the manager.
      *

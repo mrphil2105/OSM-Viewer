@@ -14,10 +14,10 @@ import java.util.List;
 
 /** A Drawing represents drawn elements in a format that can be easily passed to OpenGL */
 public class Drawing extends Entity implements Serializable {
-    private IntList indices;
-    private FloatList vertices;
-    private ByteList drawables;
-    private final long id;
+    private transient IntList indices;
+    private transient FloatList vertices;
+    private transient ByteList drawables;
+    private transient long id;
 
     public Drawing() {
         this(new IntList(), new FloatList(), new ByteList());
@@ -34,6 +34,11 @@ public class Drawing extends Entity implements Serializable {
         this.indices = indices;
         this.vertices = vertices;
         this.drawables = drawables;
+        this.id = id;
+    }
+
+    // Ugly quick fix
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -91,11 +96,10 @@ public class Drawing extends Entity implements Serializable {
         var points = new ArrayList<Vector2D>();
 
         // Add points forming a circle counterclockwise around `point`
-        // TODO: Fix pacman
         for (double i = 0; i < Math.PI * 2; i += Math.PI / 15) {
             points.add(
                     Vector2D.create(
-                            point.x() + Math.cos(i) * drawable.size, point.y() + Math.sin(i) * drawable.size));
+                            point.x() + Math.cos(i) * drawable.size(), point.y() + Math.sin(i) * drawable.size()));
         }
 
         draw(points, drawable, offset);
@@ -104,7 +108,7 @@ public class Drawing extends Entity implements Serializable {
     }
 
     void draw(List<Vector2D> points, Drawable drawable, int offset) {
-        switch (drawable.shape) {
+        switch (drawable.shape()) {
             case POLYLINE -> drawLine(points, drawable, offset);
             case FILL -> drawPolygon(points, drawable, offset);
         }
@@ -149,7 +153,7 @@ public class Drawing extends Entity implements Serializable {
         var hat = dir.hat();
         var norm = hat.normalize();
 
-        var p3 = norm.scale(drawable.size);
+        var p3 = norm.scale(drawable.size());
         var p0 = p3.scale(-1.0f);
         var p1 = p0.add(dir);
         var p2 = p3.add(dir);
@@ -172,7 +176,7 @@ public class Drawing extends Entity implements Serializable {
             hat = nextDir.hat();
             norm = hat.normalize();
 
-            var p3Next = norm.scale(drawable.size);
+            var p3Next = norm.scale(drawable.size());
             var p0Next = p3Next.scale(-1.0f);
             var p1Next = p0Next.add(nextDir);
             var p2Next = p3Next.add(nextDir);
@@ -274,6 +278,7 @@ public class Drawing extends Entity implements Serializable {
 
     @Serial
     private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        in.defaultReadObject();
         indices = (IntList) in.readUnshared();
         vertices = (FloatList) in.readUnshared();
         drawables = (ByteList) in.readUnshared();
@@ -281,6 +286,7 @@ public class Drawing extends Entity implements Serializable {
 
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
         out.writeUnshared(indices());
         out.writeUnshared(vertices());
         out.writeUnshared(drawables());

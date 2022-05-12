@@ -7,15 +7,14 @@ import java.io.*;
  * transferred to the passed stream. Subclasses have access to the file stream and can write to it
  * continuously.
  */
-public abstract class TempFileWriter implements Writer, IOConstants {
+public abstract class TempFileWriter implements Writer {
     private final File file;
     protected final ObjectOutputStream stream;
 
     public TempFileWriter() throws IOException {
         file = File.createTempFile("osm", "");
         file.deleteOnExit();
-        stream =
-                new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE));
+        stream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
     }
 
     /**
@@ -25,10 +24,10 @@ public abstract class TempFileWriter implements Writer, IOConstants {
      * @return Input stream of the underlying file
      * @throws IOException
      */
-    private final InputStream finish() throws IOException {
+    private InputStream finish() throws IOException {
         stream.flush();
         stream.close();
-        return new BufferedInputStream(new FileInputStream(file), BUFFER_SIZE);
+        return new BufferedInputStream(new FileInputStream(file));
     }
 
     @Override
