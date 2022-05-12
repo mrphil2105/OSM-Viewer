@@ -12,6 +12,7 @@ public record OSMTag(Key key, String value) implements Serializable {
         CYCLEWAY_RIGHT,
         CYCLEWAY_BOTH,
         FOOTWAY,
+        SERVICE,
         NATURAL,
         LANDUSE,
         AMENITY,
@@ -40,6 +41,7 @@ public record OSMTag(Key key, String value) implements Serializable {
                 case "cycleway:right" -> CYCLEWAY_RIGHT;
                 case "cycleway:both" -> CYCLEWAY_BOTH;
                 case "footway" -> FOOTWAY;
+                case "service" -> SERVICE;
                 case "natural" -> NATURAL;
                 case "landuse" -> LANDUSE;
                 case "amenity" -> AMENITY;
