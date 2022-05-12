@@ -297,9 +297,8 @@ public class Controller {
         if (model.supports(Feature.ADDRESS_SEARCH)) {
             searchTextField.init(model);
             searchTextField.setDisable(false);
-            if (lastDrawnAddress != null){
-                lastDrawnAddress=null;
-            }
+            lastDrawnAddress=null;
+
             model
                     .getObservableSearchSuggestions()
                     .addListener(
