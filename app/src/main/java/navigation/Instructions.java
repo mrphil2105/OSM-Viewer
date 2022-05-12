@@ -37,22 +37,19 @@ import util.DistanceUtils;
             if (i < edges.size() - 1){
                 nextEdge = edges.get(i + 1);
             } else {
-                instructionsString += "Stay at " + edges.get(i).name() + " for " + getDistance((float)currentEdge.from().x(), (float)currentEdge.from().y(), (float)currentEdge.to().x(), (float)currentEdge.to().y())  + "\n";
+                instructionsString += "Stay at " + edges.get(i).name() + " for " + getDistance(currentEdge.from(), currentEdge.to())  + "\n";
                 break;
             }
             getInstructionString(alignOrientation(preDir, calc) - preDir);
             preEdge = edges.get(i);
         }
         instructionsString += "You have arrived" + "\n";
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-        ClipboardContent content = new ClipboardContent();
-        content.putString(instructionsString);
-        clipboard.setContent(content);
+
     }
 
     private void getInstructionString(double calc) {
         double abs = Math.abs(calc);
-        String dist = getDistance((float)currentEdge.from().x(), (float)currentEdge.from().y(), (float)currentEdge.to().x(), (float)currentEdge.to().y());
+        String dist = getDistance(currentEdge.from(), currentEdge.to());
 
         if (!preEdge.name().equals("Unnamed way")){
             name = preEdge.name();
@@ -168,8 +165,8 @@ import util.DistanceUtils;
         return resultOrientation;
     }
 
-    private String getDistance(float fromLon, float fromLat, float toLon, float toLat){
-        double dist = (DistanceUtils.calculateEarthDistance(new Point(fromLon, fromLat), new Point(toLon, toLat)) * 1000) + lastDistance;
+    private String getDistance(Point from, Point to){
+        double dist = (DistanceUtils.calculateEarthDistance(from, to) * 1000) + lastDistance;
         lastDistance = dist;
         if (dist < 1000) {
             int distM = (int)Math.round(dist/10.0) * 10;
@@ -178,6 +175,12 @@ import util.DistanceUtils;
             dist = (Math.round((dist/1000) * 100.0) / 100.0);
             return dist + " km ";
         }
+    }
+    public void setClipboard(){
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(instructionsString);
+        clipboard.setContent(content);
     }
 }
 

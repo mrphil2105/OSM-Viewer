@@ -15,6 +15,7 @@ import osm.elements.*;
 import util.DistanceUtils;
 
 public class Dijkstra implements OSMObserver, Serializable {
+    private static Instructions instructions;
     private transient Rect bounds;
     private final transient RefList trafficLightNodes;
 
@@ -27,7 +28,6 @@ public class Dijkstra implements OSMObserver, Serializable {
     private transient Map<Long, Edge> edgeTo;
     private transient Set<Long> settled;
     private transient PriorityQueue<Node> queue;
-
     private transient EdgeRole mode;
 
     public Dijkstra() {
@@ -308,11 +308,15 @@ public class Dijkstra implements OSMObserver, Serializable {
         if (from == sourceVertex) {
             Collections.reverse(path);
             Collections.reverse(roads);
-            new Instructions(roads);
+            instructions = new Instructions(roads);
             return path;
         }
 
         return null;
+    }
+
+    public static void getInstructions(){
+        instructions.setClipboard();
     }
 
     private static Direction determineDirection(OSMWay way) {
