@@ -302,8 +302,10 @@ public class Dijkstra implements OSMObserver, Serializable {
             to = from;
         }
 
+        // We add to the list and reverse instead of inserting at index 0, because that operation on an ArrayList is slow.
         if (from == sourceVertex) {
             Collections.reverse(path);
+
             return path;
         }
 
