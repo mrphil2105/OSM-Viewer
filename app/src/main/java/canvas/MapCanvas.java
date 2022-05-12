@@ -174,8 +174,8 @@ public class MapCanvas extends Region implements MouseListener {
 
     public void zoomTo(Point point) {
         System.out.println("hey");
-        center(point);
-        setZoom(25);
+        smoothZoomTo(25,point);
+
     }
 
     public void zoomTo(Point point, float zoom) {
@@ -183,16 +183,18 @@ public class MapCanvas extends Region implements MouseListener {
         center(point);
     }
 
-    public void smoothZoom(float zoom){
-        float delay = 500;
-        float frames = 60;
+    public void smoothZoomTo(float zoom,Point center){
+        float delay = 1000/60;
+        float zoomFrames = 60;
+        float panFrames = 60;
 
         var distance=Math.abs(zoom-transform.getMxx());
-        var time = frames*delay ;
-        System.out.println(time);
+        var xPanDistance=center.x()-getCenterPoint().x();
+        var yPanDistance=center.y()-getCenterPoint().y();
+
 
         Timer timer = new Timer();
-        TimerTask zoomTimer = new ZoomTimer(transform,zoom,(float) distance/frames,timer);
+        TimerTask zoomTimer = new ZoomTimer(this,zoom, (float) distance/zoomFrames,  center, zoomFrames,xPanDistance/panFrames,yPanDistance/panFrames, panFrames,timer);
         timer.scheduleAtFixedRate(zoomTimer, 0L, (long) delay);
 
         //transform.setMxx(zoom);
@@ -200,12 +202,8 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
     public void setZoom(float zoom) {
-
         transform.setMxx(zoom);
         transform.setMyy(zoom);
-
-
-
     }
 
     public void zoomChange(boolean positive) {
@@ -305,4 +303,14 @@ public class MapCanvas extends Region implements MouseListener {
             prop.get().handle(event);
         }
     }
+
+
+    public Point getCenterPoint(){
+        var x = -(transform.getTx() - getWidth()/2) / transform.getMxx();
+        var y = -(transform.getTy() - getHeight()/2) / transform.getMyy();
+        return new Point((float) x, (float) y);
+    }
+
+
+
 }

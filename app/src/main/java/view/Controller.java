@@ -139,6 +139,8 @@ public class Controller {
 
         canvas.mapMouseClickedProperty.set(
                 e -> {
+                    canvas.center(canvas.getCenterPoint());
+
                     if (e.getButton() == MouseEvent.BUTTON2) {
                         var point = new Point(e.getX(), e.getY());
                         point = canvas.canvasToMap(point);
