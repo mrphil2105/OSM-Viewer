@@ -457,15 +457,17 @@ public class Dijkstra implements OSMObserver, Serializable {
         };
     }
 
-    private int getRoadRole(OSMWay way){
+    private RoadRole getRoadRole(OSMWay way){
         var tags = way.tags().stream().filter(t -> t.key() == HIGHWAY).findFirst().orElse(null);
         var tagsRoundabout = way.tags().stream().filter(t -> t.key() == JUNCTION).findFirst().orElse(null);
         if (tagsRoundabout == null){
             return switch (tags.value()) {
             case "motorway" -> RoadRole.MOTORWAY;
-            case "motorway_link" -> RoadRole.MOTORWAY_LINK;
+            case "motorway_link" -> RoadRole.MOTORWAYLINK;
+            case "primary_link", "trunk_link", "tertiary_link", "secondary_link" -> RoadRole.LINK;
+            case "mini_roundabout" -> RoadRole.ROUNDABOUT;
             default -> RoadRole.WAY;
-            };
+            };        
         }
         else {
             return switch (tagsRoundabout.value()) {
