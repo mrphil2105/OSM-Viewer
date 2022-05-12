@@ -47,12 +47,15 @@ public class AddressTest {
         //should return addreses which street name starts with input letters,but only one per city
 
         var list = search("t");
+        //there are three valid possibilities since, there are three valid addreses for city "testby", but only one of the should be picked
         int[] shouldContain = {0,3,4};
-        assertTrue(containsExactly(list,shouldContain));
+        int[] shouldContain2 = {1,3,4};
+        int[] shouldContain3 = {2,3,4};
+        assertTrue(containsExactly(list,shouldContain) || containsExactly(list,shouldContain2) || containsExactly(list,shouldContain3));
 
         var list2 = search(" An");
-        int[] shouldContain2 = {5,7};
-        assertTrue(containsExactly(list2,shouldContain2));
+        int[] shouldContain4 = {5,7};
+        assertTrue(containsExactly(list2,shouldContain4));
 
     }
 
@@ -61,12 +64,15 @@ public class AddressTest {
        //should return addresses with the given street name,but only one per city
 
        var list = search("testvej");
+       //there are three valid possibilities since, there are three valid addreses for "testby", but only one of the should be picked
        int[] shouldContain = {0,3,4};
-       assertTrue(containsExactly(list,shouldContain));
+       int[] shouldContain2 = {1,3,4};
+       int[] shouldContain3 = {2,3,4};
+       assertTrue(containsExactly(list,shouldContain) || containsExactly(list,shouldContain2) || containsExactly(list,shouldContain3));
 
        var list2 = search("Endu En Vej");
-       int[] shouldContain2 = {8};
-       assertTrue(containsExactly(list2,shouldContain2));
+       int[] shouldContain4 = {8};
+       assertTrue(containsExactly(list2,shouldContain4));
    }
 
     @Test
