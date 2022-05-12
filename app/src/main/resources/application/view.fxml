@@ -80,7 +80,7 @@
         </top>
         <center>
             <VBox fx:id="middleVBox">
-                <MapCanvas fx:id="canvas" prefWidth="1280" prefHeight="720"/>
+                <MapCanvas fx:id="canvas" VBox.vgrow="ALWAYS" prefWidth="1280" prefHeight="720"/>
                 <HBox alignment="center" fx:id="middleHBox" maxHeight="20">
                     <padding>
                         <Insets left="20" right="10"/>
