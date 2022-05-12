@@ -25,6 +25,7 @@ import util.DistanceUtils;
 
     private void getInstructions() {
         for (int i = 0; i < edges.size(); i++) {
+            //Checks if it is the first edge
             if (preEdge == null) {
                 preEdge = edges.get(0);
                 nextEdge = edges.get(i+1);
@@ -44,7 +45,6 @@ import util.DistanceUtils;
             preEdge = edges.get(i);
         }
         instructionsString += "You have arrived" + "\n";
-
     }
 
     private void getInstructionString(double calc) {
@@ -69,13 +69,15 @@ import util.DistanceUtils;
             case MOTORWAYLINK:
                 switch(nextEdge.role()){
                     case WAY:
+                        //Driving from way to motorway
                         instructionsString += "Stay at " +  name  + " and in " + dist + "then take the exit towards " + nextEdge.name() + "\n";
                         lastDistance = 0.0;
                         break;
                     case MOTORWAY:
                         if (name.equals(nextEdge.name())){
                             break;
-                        } 
+                        }
+                        //Checks if it is a link between two motorways
                         else if (role == RoadRole.MOTORWAY){
                             instructionsString += "Stay at " + name + " for " + dist + "then continue on " + nextEdge.name() + "\n";
                         } else {
@@ -100,13 +102,12 @@ import util.DistanceUtils;
                 break;
             
             default:
+                //If it is an unnamed way we add the orientation so we get the turn correct
                 if (preEdge.name().equals("Unnamed way") && currentEdge.name().equals("Unnamed way") && nextEdge.name().equals("Unnamed way")){
                     preAbs += abs;
-                }else {
-                     if (preAbs > abs && preAbs > 0.7 && !currentEdge.name().equals("Unnamed way")){
+                }else if (preAbs > abs && preAbs > 0.7 && !currentEdge.name().equals("Unnamed way")){
                     abs = preAbs;
                     preAbs = 0;
-                    }
                 }
                 if (abs > 0.7 && preEdge.role() != RoadRole.ROUNDABOUT && !currentEdge.name().equals("Unnamed way")) {
                     if (calc > 0){
@@ -115,8 +116,9 @@ import util.DistanceUtils;
                         instructionsString += "Stay at " + name + " and then turn right in " + dist + "at " + currentEdge.name() + "\n";
                     }  
                     lastDistance = 0.0;
-                }                 
-                else if (preEdge.role() == RoadRole.MOTORWAYLINK  && currentEdge.role() != RoadRole.MOTORWAYLINK){
+                }
+                //Exiting a motorway and turning
+                else if (preEdge.role() == RoadRole.MOTORWAYLINK  && currentEdge.role() != RoadRole.MOTORWAYLINK && currentEdge.role() != RoadRole.ROUNDABOUT){
                     if (calc > 0){
                         instructionsString += "Turn left in " + dist + "at " + currentEdge.name() + "\n";
                     } else {
@@ -132,6 +134,7 @@ import util.DistanceUtils;
                     }
                     lastDistance = 0.0;
                 }
+                //Checks if the name of the street changes
                 else if (!preEdge.name().equals(currentEdge.name()) && !preEdge.name().equals("Unnamed way") && !currentEdge.name().equals("Unnamed way") && preEdge.role() != RoadRole.ROUNDABOUT){
                     instructionsString += "Stay at " + name + " for " + dist + "and then continue on " + currentEdge.name() + "\n";
                     lastDistance = 0.0;
@@ -139,7 +142,7 @@ import util.DistanceUtils;
                 break;
         };
     }
-
+    //calculates the angle in radians
     private double calc(Road edge) {
         double fromLat = edge.from().y();
         double fromLon = edge.from().x();
