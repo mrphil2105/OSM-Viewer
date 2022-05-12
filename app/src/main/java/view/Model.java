@@ -25,7 +25,7 @@ import pointsOfInterest.PointOfInterest;
 public class Model {
     public final Rect bounds;
     private AddressDatabase addresses;
-    private final List<PointOfInterest> pointsOfInterest;
+    private final ObservableList<PointOfInterest> pointsOfInterest;
     private NearestNeighbor nearestNeighbor;
     private final StringProperty nearestRoad = new SimpleStringProperty("none");
     private Dijkstra dijkstra;
@@ -61,7 +61,8 @@ public class Model {
             if (bar != null) Platform.runLater(() -> bar.setProgress(progress.incrementAndGet() / total));
         }
 
-        pointsOfInterest = new ArrayList<>();
+        pointsOfInterest = FXCollections.observableArrayList();
+        addresses.setPointsOfInterest(pointsOfInterest);
     }
 
     public boolean supports(Feature feature) {
@@ -112,7 +113,7 @@ public class Model {
         return addresses;
     }
 
-    public List<PointOfInterest> getPointsOfInterest() {
+    public ObservableList<PointOfInterest> getPointsOfInterest() {
         return pointsOfInterest;
     }
 
