@@ -143,6 +143,8 @@ public class Controller {
 
         fps.textProperty().bind(canvas.fpsProperty.asString("FPS: %.1f"));
 
+
+
         canvas.mapMouseClickedProperty.set(
                 e -> {
                     if (e.getButton() == MouseEvent.BUTTON2) {
@@ -231,7 +233,10 @@ public class Controller {
                     }
                 });
 
-        navigationModeBox.setItems(FXCollections.observableArrayList(EdgeRole.values()));
+        var roles = FXCollections.observableArrayList(EdgeRole.values());
+        roles.remove(EdgeRole.TRAFFIC_SIGNAL);
+        navigationModeBox.setItems(roles);
+
         navigationModeBox.getSelectionModel().select(0);
         routeErrorLabel.prefWidthProperty().bind(searchPane.widthProperty());
 
@@ -424,7 +429,7 @@ public class Controller {
         routeBetweenAddresses(
                 fromRouteResult,
                 toRouteResult,
-                EdgeRole.CAR);
+                navigationModeBox.getValue());
     }
 
     @FXML

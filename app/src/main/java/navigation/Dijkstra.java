@@ -33,7 +33,7 @@ public class Dijkstra implements OSMObserver, Serializable {
 
     public Dijkstra() {
         graph = new Graph();
-
+        trafficLightNodes= new RefList();
         mode = EdgeRole.CAR;
     }
 
