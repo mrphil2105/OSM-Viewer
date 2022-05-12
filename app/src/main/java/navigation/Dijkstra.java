@@ -315,8 +315,10 @@ public class Dijkstra implements OSMObserver, Serializable {
         return null;
     }
 
-    public static void getInstructions(){
-        instructions.setClipboard();
+    public void getInstructions(){
+        if (instructions != null) {
+            instructions.setClipboard();
+        }
     }
 
     private static Direction determineDirection(OSMWay way) {
