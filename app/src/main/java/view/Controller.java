@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -31,8 +32,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import navigation.EdgeRole;
@@ -62,6 +65,8 @@ public class Controller {
 
     @FXML private VBox categories;
 
+    @FXML private GridPane searchPane;
+
     @FXML private SearchTextField searchTextField;
 
     @FXML private SearchTextField fromRouteTextField;
@@ -69,6 +74,10 @@ public class Controller {
     @FXML private SearchTextField toRouteTextField;
 
     @FXML private Button routeButton;
+
+    @FXML private ComboBox<EdgeRole> navigationModeBox;
+
+    @FXML private Label routeErrorLabel;
 
     @FXML private RadioButton radioButtonCar;
 
@@ -110,32 +119,31 @@ public class Controller {
 
     @FXML private Label fps;
 
+    private final ListChangeListener<? super Point> routeRedrawListener = listener -> {
+        while (listener.next()) {
+        }
+
+        if (!listener.wasAdded()) {
+            return;
+        }
+
+        var renderer = canvas.getRenderer();
+        if (routeDrawing != null) renderer.clear(routeDrawing);
+
+        var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
+        routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
+
+        renderer.draw(routeDrawing);
+    };
+
     public void init(Model model) {
         setModel(model);
 
         setStyleSheets("style.css");
 
-        model
-                .getRoutePoints()
-                .addListener(
-                        (ListChangeListener<? super Point>)
-                                listener -> {
-                                    while (listener.next()) {}
-
-                                    if (!listener.wasAdded()) {
-                                        return;
-                                    }
-
-                                    var renderer = canvas.getRenderer();
-                                    if (routeDrawing != null) renderer.clear(routeDrawing);
-
-                                    var vectors = listener.getAddedSubList().stream().map(Vector2D::create).toList();
-                                    routeDrawing = Drawing.create(vectors, Drawable.ROUTE);
-
-                                    renderer.draw(routeDrawing);
-                                });
-
         fps.textProperty().bind(canvas.fpsProperty.asString("FPS: %.1f"));
+
+
 
         canvas.mapMouseClickedProperty.set(
                 e -> {
@@ -143,13 +151,13 @@ public class Controller {
                         var point = new Point(e.getX(), e.getY());
                         point = canvas.canvasToMap(point);
                         point = Point.mapToGeo(point);
-                        point = model.getNearestPoint(point);
 
                         if (fromPoint == null) {
                             fromPoint = point;
                         } else if (toPoint == null) {
                             toPoint = point;
-                            model.calculateBestRoute(fromPoint, toPoint);
+                            var mode = navigationModeBox.getValue();
+                            this.model.calculateBestRoute(fromPoint, toPoint, mode);
                         } else {
                             fromPoint = point;
                             toPoint = null;
@@ -224,12 +232,21 @@ public class Controller {
                                 e.getY() + screenBounds.getMinY() - 30);
                     }
                 });
+
+        var roles = FXCollections.observableArrayList(EdgeRole.values());
+        roles.remove(EdgeRole.TRAFFIC_SIGNAL);
+        navigationModeBox.setItems(roles);
+
+        navigationModeBox.getSelectionModel().select(0);
+        routeErrorLabel.prefWidthProperty().bind(searchPane.widthProperty());
+
         canvas.mapMouseWheelProperty.set(
                 e -> {
                     setZoomAndScale();
                 });
         canvas.setZoomHandler(model.bounds);
         setZoomAndScale();
+
         // FIXME: yuck
         categories
                 .getChildren()
@@ -260,9 +277,14 @@ public class Controller {
     }
 
     private void setModel(Model model) {
+        if (this.model != null) {
+            this.model.getRoutePoints().removeListener(routeRedrawListener);
+        }
+
         disableAll();
 
         this.model = model;
+        model.getRoutePoints().addListener(routeRedrawListener);
 
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
@@ -341,21 +363,12 @@ public class Controller {
         var parsedAddress = textField.parseAddress();
         var result = textField.handleSearch(parsedAddress);
         if (result == null || result.size() <= 0){
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("We couldn't help you find the address");
-            alert.setHeaderText("No Results");
-            alert.setContentText("Perhaps you misspelled or used a wrong format.\n The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
-
-            alert.showAndWait();
             return null;
         }
         if (result.size() > 1) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("We couldn't help you find the address");
-            alert.setHeaderText("Too Many Results");
-            alert.setContentText("There were too many results. Try being more specific");
+            routeErrorLabel.setText("More than one address was found. Try being more specific.");
+            routeErrorLabel.setVisible(true);
 
-            alert.showAndWait();
             return null;
         }
         return result.get(0);
@@ -365,6 +378,11 @@ public class Controller {
     public void handleSearchClick() {
         var result = handleSearchInput(searchTextField);
         if(result == null){
+            routeErrorLabel.setText("Please enter valid search address." +
+                System.lineSeparator() +
+                "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
+            routeErrorLabel.setVisible(true);
+
             return;
         }
 
@@ -404,12 +422,17 @@ public class Controller {
         var toRouteResult = handleSearchInput(toRouteTextField);
 
         if (fromRouteResult == null || toRouteResult == null) {
+            routeErrorLabel.setText("Please enter valid from and to addresses." +
+                System.lineSeparator() +
+                "The format is <Street> <House Number> (<Floor> <Side>) <Postcode> and/or <City>");
+            routeErrorLabel.setVisible(true);
+
             return;
         }
         routeBetweenAddresses(
                 fromRouteResult,
                 toRouteResult,
-                EdgeRole.CAR);
+                navigationModeBox.getValue());
     }
 
     @FXML
@@ -559,6 +582,8 @@ public class Controller {
 
     @FXML
     public void handleFromKeyTyped(KeyEvent event) {
+        routeErrorLabel.setVisible(false);
+
         var result = handleKeyTyped(event);
         if (result == null){
             model.setFromSuggestions(Collections.emptyList());
@@ -569,6 +594,8 @@ public class Controller {
 
     @FXML
     public void handleToKeyTyped(KeyEvent event) {
+        routeErrorLabel.setVisible(false);
+
         var result = handleKeyTyped(event);
         if (result == null){
             model.setFromSuggestions(Collections.emptyList());
@@ -600,10 +627,12 @@ public class Controller {
         Point from = new Point(addressFrom.lon(), addressFrom.lat());
         Point to = new Point(addressTo.lon(), addressTo.lat());
 
-        Point dijkstraFrom = model.getNearestPoint(from);
-        Point dijkstraTo = model.getNearestPoint(to);
+        var hasRoute = model.calculateBestRoute(from, to, mode);
 
-        model.calculateBestRoute(dijkstraFrom, dijkstraTo);
+        if (!hasRoute) {
+            routeErrorLabel.setText("No route could be found.");
+            routeErrorLabel.setVisible(true);
+        }
     }
 
     private void setZoomAndScale() {
