@@ -103,6 +103,8 @@ public class Model {
             return false;
         }
 
+        setFromToPoints(new Pair<>(Point.geoToMap(from),Point.geoToMap(to)));
+
         var routePoints = shortestPath.stream().map(Point::geoToMap).toList();
         this.routePoints.setAll(routePoints);
 

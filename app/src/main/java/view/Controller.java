@@ -173,8 +173,6 @@ public class Controller {
                         } else if (toPoint == null) {
                             toPoint = point;
 
-                            this.model.setFromToPoints(new Pair<>(Point.geoToMap(fromPoint),Point.geoToMap(toPoint)));
-
                             var mode = navigationModeBox.getValue();
                             this.model.calculateBestRoute(fromPoint, toPoint, mode);
                         } else {
@@ -650,7 +648,7 @@ public class Controller {
         Point from = new Point(addressFrom.lon(), addressFrom.lat());
         Point to = new Point(addressTo.lon(), addressTo.lat());
 
-        model.setFromToPoints(new Pair<>(Point.geoToMap(from),Point.geoToMap(to)));
+
         var hasRoute = model.calculateBestRoute(from, to, mode);
 
         if (!hasRoute) {
