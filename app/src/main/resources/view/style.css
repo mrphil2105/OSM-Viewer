@@ -17,6 +17,10 @@
     -fx-background-color: #99caf8;
     -fx-text-fill: #ffffff;
 }
+ .button:hover {
+     -fx-background-color: #89b5df ;
+
+ }
 
 #removeButton{
     -fx-background-color: #db6e60;

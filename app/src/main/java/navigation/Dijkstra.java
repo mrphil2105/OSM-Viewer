@@ -5,6 +5,7 @@ import static osm.elements.OSMTag.Key.*;
 import java.io.Serializable;
 import java.util.*;
 
+import collections.RefList;
 import collections.enumflags.EnumFlags;
 import collections.spatial.LinearSearchTwoDTree;
 import collections.spatial.SpatialTree;
@@ -16,6 +17,7 @@ import util.DistanceUtils;
 
 public class Dijkstra implements OSMObserver, Serializable {
     private transient Rect bounds;
+    private transient RefList trafficLightNodes;
 
     private final Graph graph;
     private SpatialTree<Object> carTree;
@@ -31,7 +33,7 @@ public class Dijkstra implements OSMObserver, Serializable {
 
     public Dijkstra() {
         graph = new Graph();
-
+        trafficLightNodes= new RefList();
         mode = EdgeRole.CAR;
     }
 
@@ -60,12 +62,12 @@ public class Dijkstra implements OSMObserver, Serializable {
         }
 
         int maxSpeed = tags.stream()
-            .filter(t -> t.key() == MAXSPEED &&
-                !t.value().equals("signals") &&
-                !t.value().equals("none"))
-            .map(t -> Integer.parseInt(t.value()))
-            .findFirst()
-            .orElse(getExpectedMaxSpeed(way));
+                .filter(t -> t.key() == MAXSPEED &&
+                        !t.value().equals("signals") &&
+                        !t.value().equals("none"))
+                .map(t -> Integer.parseInt(t.value()))
+                .findFirst()
+                .orElse(getExpectedMaxSpeed(way));
 
         var direction = determineDirection(way);
 
@@ -79,8 +81,8 @@ public class Dijkstra implements OSMObserver, Serializable {
         for (int i = 1; i < nodes.length; i++) {
             var secondNode = nodes[i];
 
-            var firstPoint = new Point((float)firstNode.lon(), (float)firstNode.lat());
-            var secondPoint = new Point((float)secondNode.lon(), (float)secondNode.lat());
+            var firstPoint = new Point((float) firstNode.lon(), (float) firstNode.lat());
+            var secondPoint = new Point((float) secondNode.lon(), (float) secondNode.lat());
 
             if (!bounds.contains(firstPoint) || !bounds.contains(secondPoint)) {
                 continue;
@@ -89,6 +91,12 @@ public class Dijkstra implements OSMObserver, Serializable {
             var firstVertex = coordinatesToLong(firstPoint);
             var secondVertex = coordinatesToLong(secondPoint);
             var distance = (float)DistanceUtils.calculateEarthDistance(firstPoint, secondPoint);
+
+
+            if (trafficLightNodes.contains(firstNode.id()) || trafficLightNodes.contains(secondNode.id())) {
+               edgeRoles.set(EdgeRole.TRAFFIC_SIGNAL);
+            }
+
 
             if (direction == Direction.SINGLE || direction == Direction.BOTH) {
                 var edge = new Edge(firstVertex, secondVertex, distance, maxSpeed, edgeRoles);
@@ -106,7 +114,12 @@ public class Dijkstra implements OSMObserver, Serializable {
                         case CAR -> carTree;
                         case BIKE -> bikeTree;
                         case WALK -> walkTree;
+                        case TRAFFIC_SIGNAL -> null;
                     };
+
+                    if (tree == null) {
+                        continue;
+                    }
 
                     tree.insert(firstPoint, null);
                     tree.insert(secondPoint, null);
@@ -121,12 +134,12 @@ public class Dijkstra implements OSMObserver, Serializable {
         var lonBits = Float.floatToIntBits(point.x());
         var latBits = Float.floatToIntBits(point.y());
 
-        return (((long)lonBits) << 32) | (latBits & 0xFFFFFFFFL);
+        return (((long) lonBits) << 32) | (latBits & 0xFFFFFFFFL);
     }
 
     private static Point longToCoordinates(long value) {
-        var lonBits = (int)(value >>> 32);
-        var latBits = (int)(value & 0xFFFFFFFFL);
+        var lonBits = (int) (value >>> 32);
+        var latBits = (int) (value & 0xFFFFFFFFL);
 
         var lon = Float.intBitsToFloat(lonBits);
         var lat = Float.intBitsToFloat(latBits);
@@ -146,6 +159,7 @@ public class Dijkstra implements OSMObserver, Serializable {
             case CAR -> carTree;
             case BIKE -> bikeTree;
             case WALK -> walkTree;
+            case TRAFFIC_SIGNAL -> null;
         };
 
         var fromResult = tree.nearest(from);
@@ -211,9 +225,25 @@ public class Dijkstra implements OSMObserver, Serializable {
     private float calculateWeight(Edge edge) {
         float weight = edge.distance();
 
+
         if (mode == EdgeRole.CAR) {
             weight /= edge.maxSpeed();
         }
+        if (edge.hasRole(EdgeRole.TRAFFIC_SIGNAL)) {
+
+            var trafficSignalModifier = switch (mode) {
+                //according to this source (https://transportist.org/2018/03/06/how-much-time-is-spent-at-traffic-signals/), one stop at a traffic light takes on averedge 15 seconds, so we add that to the weight.
+                case CAR -> 15/3600;
+                case BIKE -> 15/3600*27; //average biking speed is about 27 km/h (https://www.declinemagazine.com/mtb/average-cycling-speed-by-age/)
+                case WALK -> 15/3600*5; //average walking speed is 5 km/h (https://www.business-standard.com/article/current-affairs/fit-proper-what-is-the-ideal-walking-speed-for-you-115100900029_1.html)
+                case TRAFFIC_SIGNAL -> 0;
+            };
+            weight += trafficSignalModifier;
+
+        }
+
+
+
 
         return weight;
     }
@@ -234,7 +264,7 @@ public class Dijkstra implements OSMObserver, Serializable {
             heuristic /= 130;
         }
 
-        return (float)heuristic;
+        return (float) heuristic;
     }
 
     private static List<Long> extractPath(long sourceVertex, long targetVertex, Map<Long, Edge> edgeTo) {
@@ -301,11 +331,11 @@ public class Dijkstra implements OSMObserver, Serializable {
         var edgeRoles = new EnumFlags<EdgeRole>(false);
 
         boolean isCycleway = way.tags()
-            .stream()
-            .anyMatch(t -> t.key() == CYCLEWAY ||
-                t.key() == CYCLEWAY_LEFT ||
-                t.key() == CYCLEWAY_RIGHT ||
-                t.key() == CYCLEWAY_BOTH);
+                .stream()
+                .anyMatch(t -> t.key() == CYCLEWAY ||
+                        t.key() == CYCLEWAY_LEFT ||
+                        t.key() == CYCLEWAY_RIGHT ||
+                        t.key() == CYCLEWAY_BOTH);
 
         if (isCycleway) {
             edgeRoles.set(EdgeRole.BIKE);
@@ -320,50 +350,70 @@ public class Dijkstra implements OSMObserver, Serializable {
         // The following is in accordance with: https://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Access_restrictions#Denmark
         switch (highwayTag.value()) {
             case "motorway",
-                "trunk",
-                "primary",
-                "secondary",
-                "tertiary",
-                "unclassified",
-                "residential",
-                "living_street",
-                "motorway_link",
-                "trunk_link",
-                "primary_link",
-                "secondary_link",
-                "tertiary_link" -> edgeRoles.set(EdgeRole.CAR);
+                    "trunk",
+                    "primary",
+                    "secondary",
+                    "tertiary",
+                    "unclassified",
+                    "residential",
+                    "living_street",
+                    "motorway_link",
+                    "trunk_link",
+                    "primary_link",
+                    "secondary_link",
+                    "tertiary_link" -> edgeRoles.set(EdgeRole.CAR);
         }
 
         switch (highwayTag.value()) {
             case "primary",
-                "secondary",
-                "tertiary",
-                "unclassified",
-                "residential",
-                "living_street",
-                "track",
-                "path",
-                "cycleway",
-                "primary_link",
-                "secondary_link",
-                "tertiary_link" -> edgeRoles.set(EdgeRole.BIKE);
+                    "secondary",
+                    "tertiary",
+                    "unclassified",
+                    "residential",
+                    "living_street",
+                    "track",
+                    "path",
+                    "cycleway",
+                    "primary_link",
+                    "secondary_link",
+                    "tertiary_link" -> edgeRoles.set(EdgeRole.BIKE);
         }
 
         switch (highwayTag.value()) {
             case "primary",
-                "secondary",
-                "tertiary",
-                "unclassified",
-                "residential",
-                "living_street",
-                "track",
-                "path",
-                "cycleway",
-                "footway",
-                "pedestrian",
-                "primary_link",
-                "secondary_link",
-                "tertiary_link" -> edgeRoles.set(EdgeRole.WALK);
+                    "secondary",
+                    "tertiary",
+                    "unclassified",
+                    "residential",
+                    "living_street",
+                    "track",
+                    "path",
+                    "cycleway",
+                    "footway",
+                    "pedestrian",
+                    "primary_link",
+                    "secondary_link",
+                    "tertiary_link" -> edgeRoles.set(EdgeRole.WALK);
+        }
+
+        if (highwayTag.value().equals("service")) {
+            var serviceTag = way.tags().stream().filter(t -> t.key() == SERVICE).findFirst().orElse(null);
+
+            if (serviceTag != null) {
+                switch (serviceTag.value()) {
+                    case "parking_aisle",
+                        "driveway" -> edgeRoles.set(EdgeRole.CAR);
+                }
+
+                switch (serviceTag.value()) {
+                    case "parking_aisle",
+                        "driveway",
+                        "alley" -> {
+                        edgeRoles.set(EdgeRole.BIKE);
+                        edgeRoles.set(EdgeRole.WALK);
+                    }
+                }
+            }
         }
 
         return edgeRoles;
@@ -395,5 +445,13 @@ public class Dijkstra implements OSMObserver, Serializable {
 
     private enum Direction {
         SINGLE, BOTH, REVERSE, UNKNOWN
+    }
+
+    @Override
+    public void onNode(OSMNode node) {
+        if (node.tags().stream().anyMatch(t -> t.key() == HIGHWAY && t.value().equals("traffic_signals"))) {
+            trafficLightNodes.add(node.id());
+
+        }
     }
 }

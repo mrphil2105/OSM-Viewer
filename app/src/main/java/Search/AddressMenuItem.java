@@ -31,8 +31,8 @@ public class AddressMenuItem extends CustomMenuItem {
 
         if (showStreet) stringBuilder.append(address.street()).append(" ");
         if (showHouse) stringBuilder.append(address.houseNumber()).append(" ");
-        if (showCity) stringBuilder.append(address.city()).append(" ");
         if (showPostcode) stringBuilder.append(address.postcode()).append(" ");
+        if (showCity) stringBuilder.append(address.city()).append(" ");
 
         return new Text(stringBuilder.toString());
     }
