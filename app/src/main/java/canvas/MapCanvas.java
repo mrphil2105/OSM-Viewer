@@ -23,6 +23,10 @@ import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 
+import java.sql.Time;
+import java.time.Clock;
+import java.util.Timer;
+
 public class MapCanvas extends Region implements MouseListener {
     final Affine transform = new Affine();
     private Animator animator;
@@ -33,6 +37,7 @@ public class MapCanvas extends Region implements MouseListener {
     private Point2D lastMouse;
     private CanvasFocusListener canvasFocusListener;
     private ZoomHandler zoomHandler;
+    private float zoomspeed = 10;
 
     private final ChangeListener<Number> HEIGHT_LISTENER =
             (observable, oldValue, newValue) ->
@@ -178,8 +183,22 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
     public void setZoom(float zoom) {
-        transform.setMxx(zoom);
-        transform.setMyy(zoom);
+
+        var startTime= System.nanoTime();
+        var time=(zoom-transform.getMxx())*zoomspeed;
+        var distance=zoom-transform.getMxx();
+
+        float lastTime = System.nanoTime();
+        while (System.nanoTime()-startTime<time){
+
+            var change = distance/time*(System.nanoTime()-lastTime);
+            lastTime=System.nanoTime();
+            transform.prependScale(change, change);
+
+        }
+
+        //transform.setMxx(zoom);
+        //transform.setMyy(zoom);
     }
 
     public void zoomChange(boolean positive) {
