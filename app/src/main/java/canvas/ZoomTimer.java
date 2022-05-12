@@ -28,7 +28,7 @@ public class ZoomTimer extends TimerTask {
         this.finalZoom=finalZoom;
         this.zoomIncrements=zoomIncrements;
         this.finalCenter=finalCenter;
-        this.xPanIncrements=xPanIncrements*2;
+        this.xPanIncrements=xPanIncrements;
         this.yPanIncrements=yPanIncrements*2;
         this.timer=timer;
         this.zoomFrames=zoomFrames;
@@ -50,8 +50,7 @@ public class ZoomTimer extends TimerTask {
         if (frames<panFrames){
             var point =new Point(startPoint.x()+xPanIncrements,startPoint.y()+yPanIncrements);
             canvas.center(point);
-            xPanIncrements-=2;
-            yPanIncrements-=2;
+
 
         }else{
             canvas.center(finalCenter);
