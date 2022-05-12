@@ -1,19 +1,20 @@
 package navigation;
 
-import static osm.elements.OSMTag.Key.HIGHWAY;
-import static osm.elements.OSMTag.Key.NAME;
-
 import collections.spatial.LinearSearchTwoDTree;
 import collections.spatial.SpatialTree;
 import geometry.Point;
 import geometry.Rect;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.util.Pair;
 import osm.OSMObserver;
 import osm.elements.OSMTag;
 import osm.elements.OSMWay;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static osm.elements.OSMTag.Key.HIGHWAY;
+import static osm.elements.OSMTag.Key.NAME;
 
 public class NearestNeighbor implements OSMObserver, Serializable {
     private transient Rect bounds;
@@ -44,7 +45,7 @@ public class NearestNeighbor implements OSMObserver, Serializable {
         }
 
         for (var node : way.nodes()) {
-            var point = new Point((float)node.lon(), (float)node.lat());
+            var point = new Point((float) node.lon(), (float) node.lat());
             var pair = new Pair<>(point, name);
             nodeCache.add(pair);
         }
@@ -64,9 +65,11 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     }
 
     private void addToTree(List<Pair<Point, String>> nodes, int level) {
-        nodes.sort((first, second) -> (level & 1) == 0 ?
-            Float.compare(first.getKey().x(), second.getKey().x()) :
-            Float.compare(first.getKey().y(), second.getKey().y()));
+        nodes.sort(
+                (first, second) ->
+                        (level & 1) == 0
+                                ? Float.compare(first.getKey().x(), second.getKey().x())
+                                : Float.compare(first.getKey().y(), second.getKey().y()));
 
         var halfSize = nodes.size() / 2;
         var median = nodes.get(halfSize);

@@ -18,7 +18,7 @@ public class AutofillContextMenu extends ContextMenu {
 
         AddressMenuItem menuItem = (AddressMenuItem) actionEvent.getSource();
         Address menuAddress = menuItem.getAddress();
-        boolean pointOfIntest= (menuAddress.street().toLowerCase().contains(("(point of interest)")));
+        boolean pointOfIntest = (menuAddress.street().toLowerCase().contains(("(point of interest)")));
 
         AddressBuilder parsed = AddressDatabase.parse(inputText);
         assert parsed != null;
@@ -36,10 +36,8 @@ public class AutofillContextMenu extends ContextMenu {
         } else if (appendCity && !pointOfIntest) {
             stringBuilder.append("House No. ");
         }
-        if (address.postcode() != null)
-            stringBuilder.append(menuAddress.postcode()).append(" ");
-        if (address.city() != null || appendCity)
-            stringBuilder.append(menuAddress.city()).append(" ");
+        if (address.postcode() != null) stringBuilder.append(menuAddress.postcode()).append(" ");
+        if (address.city() != null || appendCity) stringBuilder.append(menuAddress.city()).append(" ");
 
         text.setText(stringBuilder.toString());
         if (appendCity && address.houseNumber() == null && !pointOfIntest) {

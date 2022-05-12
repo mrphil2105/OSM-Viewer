@@ -2,12 +2,6 @@ package Search;
 
 import collections.trie.Trie;
 import collections.trie.TrieBuilder;
-import java.io.Serializable;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
 import geometry.Point;
 import osm.OSMObserver;
 import osm.elements.OSMNode;
@@ -15,34 +9,41 @@ import osm.elements.OSMTag;
 import pointsOfInterest.PointOfInterest;
 import util.Predicates;
 
+import java.io.Serializable;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 public class AddressDatabase implements OSMObserver, Serializable {
+    private static final String REGEX =
+            "^[ .,]*(?<street>[A-Za-zæøåÆØÅ.é ]+?)(([ .,]+)(?<house>[0-9]+[A-Za-z]?(-[0-9]+)?)([ ,.]+(?<floor>[0-9]{1,3})([ ,.]+(?<side>tv|th|mf|[0-9]{1,3})?))?([ ,.]*(?<postcode>[0-9]{4})??[ ,.]*(?<city>[A-Za-zæøåÆØÅ ]+?)?)?)?[ ,.]*$";
+    private static final Pattern PATTERN = Pattern.compile(REGEX);
     private Trie<List<Address>> streetToAddress;
     private Trie<List<Address>> cityToAddress;
     private Trie<List<Address>> postcodeToAddress;
     private TrieBuilder<List<Address>> streetTrieBuilder;
     private TrieBuilder<List<Address>> cityTrieBuilder;
     private TrieBuilder<List<Address>> postcodeTrieBuilder;
-
     private List<PointOfInterest> pointsOfInterest;
 
     public AddressDatabase() {
         streetTrieBuilder = new TrieBuilder<>('\0');
         cityTrieBuilder = new TrieBuilder<>('\0');
         postcodeTrieBuilder = new TrieBuilder<>('\0');
-        pointsOfInterest=new ArrayList<>();
+        pointsOfInterest = new ArrayList<>();
     }
 
     public static AddressBuilder parse(String toParse) {
 
         var builder = new AddressBuilder();
-        if (toParse.contains("(Point of interest)")){
+        if (toParse.contains("(Point of interest)")) {
             builder.street(toParse);
             builder.house("");
             builder.city("");
             builder.postcode("");
             return builder;
         }
-
 
         var matcher = PATTERN.matcher(toParse);
 
@@ -114,16 +115,21 @@ public class AddressDatabase implements OSMObserver, Serializable {
         cityTrieBuilder = null;
     }
 
-    private static final String REGEX =
-            "^[ .,]*(?<street>[A-Za-zæøåÆØÅ.é ]+?)(([ .,]+)(?<house>[0-9]+[A-Za-z]?(-[0-9]+)?)([ ,.]+(?<floor>[0-9]{1,3})([ ,.]+(?<side>tv|th|mf|[0-9]{1,3})?))?([ ,.]*(?<postcode>[0-9]{4})??[ ,.]*(?<city>[A-Za-zæøåÆØÅ ]+?)?)?)?[ ,.]*$";
-    private static final Pattern PATTERN = Pattern.compile(REGEX);
-
     public List<Address> search(Address input) {
 
-        for (PointOfInterest poi : pointsOfInterest){
-            if (input.street().toLowerCase().equals((poi.name() + " (point of interest)").toLowerCase())){
+        for (PointOfInterest poi : pointsOfInterest) {
+            if (input
+                    .street()
+                    .equalsIgnoreCase((poi.name() + " (point of interest)"))) {
                 var list = new ArrayList<Address>();
-                list.add(new Address(poi.name() + " (Point of interest)","","","",(float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
+                list.add(
+                        new Address(
+                                poi.name() + " (Point of interest)",
+                                "",
+                                "",
+                                "",
+                                (float) Point.mapToGeoY(poi.lat()),
+                                (float) Point.mapToGeoX(poi.lon())));
                 return list;
             }
         }
@@ -182,29 +188,34 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
         List<Address> results;
         if (input.houseNumber() != null) {
-            results= filterStream.limit(maxEntries).toList();
+            results = filterStream.limit(maxEntries).toList();
         } else {
-            results= filterStream
-                    .filter(
-                            Predicates.distinctByKey(e -> e.street().hashCode() * e.postcode().hashCode()))
-                    .limit(maxEntries)
-                    .toList();
+            results =
+                    filterStream
+                            .filter(
+                                    Predicates.distinctByKey(e -> e.street().hashCode() * e.postcode().hashCode()))
+                            .limit(maxEntries)
+                            .toList();
         }
 
-        List<Address> newResult=new ArrayList<>();
-        for (PointOfInterest poi : pointsOfInterest){
-            if (poi.name().toLowerCase().startsWith(input.street().toLowerCase())){
-                newResult.add(new Address(poi.name() + " (Point of interest)","","","", (float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
+        List<Address> newResult = new ArrayList<>();
+        for (PointOfInterest poi : pointsOfInterest) {
+            if (poi.name().toLowerCase().startsWith(input.street().toLowerCase())) {
+                newResult.add(
+                        new Address(
+                                poi.name() + " (Point of interest)",
+                                "",
+                                "",
+                                "",
+                                (float) Point.mapToGeoY(poi.lat()),
+                                (float) Point.mapToGeoX(poi.lon())));
             }
         }
 
         newResult.addAll(results);
 
         return newResult;
-
-
     }
-
 
     public void setPointsOfInterest(List<PointOfInterest> pointsOfInterest) {
         this.pointsOfInterest = pointsOfInterest;

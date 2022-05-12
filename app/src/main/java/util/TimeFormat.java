@@ -3,7 +3,8 @@ package util;
 import java.time.Duration;
 
 public class TimeFormat {
-    private TimeFormat() {}
+    private TimeFormat() {
+    }
 
     // Credit: https://stackoverflow.com/a/65586659/7362723
     public static String formatDuration(Duration duration) {

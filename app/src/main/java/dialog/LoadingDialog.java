@@ -1,11 +1,5 @@
 package dialog;
 
-import static util.TimeFormat.formatDuration;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalTime;
-import java.util.function.Consumer;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -15,14 +9,22 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 
-public class LoadingDialog extends Dialog {
-    @FXML private Label header;
-    @FXML private Label timer;
-    @FXML private Button closeBtn;
-    @FXML private ProgressBar progress;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.function.Consumer;
 
+import static util.TimeFormat.formatDuration;
+
+public class LoadingDialog extends Dialog {
     @FXML
-    private void initialize() {}
+    private Label header;
+    @FXML
+    private Label timer;
+    @FXML
+    private Button closeBtn;
+    @FXML
+    private ProgressBar progress;
 
     public static void showDialog(String header, Consumer<ProgressBar> task) throws IOException {
         var diag = (LoadingDialog) load("LoadingDialog.fxml");
@@ -57,6 +59,10 @@ public class LoadingDialog extends Dialog {
         diag.header.textProperty().set(header);
 
         diag.showAndWait();
+    }
+
+    @FXML
+    private void initialize() {
     }
 
     public void finish() {

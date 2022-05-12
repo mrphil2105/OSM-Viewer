@@ -1,6 +1,7 @@
 package osm.elements;
 
 import collections.Entity;
+
 import java.util.List;
 
 public final class SlimOSMRelation extends Entity {

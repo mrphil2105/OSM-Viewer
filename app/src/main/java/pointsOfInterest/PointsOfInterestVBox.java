@@ -1,16 +1,11 @@
 package pointsOfInterest;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import drawing.Drawable;
-import drawing.Drawing;
-import geometry.Point;
-import geometry.Vector2D;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
+
+import java.util.ArrayList;
 
 public class PointsOfInterestVBox extends VBox {
 
@@ -23,35 +18,32 @@ public class PointsOfInterestVBox extends VBox {
                 (ListChangeListener<? super PointOfInterest>)
                         listener -> {
                             update();
-
                         });
-
 
         update();
     }
 
-
-    public void update(){
+    public void update() {
         removeDeletedPoints();
         addNewPointsOfInterest();
     }
 
-    private void addNewPointsOfInterest(){
-        for (PointOfInterest point : pointsOfInterest){
-            if (!contains(point)){
+    private void addNewPointsOfInterest() {
+        for (PointOfInterest point : pointsOfInterest) {
+            if (!contains(point)) {
                 addPointOfInterest(point);
             }
         }
     }
 
-    private void removeDeletedPoints(){
+    private void removeDeletedPoints() {
         var toToBeRemoved = new ArrayList<PointsOfInterestHBox>();
-        for (Node n :getChildren()){
-            if (!pointsOfInterest.contains(((PointsOfInterestHBox)n).getPointOfInterest())){
-                toToBeRemoved.add((PointsOfInterestHBox)n);
+        for (Node n : getChildren()) {
+            if (!pointsOfInterest.contains(((PointsOfInterestHBox) n).getPointOfInterest())) {
+                toToBeRemoved.add((PointsOfInterestHBox) n);
             }
         }
-        for (PointsOfInterestHBox point : toToBeRemoved){
+        for (PointsOfInterestHBox point : toToBeRemoved) {
             removePointOfInterest(point.getPointOfInterest());
         }
     }
