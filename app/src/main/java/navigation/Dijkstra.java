@@ -396,6 +396,26 @@ public class Dijkstra implements OSMObserver, Serializable {
                     "tertiary_link" -> edgeRoles.set(EdgeRole.WALK);
         }
 
+        if (highwayTag.value().equals("service")) {
+            var serviceTag = way.tags().stream().filter(t -> t.key() == SERVICE).findFirst().orElse(null);
+
+            if (serviceTag != null) {
+                switch (serviceTag.value()) {
+                    case "parking_aisle",
+                        "driveway" -> edgeRoles.set(EdgeRole.CAR);
+                }
+
+                switch (serviceTag.value()) {
+                    case "parking_aisle",
+                        "driveway",
+                        "alley" -> {
+                        edgeRoles.set(EdgeRole.BIKE);
+                        edgeRoles.set(EdgeRole.WALK);
+                    }
+                }
+            }
+        }
+
         return edgeRoles;
     }
 
