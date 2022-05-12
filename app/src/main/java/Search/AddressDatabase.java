@@ -7,9 +7,12 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import geometry.Point;
 import osm.OSMObserver;
 import osm.elements.OSMNode;
 import osm.elements.OSMTag;
+import pointsOfInterest.PointOfInterest;
 import util.Predicates;
 
 public class AddressDatabase implements OSMObserver, Serializable {
@@ -19,6 +22,9 @@ public class AddressDatabase implements OSMObserver, Serializable {
     private TrieBuilder<List<Address>> streetTrieBuilder;
     private TrieBuilder<List<Address>> cityTrieBuilder;
     private TrieBuilder<List<Address>> postcodeTrieBuilder;
+
+    private List<PointOfInterest> pointsOfInterest;
+
     public AddressDatabase() {
         streetTrieBuilder = new TrieBuilder<>('\0');
         cityTrieBuilder = new TrieBuilder<>('\0');
@@ -26,7 +32,19 @@ public class AddressDatabase implements OSMObserver, Serializable {
     }
 
     public static AddressBuilder parse(String toParse) {
+
         var builder = new AddressBuilder();
+        if (toParse.contains("(Point of interest)")){
+            builder.street(toParse);
+            builder.house("");
+            builder.city("");
+            builder.postcode("");
+            builder.floor("");
+            builder.side("");
+            return builder;
+        }
+
+
         var matcher = PATTERN.matcher(toParse);
 
         if (matcher.matches()) {
@@ -105,6 +123,14 @@ public class AddressDatabase implements OSMObserver, Serializable {
 
     public List<Address> search(Address input) {
 
+        for (PointOfInterest poi : pointsOfInterest){
+            if (input.street().toLowerCase().equals((poi.name() + " (point of interest)").toLowerCase())){
+                var list = new ArrayList<Address>();
+                list.add(new Address(poi.name() + " (Point of interest)","","","","","",(float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
+                return list;
+            }
+        }
+
         var searchedStreets = streetToAddress.get(input.street());
         if (searchedStreets == null) return null;
 
@@ -157,15 +183,33 @@ public class AddressDatabase implements OSMObserver, Serializable {
             filterStream = filterStream.filter(retain::contains);
         }
 
+        List<Address> results;
         if (input.houseNumber() != null) {
-            return filterStream.limit(maxEntries).toList();
+            results= filterStream.limit(maxEntries).toList();
         } else {
-            return filterStream
+            results= filterStream
                     .filter(
                             Predicates.distinctByKey(e -> e.street().hashCode() * e.postcode().hashCode()))
                     .limit(maxEntries)
                     .toList();
         }
 
+        List<Address> newResult=new ArrayList<>();
+        for (PointOfInterest poi : pointsOfInterest){
+            if (poi.name().toLowerCase().startsWith(input.street().toLowerCase())){
+                newResult.add(new Address(poi.name() + " (Point of interest)","","","","","", (float)Point.mapToGeoY((double) poi.lat()) ,(float)Point.mapToGeoX((double) poi.lon())));
+            }
+        }
+
+        newResult.addAll(results);
+
+        return newResult;
+
+
+    }
+
+
+    public void setPointsOfInterest(List<PointOfInterest> pointsOfInterest) {
+        this.pointsOfInterest = pointsOfInterest;
     }
 }

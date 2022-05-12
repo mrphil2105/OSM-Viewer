@@ -498,7 +498,6 @@ public class Controller {
     public void addPointOfInterest(PointOfInterest point) {
         model.getPointsOfInterest().add(point);
         canvas.getRenderer().draw(point.drawing());
-        pointsOfInterestVBox.update();
         for (Node n : pointsOfInterestVBox.getChildren()) {
 
             if (((PointsOfInterestHBox) n).getPointOfInterest() == point) {
@@ -514,7 +513,6 @@ public class Controller {
                                 e -> {
                                     model.getPointsOfInterest().remove(hBox.getPointOfInterest());
                                     canvas.getRenderer().clear(hBox.getPointOfInterest().drawing());
-                                    pointsOfInterestVBox.update();
                                 });
             }
         }
