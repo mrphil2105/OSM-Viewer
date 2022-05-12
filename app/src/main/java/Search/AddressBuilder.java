@@ -3,7 +3,7 @@ package Search;
 import java.io.Serializable;
 
 public class AddressBuilder implements Serializable {
-    private String street, house, floor, side, postcode, city;
+    private String street, house, postcode, city;
     private float lat, lon;
 
     public String getStreet(){
@@ -22,13 +22,6 @@ public class AddressBuilder implements Serializable {
         this.house = house;
     }
 
-    public void floor(String floor) {
-        this.floor = floor;
-    }
-
-    public void side(String side) {
-        this.side = side;
-    }
 
     public void postcode(String postcode) {
         this.postcode = postcode;
@@ -46,6 +39,6 @@ public class AddressBuilder implements Serializable {
     }
 
     public Address build() {
-        return new Address(street, house, floor, side, postcode, city, lat, lon);
+        return new Address(street, house, postcode, city, lat, lon);
     }
 }
