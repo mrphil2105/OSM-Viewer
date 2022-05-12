@@ -4,16 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class AddressTest {
 
-    static AddressDatabase addressDatabase;
-    static Address[] addresses;
+    AddressDatabase addressDatabase;
+    Address[] addresses;
 
-    @BeforeAll
-    static void initiateAddresses() {
+    @BeforeEach
+    void initiateAddresses() {
         addressDatabase = new AddressDatabase();
         addresses = new Address[11];
 
