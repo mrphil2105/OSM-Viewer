@@ -120,6 +120,8 @@ public class Controller {
 
     @FXML private Label fps;
 
+    @FXML private Button instructionsButton;
+
     private final ListChangeListener<? super Point> routeRedrawListener = listener -> {
         while (listener.next()) {
         }
@@ -260,7 +262,6 @@ public class Controller {
                 e -> {
                     setZoomAndScale();
                 });
-
 
         // FIXME: yuck
         categories
@@ -535,6 +536,11 @@ public class Controller {
         addPointOfInterestText.show(rightVBox, screenBounds.getMinX(), screenBounds.getMinY() + 230);
 
         pointOfInterestMode = true;
+    }
+
+    @FXML
+    public void handleInstructions(){
+        model.dijkstra.getInstructions();
     }
 
     public void openMap() throws Exception {

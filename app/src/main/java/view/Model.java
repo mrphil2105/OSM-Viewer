@@ -29,7 +29,7 @@ public class Model {
     private final ObservableList<PointOfInterest> pointsOfInterest;
     private NearestNeighbor nearestNeighbor;
     private final StringProperty nearestRoad = new SimpleStringProperty("none");
-    private Dijkstra dijkstra;
+    public Dijkstra dijkstra;
     private final ObservableList<Point> routePoints = FXCollections.observableArrayList();
     private  Pair<Point,Point> fromToPoints;
     private final FeatureSet features;
