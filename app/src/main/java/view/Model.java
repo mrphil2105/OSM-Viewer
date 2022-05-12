@@ -8,6 +8,8 @@ import geometry.Point;
 import geometry.Rect;
 import io.PolygonsReader;
 import io.ReadResult;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -19,9 +21,6 @@ import navigation.Dijkstra;
 import navigation.EdgeRole;
 import navigation.NearestNeighbor;
 import pointsOfInterest.PointOfInterest;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Model {
     public final Rect bounds;
@@ -86,8 +85,8 @@ public class Model {
         nearestRoadProperty().set(road);
     }
 
-    public void getInstructionsFromDijkstra() {
-        dijkstra.getInstructions();
+    public String getInstructionsFromDijkstra() {
+        return dijkstra.getInstructions();
     }
 
     public ObservableList<Point> getRoutePoints() {

@@ -1,19 +1,18 @@
 package navigation;
 
+import static osm.elements.OSMTag.Key.*;
+
 import collections.enumflags.EnumFlags;
 import collections.spatial.LinearSearchTwoDTree;
 import collections.spatial.SpatialTree;
 import geometry.Point;
 import geometry.Rect;
+import java.io.Serializable;
+import java.util.*;
 import osm.OSMObserver;
 import osm.elements.OSMTag;
 import osm.elements.OSMWay;
 import util.DistanceUtils;
-
-import java.io.Serializable;
-import java.util.*;
-
-import static osm.elements.OSMTag.Key.*;
 
 public class Dijkstra implements OSMObserver, Serializable {
     private static Instructions instructions;
@@ -269,6 +268,7 @@ public class Dijkstra implements OSMObserver, Serializable {
                         .map(OSMTag::value)
                         .findFirst()
                         .orElse("Unnamed way");
+
         var roadRole = getRoadRole(way);
 
         for (int i = 1; i < nodes.length; i++) {
@@ -419,10 +419,11 @@ public class Dijkstra implements OSMObserver, Serializable {
         return (float) heuristic;
     }
 
-    public void getInstructions() {
+    public String getInstructions() {
         if (instructions != null) {
-            instructions.setClipboard();
+            return instructions.getInstructionsString();
         }
+        return "";
     }
 
     private int getExpectedMaxSpeed(OSMWay way) {
@@ -434,11 +435,13 @@ public class Dijkstra implements OSMObserver, Serializable {
 
         var maxSpeed =
                 switch (highwayTag.value()) {
-                    case "motorway", "motorway_link" -> 110;
-                    case "primary", "primary_link", "trunk", "trunk_link" -> 80;
-                    case "secondary", "secondary_link", "unclassified" -> 60;
-                    case "tertiary", "tertiary_link" -> 50;
-                    case "residential", "living_street" -> 40;
+                    case "motorway" -> 110;
+                    case "motorway_link" -> 100;
+                    case "primary", "trunk" -> 80;
+                    case "primary_link", "trunk_link" -> 70;
+                    case "secondary", "unclassified" -> 60;
+                    case "tertiary", "secondary_link" -> 50;
+                    case "residential", "living_street", "tertiary_link" -> 40;
                     default -> 0; // Return 0 for highways that aren't handled by Dijkstra in CAR mode.
                 };
 
@@ -451,7 +454,7 @@ public class Dijkstra implements OSMObserver, Serializable {
                             case "parking_aisle" -> 15;
                             case "driveway" -> 20;
                             default -> 0; // Return 0 for service roads that aren't handled by Dijkstra in CAR
-                            // mode.
+                                // mode.
                         };
             }
         }

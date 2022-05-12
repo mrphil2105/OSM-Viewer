@@ -1,11 +1,8 @@
 package navigation;
 
 import geometry.Point;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import util.DistanceUtils;
-
 import java.util.List;
+import util.DistanceUtils;
 
 public class Instructions {
     private final List<Road> edges;
@@ -15,7 +12,7 @@ public class Instructions {
     private Road currentEdge;
     private Road nextEdge;
     private double lastDistance = 0.0;
-    private String name = "";
+    private String name = "Unnamed way";
     private String instructionsString = "";
     private RoadRole role;
 
@@ -30,7 +27,9 @@ public class Instructions {
             if (preEdge == null) {
                 preEdge = edges.get(0);
                 nextEdge = edges.get(i + 1);
-                instructionsString += "Start at " + preEdge.name() + "\n";
+                if (!preEdge.name().equals("Unnamed way")) {
+                    instructionsString += "Start at " + preEdge.name() + "\n";
+                }
                 continue;
             }
             double calc = calc(edges.get(i));
@@ -61,6 +60,10 @@ public class Instructions {
         if (!preEdge.name().equals("Unnamed way")) {
             name = preEdge.name();
             role = preEdge.role();
+        } else if (preEdge.name().equals("Unnamed way")
+                && name.equals("Unnamed way")
+                && !currentEdge.name().equals("Unnamed way")) {
+            name = currentEdge.name();
         }
         switch (currentEdge.role()) {
             case MOTORWAY:
@@ -258,10 +261,7 @@ public class Instructions {
         }
     }
 
-    public void setClipboard() {
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-        ClipboardContent content = new ClipboardContent();
-        content.putString(instructionsString);
-        clipboard.setContent(content);
+    public String getInstructionsString() {
+        return instructionsString;
     }
 }

@@ -14,6 +14,9 @@ import features.Feature;
 import geometry.Point;
 import geometry.Vector2D;
 import io.FileParser;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -25,6 +28,8 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -35,10 +40,6 @@ import navigation.EdgeRole;
 import pointsOfInterest.PointOfInterest;
 import pointsOfInterest.PointsOfInterestHBox;
 import pointsOfInterest.PointsOfInterestVBox;
-
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Controller {
     private final Timer queryPointTimer = new Timer();
@@ -526,7 +527,10 @@ public class Controller {
 
     @FXML
     public void handleInstructions() {
-        model.getInstructionsFromDijkstra();
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(model.getInstructionsFromDijkstra());
+        clipboard.setContent(content);
     }
 
     public void openMap() throws Exception {
