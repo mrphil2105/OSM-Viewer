@@ -3,8 +3,7 @@ package navigation;
 public enum EdgeRole {
     CAR,
     BIKE,
-    WALK,
-    TRAFFIC_SIGNAL;
+    WALK;
 
     @Override
     public String toString() {
