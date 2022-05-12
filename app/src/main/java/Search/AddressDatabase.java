@@ -29,6 +29,7 @@ public class AddressDatabase implements OSMObserver, Serializable {
         streetTrieBuilder = new TrieBuilder<>('\0');
         cityTrieBuilder = new TrieBuilder<>('\0');
         postcodeTrieBuilder = new TrieBuilder<>('\0');
+        pointsOfInterest=new ArrayList<>();
     }
 
     public static AddressBuilder parse(String toParse) {
