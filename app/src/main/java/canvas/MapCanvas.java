@@ -23,6 +23,9 @@ import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MapCanvas extends Region implements MouseListener {
     final Affine transform = new Affine();
     private Animator animator;
@@ -34,12 +37,45 @@ public class MapCanvas extends Region implements MouseListener {
     private CanvasFocusListener canvasFocusListener;
     private ZoomHandler zoomHandler;
 
+    private Timer resizeHeightTimer = new Timer();
+    private TimerTask resizeHeightTimerTask;
+
+    private Timer resizeWidthTimer = new Timer();
+    private TimerTask resizeWidthTimerTask;
+
     private final ChangeListener<Number> HEIGHT_LISTENER =
-            (observable, oldValue, newValue) ->
-                    window.setSize(window.getWidth(), Math.max(1, newValue.intValue()));
+            (observable, oldValue, newValue) -> {
+                if (resizeHeightTimerTask != null) {
+                    resizeHeightTimerTask.cancel();
+                }
+
+                resizeHeightTimerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(() -> window.setSize(window.getWidth(), Math.max(1, newValue.intValue())));
+                    }
+                };
+                resizeHeightTimer.schedule(resizeHeightTimerTask, 50);
+            };
+
     private final ChangeListener<Number> WIDTH_LISTENER =
-            (observable, oldValue, newValue) ->
-                    window.setSize(Math.max(1, newValue.intValue()), window.getHeight());
+            (observable, oldValue, newValue) -> {
+                if (resizeWidthTimerTask != null) {
+                    resizeWidthTimerTask.cancel();
+                }
+
+                resizeWidthTimerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(() -> {
+                            // We need to do this twice, because otherwise it does not resize on maximize on some systems.
+                            window.setSize(Math.max(1, newValue.intValue()), window.getHeight());
+                            window.setSize(Math.max(1, newValue.intValue()), window.getHeight());
+                        });
+                    }
+                };
+                resizeWidthTimer.schedule(resizeWidthTimerTask, 50);
+            };
 
     // TODO: Add all if necessary
     public final ObjectProperty<EventHandler<MouseEvent>> mapMouseClickedProperty =
@@ -80,6 +116,9 @@ public class MapCanvas extends Region implements MouseListener {
                             }
                         });
 
+        resizeHeightTimer = new Timer();
+        resizeWidthTimer = new Timer();
+
         // Resize window when region resizes
         heightProperty().addListener(HEIGHT_LISTENER);
         widthProperty().addListener(WIDTH_LISTENER);
@@ -115,6 +154,9 @@ public class MapCanvas extends Region implements MouseListener {
             if (canvasFocusListener != null) window.removeWindowListener(canvasFocusListener);
         }
 
+        heightProperty().removeListener(HEIGHT_LISTENER);
+        widthProperty().removeListener(WIDTH_LISTENER);
+
         if (animator != null) animator.stop();
 
         if (fpsUpdater != null) fpsUpdater.stop();
@@ -126,6 +168,9 @@ public class MapCanvas extends Region implements MouseListener {
         }
 
         if (model != null) model.dispose();
+
+        if (resizeHeightTimer != null) resizeHeightTimer.cancel();
+        if (resizeWidthTimer != null) resizeWidthTimer.cancel();
     }
 
     public Point canvasToMap(Point point) {

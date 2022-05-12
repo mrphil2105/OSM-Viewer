@@ -21,17 +21,17 @@ public class AddressTest {
       addressDatabase=new AddressDatabase();
       addresses=new Address[11];
 
-      addresses[0]=(new Address("Testvej","24B",null,null,"4050","Testby",0, 0));
-      addresses[1]=(new Address("Testvej","6",null,null,"4050","Testby",0,0));
-      addresses[2]=(new Address("Testvej","21",null,null,"4050","Testby",0,0));
-      addresses[3]=(new Address("Testvej","5",null,null,"4080","Anden Testby",0,0));
-      addresses[4]=(new Address("Testvej","27",null,null,"4090","Tredje Testby",0,0));
-      addresses[5]=(new Address("Anden Testvej","245",null,null,"4050","Testby",0,0));
-      addresses[6]=(new Address("Anden Testvej","3A",null,null,"4050","Testby",0,0));
-      addresses[7]=(new Address("Anvej","35",null,null,"4080","Anden Testby",0,0));
-      addresses[8]=(new Address("Endu En Vej","21",null,null,"5080","Fjerde Testby",0,0));
-      addresses[9]=(new Address("Også En Vej","26",null,null,"5080","Fjerde Testby",0,0));
-      addresses[10]=(new Address("Også En Vej","24",null,null,"6000","Fjerde Testby b",0,0));
+      addresses[0]=(new Address("Testvej","24B","4050","Testby",0, 0));
+      addresses[1]=(new Address("Testvej","6","4050","Testby",0,0));
+      addresses[2]=(new Address("Testvej","21","4050","Testby",0,0));
+      addresses[3]=(new Address("Testvej","5","4080","Anden Testby",0,0));
+      addresses[4]=(new Address("Testvej","27","4090","Tredje Testby",0,0));
+      addresses[5]=(new Address("Anden Testvej","245","4050","Testby",0,0));
+      addresses[6]=(new Address("Anden Testvej","3A","4050","Testby",0,0));
+      addresses[7]=(new Address("Anvej","35","4080","Anden Testby",0,0));
+      addresses[8]=(new Address("Endu En Vej","21","5080","Fjerde Testby",0,0));
+      addresses[9]=(new Address("Også En Vej","26","5080","Fjerde Testby",0,0));
+      addresses[10]=(new Address("Også En Vej","24","6000","Fjerde Testby b",0,0));
 
       for (Address a:addresses){
           addressDatabase.addAddress(a);
