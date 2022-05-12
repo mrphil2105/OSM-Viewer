@@ -29,7 +29,7 @@ public class ShaderUtils {
      * @throws Exception when an error occurs loading resource.
      */
     public static String loadResource(String fileName) throws Exception {
-        try (InputStream in = ShaderUtils.class.getClassLoader().getResourceAsStream(fileName)) {
+        try (InputStream in = ShaderUtils.class.getResource(fileName).openStream()) {
             return new Scanner(in, StandardCharsets.UTF_8).useDelimiter("\\A").next();
         }
     }

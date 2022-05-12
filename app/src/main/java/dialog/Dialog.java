@@ -1,6 +1,7 @@
 package dialog;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,6 +12,7 @@ import javafx.stage.Stage;
 public abstract class Dialog {
     private Stage stage;
     private boolean closable;
+    private Consumer<DialogResult> callback;
 
     protected static Dialog load(String resource) throws IOException {
         var fxmlLoader = new FXMLLoader(Dialog.class.getResource(resource));
@@ -19,7 +21,6 @@ public abstract class Dialog {
         var diag = fxmlLoader.<Dialog>getController();
 
         diag.stage = new Stage();
-        diag.stage.initModality(Modality.APPLICATION_MODAL);
         diag.stage.setScene(new Scene(root));
         diag.stage.setResizable(false);
         diag.stage.setOnCloseRequest(
@@ -31,12 +32,20 @@ public abstract class Dialog {
     }
 
     protected void showAndWait() {
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.showAndWait();
     }
 
+    protected void show(Consumer<DialogResult> callback) {
+        this.callback = callback;
+        stage.initModality(Modality.NONE);
+        stage.show();
+    }
+
     @FXML
-    protected void close() {
+    protected void close(DialogResult result) {
         closable = true;
         stage.close();
+        if (callback != null) callback.accept(result);
     }
 }

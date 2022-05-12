@@ -34,6 +34,7 @@ public enum Drawable {
     INDUSTRIAL(Shape.FILL, Color.web("#ebdbe8"), 0, Category.CITY),
     PLANT_NURSERY(Shape.FILL, Color.web("#aedfa3"), 0, Category.CITY),
     WATER(Shape.FILL, Color.web("#aad3df"), 0, Category.LAND),
+    WATERWAY(Shape.POLYLINE, Color.web("#aad3df"), 0.3, Category.LAND),
     MUSEUM(Shape.FILL, Color.web("#f2efe9"), 0, Category.CITY),
     BUILDING(Shape.FILL, Color.web("#d9d0c9"), 0, Category.CITY),
     REST_AREA(Shape.FILL, Color.web("#efc8c8"), 0, Category.CITY),
@@ -54,8 +55,7 @@ public enum Drawable {
     SECONDARY(Shape.POLYLINE, Color.web("#f7fabf"), 0.8, Category.ROAD),
     PRIMARY(Shape.POLYLINE, Color.web("#fcd6a4"), 0.9, Category.ROAD),
     MOTORWAY(Shape.POLYLINE, Color.web("#e892a2"), 1.0, Category.ROAD),
-    NATURE_RESERVE(Shape.POLYLINE, Color.rgb(0, 180, 30, 0.2), 0.6, Category.MISC),
-    MILITARY(Shape.FILL, Color.rgb(255, 0, 0, 0.2), 0, Category.MISC),
+    TRUNK(Shape.POLYLINE, Color.web("#f9b29c"), 0.9, Category.ROAD),
     ROUTE(Shape.POLYLINE, Color.web("#1967d2"), 0.6, Category.ROAD),
     BOUNDS(Shape.POLYLINE, Color.rgb(255, 0, 150, 0.5), 5.0, Category.MISC),
     ADDRESS(Shape.FILL, Color.web("#D22B2B"), 0.4, Category.MISC),
@@ -128,7 +128,6 @@ public enum Drawable {
                 case "farmyard" -> FARMYARD;
                 case "orchard" -> ORCHARD;
                 case "quarry" -> QUARRY;
-                case "military" -> MILITARY;
                 case "greenfield" -> IGNORED;
                 case "retail" -> RETAIL;
                 case "isolated_dwelling" -> DWELLING;
@@ -169,7 +168,6 @@ public enum Drawable {
                 case "pitch" -> PITCH;
                 case "marina", "swimming_pool" -> WATER;
                 case "garden" -> GRASS;
-                case "nature_reserve" -> NATURE_RESERVE;
                 case "miniature_golf", "golf_course" -> GOLF;
                 default -> _default(tag);
             };
@@ -204,10 +202,11 @@ public enum Drawable {
                 case "secondary" -> SECONDARY;
                 case "tertiary" -> TERTIARY;
                 case "service" -> SERVICE;
+                case "trunk" -> TRUNK;
                 case "rest_area" -> REST_AREA;
                 case "track" -> TRACK;
                 case "proposed" -> IGNORED;
-                case "road", "residential", "unclassified", "raceway", "taxiway" -> ROAD;
+                case "road", "residential", "unclassified", "raceway", "taxiway", "motorway_link", "primary_link", "secondary_link", "trunk_link" -> ROAD;
                 case "bridleway",
                         "construction",
                         "crossing",
@@ -218,6 +217,10 @@ public enum Drawable {
                         "path",
                         "pedestrian",
                         "steps" -> PATH;
+                default -> _default(tag);
+            };
+            case WATERWAY -> switch (tag.value()) {
+                case "river", "stream" -> WATERWAY;
                 default -> _default(tag);
             };
             default -> _default(tag);

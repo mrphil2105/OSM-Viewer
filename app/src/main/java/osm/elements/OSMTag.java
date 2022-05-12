@@ -6,11 +6,13 @@ public record OSMTag(Key key, String value) implements Serializable {
     public enum Key {
         BUILDING,
         HIGHWAY,
+        WATERWAY,
         CYCLEWAY,
         CYCLEWAY_LEFT,
         CYCLEWAY_RIGHT,
         CYCLEWAY_BOTH,
         FOOTWAY,
+        SERVICE,
         NATURAL,
         LANDUSE,
         AMENITY,
@@ -33,11 +35,13 @@ public record OSMTag(Key key, String value) implements Serializable {
             return switch (key) {
                 case "building" -> BUILDING;
                 case "highway" -> HIGHWAY;
+                case "waterway" -> WATERWAY;
                 case "cycleway" -> CYCLEWAY;
                 case "cycleway:left" -> CYCLEWAY_LEFT;
                 case "cycleway:right" -> CYCLEWAY_RIGHT;
                 case "cycleway:both" -> CYCLEWAY_BOTH;
                 case "footway" -> FOOTWAY;
+                case "service" -> SERVICE;
                 case "natural" -> NATURAL;
                 case "landuse" -> LANDUSE;
                 case "amenity" -> AMENITY;

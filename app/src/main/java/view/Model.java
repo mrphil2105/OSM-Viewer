@@ -3,17 +3,21 @@ package view;
 import Search.Address;
 import Search.AddressDatabase;
 import features.Feature;
+import features.FeatureSet;
 import geometry.Point;
 import geometry.Rect;
 import io.PolygonsReader;
 import io.ReadResult;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.ProgressBar;
+import javafx.util.Pair;
 import navigation.Dijkstra;
 import navigation.EdgeRole;
 import navigation.NearestNeighbor;
@@ -22,12 +26,13 @@ import pointsOfInterest.PointOfInterest;
 public class Model {
     public final Rect bounds;
     private AddressDatabase addresses;
-    private final List<PointOfInterest> pointsOfInterest;
+    private final ObservableList<PointOfInterest> pointsOfInterest;
     private NearestNeighbor nearestNeighbor;
     private final StringProperty nearestRoad = new SimpleStringProperty("none");
     private Dijkstra dijkstra;
     private final ObservableList<Point> routePoints = FXCollections.observableArrayList();
-    private final Set<Feature> features;
+    private  Pair<Point,Point> fromToPoints;
+    private final FeatureSet features;
 
     public canvas.Model canvasModel;
 
@@ -35,10 +40,15 @@ public class Model {
     private final ObservableList<Address> toSuggestions = FXCollections.observableArrayList();
     private final ObservableList<Address> fromSuggestions = FXCollections.observableArrayList();
 
-    public Model(ReadResult result) {
+    public Model(ReadResult result, ProgressBar bar) {
         bounds = result.bounds().getRect();
 
-        features = result.readers().keySet();
+        features = new FeatureSet(result.readers().keySet());
+
+        double total = result.readers().size();
+        AtomicInteger progress = new AtomicInteger();
+
+        if (total == 1 && bar != null) Platform.runLater(() -> bar.setProgress(-1));
 
         for (var entry : result.readers().entrySet()) {
             switch (entry.getKey()) {
@@ -47,13 +57,14 @@ public class Model {
                 case PATHFINDING -> dijkstra = (Dijkstra) entry.getValue().read();
                 case ADDRESS_SEARCH -> {
                     addresses = (AddressDatabase) entry.getValue().read();
-                    // FIXME: Why are the tries not built at the .map file creation step?
-                    addresses.buildTries();
                 }
             }
+
+            if (bar != null) Platform.runLater(() -> bar.setProgress(progress.incrementAndGet() / total));
         }
 
-        pointsOfInterest = new ArrayList<>();
+        pointsOfInterest = FXCollections.observableArrayList();
+        addresses.setPointsOfInterest(pointsOfInterest);
     }
 
     public boolean supports(Feature feature) {
@@ -72,41 +83,44 @@ public class Model {
         return nearestRoad.get();
     }
 
-    public Point getNearestPoint(Point query) {
-        return nearestNeighbor.nearestTo(query);
-    }
-
     public void setQueryPoint(Point query) {
         var road = nearestNeighbor.nearestRoad(query);
         nearestRoadProperty().set(road);
+    }
+
+    public void getInstructionsFromDijkstra(){
+            dijkstra.getInstructions();
     }
 
     public ObservableList<Point> getRoutePoints() {
         return routePoints;
     }
 
-    public void calculateBestRoute(Point from, Point to) {
-        // TODO: Allow user to set edge role.
-        var shortestPath = dijkstra.shortestPath(from, to, EdgeRole.CAR);
+    public boolean calculateBestRoute(Point from, Point to, EdgeRole mode) {
+        var shortestPath = dijkstra.shortestPath(from, to, mode);
+
+
 
         if (shortestPath == null) {
             routePoints.clear();
             System.out.println("No path between " + from + " and " + to + ".");
 
-            return;
+            return false;
         }
 
-        var routePoints = shortestPath.stream()
-            .map(Point::geoToMap)
-            .toList();
+        setFromToPoints(new Pair<>(Point.geoToMap(from),Point.geoToMap(to)));
+
+        var routePoints = shortestPath.stream().map(Point::geoToMap).toList();
         this.routePoints.setAll(routePoints);
+
+        return true;
     }
 
     public AddressDatabase getAddresses() {
         return addresses;
     }
 
-    public List<PointOfInterest> getPointsOfInterest() {
+    public ObservableList<PointOfInterest> getPointsOfInterest() {
         return pointsOfInterest;
     }
 
@@ -132,6 +146,14 @@ public class Model {
 
     public void setFromSuggestions(List<Address> suggestions) {
         this.fromSuggestions.setAll(suggestions);
+    }
+
+    public Pair<Point, Point> getFromToPoints() {
+        return fromToPoints;
+    }
+
+    public void setFromToPoints(Pair<Point, Point> fromToPoints) {
+        this.fromToPoints = fromToPoints;
     }
 
 }
