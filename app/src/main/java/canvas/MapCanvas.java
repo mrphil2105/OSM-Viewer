@@ -190,6 +190,7 @@ public class MapCanvas extends Region implements MouseListener {
 
         float lastTime = System.nanoTime();
         while (System.nanoTime()-startTime<time){
+            System.out.println("here");
 
             var change = distance/time*(System.nanoTime()-lastTime);
             lastTime=System.nanoTime();
