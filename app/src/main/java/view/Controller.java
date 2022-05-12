@@ -540,7 +540,7 @@ public class Controller {
 
     @FXML
     public void handleInstructions(){
-        model.dijkstra.getInstructions();
+        model.getInstructionsFromDijkstra();
     }
 
     public void openMap() throws Exception {

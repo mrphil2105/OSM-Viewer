@@ -29,7 +29,7 @@ public class Model {
     private final ObservableList<PointOfInterest> pointsOfInterest;
     private NearestNeighbor nearestNeighbor;
     private final StringProperty nearestRoad = new SimpleStringProperty("none");
-    public Dijkstra dijkstra;
+    private Dijkstra dijkstra;
     private final ObservableList<Point> routePoints = FXCollections.observableArrayList();
     private  Pair<Point,Point> fromToPoints;
     private final FeatureSet features;
@@ -86,6 +86,10 @@ public class Model {
     public void setQueryPoint(Point query) {
         var road = nearestNeighbor.nearestRoad(query);
         nearestRoadProperty().set(road);
+    }
+
+    public void getInstructionsFromDijkstra(){
+            dijkstra.getInstructions();
     }
 
     public ObservableList<Point> getRoutePoints() {
