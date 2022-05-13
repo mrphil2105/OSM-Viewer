@@ -65,8 +65,14 @@ public class GridTest {
         var res = grid.range(new Rect(8, 8, 30, 16));
         var iter = res.iterator();
 
+        assertNull(iter.next());
+        assertNull(iter.next());
+        assertNull(iter.next());
         assertEquals(new Point(0, 0), iter.next());
+        assertNull(iter.next());
         assertEquals(new Point(0, 1), iter.next());
+        assertNull(iter.next());
+        assertNull(iter.next());
         assertThrows(NoSuchElementException.class, iter::next);
     }
 
