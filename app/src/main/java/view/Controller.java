@@ -280,6 +280,11 @@ public class Controller {
                                             return cb;
                                         })
                                 .toList());
+
+
+        searchTextField.setOnAction(event -> {
+           search();
+        });
     }
 
     private void setModel(Model model) {
@@ -392,6 +397,10 @@ public class Controller {
 
     @FXML
     public void handleSearchClick() {
+       search();
+    }
+
+    public void search(){
         var result = handleSearchInput(searchTextField);
         if (result == null) {
             routeErrorLabel.setText(
