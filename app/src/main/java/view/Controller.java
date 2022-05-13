@@ -5,7 +5,6 @@ import Search.SearchTextField;
 import canvas.MapCanvas;
 import canvas.Renderer;
 import collections.Entity;
-
 import com.jogamp.newt.event.MouseEvent;
 import dialog.CreateMapDialog;
 import dialog.LoadingDialog;
@@ -23,7 +22,6 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
@@ -45,6 +43,7 @@ import pointsOfInterest.PointsOfInterestVBox;
 
 public class Controller {
     private final Timer queryPointTimer = new Timer();
+    private final Timer clearCopiedTimer = new Timer();
     private Model model;
     private TimerTask queryPointTimerTask;
     private Point fromPoint, toPoint;
@@ -379,14 +378,13 @@ public class Controller {
 
         nearestRoadLabel.setVisible(false);
         middleHBox.setDisable(true);
-
-        
     }
 
     public void dispose() {
         model.dispose();
         canvas.dispose();
         queryPointTimer.cancel();
+        clearCopiedTimer.cancel();
     }
 
 
@@ -510,7 +508,7 @@ public class Controller {
     }
 
     public void zoomOn(Point point) {
-        canvas.smoothZoomTo(25,point);
+        canvas.smoothZoomTo(4,point);
     }
 
     public void addPointOfInterest(PointOfInterest point) {
@@ -562,21 +560,16 @@ public class Controller {
             content.putString(model.getInstructionsFromDijkstra());
             clipboard.setContent(content);
             instructionsButton.setText("Copied!");
-            delay(2000, () -> instructionsButton.setText("Copy route"));
-        }
-    }
 
-    private void delay(long milliseconds, Runnable continuation) {
-        Task<Void> sleeper = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                try { Thread.sleep(milliseconds); }
-                catch (InterruptedException e) { }
-                return null;
-            }
-        };
-        sleeper.setOnSucceeded(event -> continuation.run());
-        new Thread(sleeper).start();
+            var clearCopiedTimerTask =
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(() -> instructionsButton.setText("Copy route"));
+                    }
+                };
+            clearCopiedTimer.schedule(clearCopiedTimerTask, 2000);
+        }
     }
 
     public void openMap() throws Exception {
