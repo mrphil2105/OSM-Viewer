@@ -42,9 +42,10 @@ public class AutofillContextMenu extends ContextMenu {
 
         text.setText(stringBuilder.toString());
         if (appendCity && address.houseNumber() == null && !pointOfIntest) {
-            for (int i = 0; i < menuAddress.street().split(" ").length; i++) {
-                text.nextWord();
+            for (int i = 0; i < menuAddress.street().length(); i++) {
+                text.forward();
             }
+            text.forward();
             text.selectNextWord();
             text.selectNextWord();
             text.selectForward();
