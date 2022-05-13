@@ -159,6 +159,8 @@ public class Controller {
 
         canvas.mapMouseClickedProperty.set(
                 e -> {
+
+
                     if (e.getButton() == MouseEvent.BUTTON2) {
                         var point = new Point(e.getX(), e.getY());
                         point = canvas.canvasToMap(point);
@@ -375,6 +377,7 @@ public class Controller {
         queryPointTimer.cancel();
     }
 
+
     private Address handleSearchInput(SearchTextField textField) {
         var parsedAddress = textField.parseAddress();
         var result = textField.handleSearch(parsedAddress);
@@ -385,10 +388,12 @@ public class Controller {
             routeErrorLabel.setText("More than one address was found. Try being more specific.");
             routeErrorLabel.setVisible(true);
 
+
             return null;
         }
         return result.get(0);
     }
+
 
     @FXML
     public void handleSearchClick() {
@@ -408,6 +413,7 @@ public class Controller {
         }
 
         Point point = Point.geoToMap(new Point(result.lon(), result.lat()));
+
         zoomOn(point);
         var drawing = canvas.getRenderer().draw(Vector2D.create(point), DrawableEnum.ADDRESS);
         if (lastDrawnAddress != null) {
@@ -440,6 +446,7 @@ public class Controller {
         var fromRouteResult = handleSearchInput(fromRouteTextField);
         var toRouteResult = handleSearchInput(toRouteTextField);
 
+
         if (fromRouteResult == null || toRouteResult == null) {
             routeErrorLabel.setText(
                     "Please enter valid from and to addresses."
@@ -450,6 +457,7 @@ public class Controller {
             return;
         }
         routeBetweenAddresses(fromRouteResult, toRouteResult, navigationModeBox.getValue());
+
     }
 
     @FXML
@@ -490,7 +498,7 @@ public class Controller {
     }
 
     public void zoomOn(Point point) {
-        canvas.zoomTo(point);
+        canvas.smoothZoomTo(25,point);
     }
 
     public void addPointOfInterest(PointOfInterest point) {
@@ -611,7 +619,6 @@ public class Controller {
     @FXML
     public void handleFromKeyTyped(KeyEvent event) {
         routeErrorLabel.setVisible(false);
-
         var result = handleKeyTyped(event);
         if (result == null) {
             model.setFromSuggestions(Collections.emptyList());
@@ -635,10 +642,12 @@ public class Controller {
     @FXML
     public void handleSearchKeyTyped(KeyEvent event) {
         var result = handleKeyTyped(event);
+
         if (result == null) {
             model.setSearchSuggestions(Collections.emptyList());
             return;
         }
+
         model.setSearchSuggestions(result);
     }
 
