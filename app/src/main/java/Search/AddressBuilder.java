@@ -40,6 +40,7 @@ public class AddressBuilder implements Serializable {
 
         this.lon = lon;
     }
+    public Address build(){
 
         return new Address(street, house, postcode, city, lat, lon);
     }

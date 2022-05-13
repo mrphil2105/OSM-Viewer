@@ -258,10 +258,6 @@ public class MapCanvas extends Region implements MouseListener {
         return (float) (transform.getMxx() / startZoom);
     }
 
-    public void setZoom(float zoom) {
-        transform.setMxx(zoom);
-        transform.setMyy(zoom);
-    }
 
     public void setZoomHandler(Rect bounds) {
         this.zoomHandler = new ZoomHandler(bounds, this);
