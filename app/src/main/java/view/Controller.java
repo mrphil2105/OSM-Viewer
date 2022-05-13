@@ -593,7 +593,7 @@ public class Controller {
         diag.getExtensionFilters()
                 .add(
                         new FileChooser.ExtensionFilter(
-                                "OSM data file", "*.osm", " *.xml", " *.osm.zip", " *.xml.zip", "*.zip"));
+                                "OSM data file", "*.osm", "*.xml", "*.osm.zip", "*.xml.zip", "*.zip"));
         var file = diag.showOpenDialog(scene.getWindow());
         if (file == null) return;
 
