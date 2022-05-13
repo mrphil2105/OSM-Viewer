@@ -26,6 +26,10 @@
     -fx-background-color: #db6e60;
 }
 
+ #removeButton:hover {
+     -fx-background-color: #b55a4e ;
+ }
+
 .radio-button .radio {
     -fx-background-color: white;
     -fx-border-color:grey;
