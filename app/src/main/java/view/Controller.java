@@ -302,6 +302,7 @@ public class Controller {
         if (model.supports(Feature.DRAWING)) {
             canvas.setModel(model.canvasModel);
             canvas.setVisible(true);
+            fps.setVisible(true);
 
             pointsOfInterestVBox.init(model.getPointsOfInterest());
             rightVBox.setDisable(false);
@@ -365,6 +366,7 @@ public class Controller {
 
         canvas.dispose();
         canvas.setVisible(false);
+        fps.setVisible(false);
         rightVBox.setDisable(true);
 
         searchTextField.setDisable(true);
