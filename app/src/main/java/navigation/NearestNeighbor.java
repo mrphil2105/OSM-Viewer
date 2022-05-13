@@ -61,6 +61,10 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     public String nearestRoad(Point query) {
         var nearestResult = tree.nearest(query);
 
+        if (nearestResult == null) {
+            return null;
+        }
+
         return nearestResult.value();
     }
 
