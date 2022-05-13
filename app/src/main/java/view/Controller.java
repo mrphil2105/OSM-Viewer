@@ -326,7 +326,7 @@ public class Controller {
                                     });
         }
 
-        if (model.supports(Feature.PATHFINDING)) {
+        if (model.supports(Feature.PATHFINDING) && model.supports(Feature.ADDRESS_SEARCH)) {
             fromToDrawings = null;
             toRouteTextField.init(model);
             fromRouteTextField.init(model);
