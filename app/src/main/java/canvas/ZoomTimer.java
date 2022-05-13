@@ -34,10 +34,10 @@ public class ZoomTimer extends TimerTask {
         finalZoom=zoom;
         finalCenter=center;
 
-        zoomFrames = 100;
+        zoomFrames = 40;
         panFrames = 40;
 
-        var distance=Math.abs(zoom-transform.getMxx());
+        var distance=zoom-transform.getMxx();
         var xPanDistance=center.x()-canvas.getCenterPoint().x();
         var yPanDistance=center.y()-canvas.getCenterPoint().y();
 
@@ -70,12 +70,14 @@ public class ZoomTimer extends TimerTask {
             canvas.center(point);
 
         }else{
+
             if (!quickZoom){
                 var missingFrames=zoomFrames-frames;
                 frames=zoomFrames-15;
                 zoomIncrements*=missingFrames/15;
                 quickZoom=true;
             }
+
             canvas.center(finalCenter);
         }
 

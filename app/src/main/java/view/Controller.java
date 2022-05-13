@@ -498,7 +498,7 @@ public class Controller {
     }
 
     public void zoomOn(Point point) {
-        canvas.smoothZoomTo(25,point);
+        canvas.smoothZoomTo(3,point);
     }
 
     public void addPointOfInterest(PointOfInterest point) {
