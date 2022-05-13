@@ -184,20 +184,9 @@ public class MapCanvas extends Region implements MouseListener {
 
     public void smoothZoomTo(float zoom,Point center){
         float delay = 1000/60;
-        float zoomFrames = 100;
-        float panFrames = 40;
-
-        var distance=Math.abs(zoom-transform.getMxx());
-        var xPanDistance=center.x()-getCenterPoint().x();
-        var yPanDistance=center.y()-getCenterPoint().y();
-
-
         Timer timer = new Timer();
-        TimerTask zoomTimer = new ZoomTimer(this,zoom, (float) distance/zoomFrames,  center, zoomFrames,xPanDistance/panFrames,yPanDistance/panFrames, panFrames,timer);
+        TimerTask zoomTimer = new ZoomTimer(this,center,zoom,timer);
         timer.scheduleAtFixedRate(zoomTimer, 0L, (long) delay);
-
-        //transform.setMxx(zoom);
-        //transform.setMyy(zoom);
     }
 
     public void setZoom(float zoom) {

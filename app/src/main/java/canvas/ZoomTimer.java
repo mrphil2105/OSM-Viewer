@@ -26,21 +26,29 @@ public class ZoomTimer extends TimerTask {
     boolean quickZoom = false;
 
 
-    public ZoomTimer(MapCanvas canvas, float finalZoom, float zoomIncrements, Point finalCenter, float zoomFrames, float xPanIncrements,float yPanIncrements,  float panFrames, Timer timer){
+    public ZoomTimer(MapCanvas canvas, Point center, float zoom, Timer timer){
+
         this.canvas=canvas;
-        this.transform=canvas.transform;
-        this.finalZoom=finalZoom;
-        this.zoomIncrements=zoomIncrements;
-        this.finalCenter=finalCenter;
-        this.xPanIncrements=xPanIncrements;
-        this.yPanIncrements=yPanIncrements;
+        transform=canvas.transform;
+
+        finalZoom=zoom;
+        finalCenter=center;
+
+        zoomFrames = 100;
+        panFrames = 40;
+
+        var distance=Math.abs(zoom-transform.getMxx());
+        var xPanDistance=center.x()-canvas.getCenterPoint().x();
+        var yPanDistance=center.y()-canvas.getCenterPoint().y();
+
+        zoomIncrements= (float) distance/zoomFrames;
+        xPanIncrements=xPanDistance/panFrames;
+        yPanIncrements=yPanDistance/panFrames;
         this.timer=timer;
-        this.zoomFrames=zoomFrames;
-        this.panFrames=panFrames;
+
         frames=0;
         startZoomFactor=0f;
         zoomFactor = startZoomFactor;
-
 
     }
 
