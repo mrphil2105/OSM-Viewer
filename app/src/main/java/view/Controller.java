@@ -139,7 +139,7 @@ public class Controller {
 
         canvas.mapMouseClickedProperty.set(
                 e -> {
-                    canvas.center(canvas.getCenterPoint());
+
 
                     if (e.getButton() == MouseEvent.BUTTON2) {
                         var point = new Point(e.getX(), e.getY());
@@ -369,7 +369,6 @@ public class Controller {
 
         Point point =
                 Point.geoToMap(new Point(result.lon(), result.lat()));
-        System.out.println("hey");
         zoomOn(point);
         var drawing = Drawing.create(Vector2D.create(point), Drawable.ADDRESS);
         canvas.getRenderer().draw(drawing);
@@ -450,8 +449,7 @@ public class Controller {
     }
 
     public void zoomOn(Point point) {
-        System.out.println("hey");
-        canvas.zoomTo(point);
+        canvas.smoothZoomTo(25,point);
     }
 
     public void addPointOfInterest(PointOfInterest point) {

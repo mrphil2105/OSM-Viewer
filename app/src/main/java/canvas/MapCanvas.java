@@ -173,8 +173,7 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
     public void zoomTo(Point point) {
-        System.out.println("hey");
-        smoothZoomTo(25,point);
+        zoomTo(point,25);
 
     }
 
@@ -185,8 +184,8 @@ public class MapCanvas extends Region implements MouseListener {
 
     public void smoothZoomTo(float zoom,Point center){
         float delay = 1000/60;
-        float zoomFrames = 600;
-        float panFrames = 300;
+        float zoomFrames = 100;
+        float panFrames = 40;
 
         var distance=Math.abs(zoom-transform.getMxx());
         var xPanDistance=center.x()-getCenterPoint().x();

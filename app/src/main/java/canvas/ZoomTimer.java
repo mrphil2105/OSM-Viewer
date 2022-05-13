@@ -21,6 +21,10 @@ public class ZoomTimer extends TimerTask {
     float panFrames;
     float zoomFrames;
 
+    float zoomFactor;
+    float startZoomFactor;
+    boolean quickZoom = false;
+
 
     public ZoomTimer(MapCanvas canvas, float finalZoom, float zoomIncrements, Point finalCenter, float zoomFrames, float xPanIncrements,float yPanIncrements,  float panFrames, Timer timer){
         this.canvas=canvas;
@@ -29,11 +33,13 @@ public class ZoomTimer extends TimerTask {
         this.zoomIncrements=zoomIncrements;
         this.finalCenter=finalCenter;
         this.xPanIncrements=xPanIncrements;
-        this.yPanIncrements=yPanIncrements*2;
+        this.yPanIncrements=yPanIncrements;
         this.timer=timer;
         this.zoomFrames=zoomFrames;
         this.panFrames=panFrames;
         frames=0;
+        startZoomFactor=0f;
+        zoomFactor = startZoomFactor;
 
 
     }
@@ -43,23 +49,32 @@ public class ZoomTimer extends TimerTask {
 
         var startPoint=canvas.getCenterPoint();
         if (frames<zoomFrames){
-            transform.setMxx(transform.getMxx()+zoomIncrements);
-            transform.setMyy(transform.getMyy()+zoomIncrements);
+            transform.setMxx(transform.getMxx()+zoomIncrements*zoomFactor);
+            transform.setMyy(transform.getMyy()+zoomIncrements*zoomFactor);
+            if (!quickZoom){
+                zoomFactor+= ((1+(1-startZoomFactor)) -startZoomFactor) / zoomFrames;
+            }
+
         }
 
         if (frames<panFrames){
             var point =new Point(startPoint.x()+xPanIncrements,startPoint.y()+yPanIncrements);
             canvas.center(point);
 
-
         }else{
+            if (!quickZoom){
+                var missingFrames=zoomFrames-frames;
+                frames=zoomFrames-15;
+                zoomIncrements*=missingFrames/15;
+                quickZoom=true;
+            }
             canvas.center(finalCenter);
         }
 
 
         frames++;
         if (frames>=zoomFrames && frames>=panFrames){
-            canvas.setZoom(finalZoom);
+           // canvas.setZoom(finalZoom);
             canvas.center(finalCenter);
             timer.cancel();
         }
