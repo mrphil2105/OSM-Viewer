@@ -69,6 +69,10 @@ public class NearestNeighbor implements OSMObserver, Serializable {
     }
 
     private void addToTree(List<Pair<Point, String>> nodes, int level) {
+        if (nodes.isEmpty()) {
+            return;
+        }
+
         nodes.sort(
                 (first, second) ->
                         (level & 1) == 0
