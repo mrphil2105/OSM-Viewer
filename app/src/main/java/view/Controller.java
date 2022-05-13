@@ -5,6 +5,7 @@ import Search.SearchTextField;
 import canvas.MapCanvas;
 import canvas.Renderer;
 import collections.Entity;
+
 import com.jogamp.newt.event.MouseEvent;
 import dialog.CreateMapDialog;
 import dialog.LoadingDialog;
@@ -22,6 +23,7 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
@@ -508,7 +510,7 @@ public class Controller {
     }
 
     public void zoomOn(Point point) {
-        canvas.smoothZoomTo(3,point);
+        canvas.smoothZoomTo(25,point);
     }
 
     public void addPointOfInterest(PointOfInterest point) {
@@ -554,10 +556,27 @@ public class Controller {
 
     @FXML
     public void handleInstructions() {
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-        ClipboardContent content = new ClipboardContent();
-        content.putString(model.getInstructionsFromDijkstra());
-        clipboard.setContent(content);
+        if (!model.getInstructionsFromDijkstra().equals("")){
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            content.putString(model.getInstructionsFromDijkstra());
+            clipboard.setContent(content);
+            instructionsButton.setText("Copied!");
+            delay(2000, () -> instructionsButton.setText("Copy route"));
+        }
+    }
+
+    public static void delay(long milliseconds, Runnable continuation) {
+        Task<Void> sleeper = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try { Thread.sleep(milliseconds); }
+                catch (InterruptedException e) { }
+                return null;
+            }
+        };
+        sleeper.setOnSucceeded(event -> continuation.run());
+        new Thread(sleeper).start();
     }
 
     public void openMap() throws Exception {

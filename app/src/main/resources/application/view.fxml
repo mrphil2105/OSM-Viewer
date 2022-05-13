@@ -37,7 +37,7 @@
                                      GridPane.rowIndex="3" onKeyTyped="#handleToKeyTyped" onMouseClicked="#handleToInFocus"/>
                     <ComboBox fx:id="navigationModeBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
                     <HBox spacing="10" alignment="center_left" GridPane.columnIndex="0" GridPane.rowIndex="5">
-                        <Button fx:id="instructionsButton" onAction="#handleInstructions" text="Copy"/>
+                        <Button fx:id="instructionsButton" onAction="#handleInstructions" text="Copy route"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button fx:id="routeButton" id="allButtons" text="Find route" onAction="#handleRouteClick"/>
                     </HBox>
