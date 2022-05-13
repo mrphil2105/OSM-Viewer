@@ -66,6 +66,9 @@
                     <RadioButton fx:id="radioButtonPartyMode" text="Party mode" GridPane.columnIndex="0"
                                  GridPane.rowIndex="8" toggleGroup="$groupMode" onAction="#handlePartyMode"/>
                     <HBox fx:id="pointsOfInterestHeader" GridPane.columnIndex="0" GridPane.rowIndex="9">
+                        <padding>
+                            <Insets top="25" />
+                        </padding>
                         <Label text="Points of interest" GridPane.columnIndex="0" GridPane.rowIndex="9"/>
                         <Button text="+" fx:id="addPointOfInterest" onAction="#enterPointOfInterestMode"/>
 

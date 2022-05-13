@@ -537,7 +537,7 @@ public class Controller {
 
         var bounds = rightVBox.getBoundsInLocal();
         var screenBounds = rightVBox.localToScreen(bounds);
-        addPointOfInterestText.show(rightVBox, screenBounds.getMinX(), screenBounds.getMinY() + 230);
+        addPointOfInterestText.show(rightVBox, screenBounds.getMinX(), screenBounds.getMinY() + 360);
 
         pointOfInterestMode = true;
     }
