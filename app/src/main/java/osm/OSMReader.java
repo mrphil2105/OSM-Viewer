@@ -1,6 +1,14 @@
 package osm;
 
 import geometry.Rect;
+import jdk.incubator.vector.ByteVector;
+import jdk.incubator.vector.VectorMask;
+import jdk.incubator.vector.VectorSpecies;
+import osm.elements.*;
+import osm.tables.NodeTable;
+import osm.tables.WayTable;
+import util.ThrowingRunnable;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,37 +17,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import jdk.incubator.vector.*;
-import osm.elements.*;
-import osm.tables.NodeTable;
-import osm.tables.WayTable;
-import util.ThrowingRunnable;
 
 public class OSMReader {
-    enum Parseable {
-        NODE('n', true),
-        WAY('w', true),
-        RELATION('r', true),
-        TAG('t', false),
-        ND('n', false),
-        MEMBER('m', false);
-
-        final byte b;
-        final boolean isContainer;
-
-        Parseable(char c, boolean isContainer) {
-            b = (byte) c;
-            this.isContainer = isContainer;
-        }
-    }
-
     private static final VectorSpecies<Byte> SPECIES = ByteVector.SPECIES_PREFERRED;
     private static final int SPECIES_LENGTH = SPECIES.length();
-
     private static final VectorMask<Byte>[] LSHIFT_MASKS =
             (VectorMask<Byte>[]) new VectorMask[SPECIES_LENGTH];
     private static final double[] POWERS_OF_TEN = new double[24];
-
     private static final ByteVector TAG = ByteVector.broadcast(SPECIES, (byte) '<');
     private static final ByteVector QUOTE = ByteVector.broadcast(SPECIES, (byte) '"');
     private static final ByteVector L = ByteVector.broadcast(SPECIES, (byte) 'l');
@@ -55,20 +39,17 @@ public class OSMReader {
         }
     }
 
-    private InputStream stream;
     private final byte[] buf = new byte[64 * 4096]; // must be multiple of 64
-    private int cur = 0;
-
     private final List<OSMObserver> observers = new ArrayList<>();
-
     private final NodeTable nodes = new NodeTable();
     private final WayTable ways = new WayTable();
-
     private final OSMNode node = new OSMNode();
     private final OSMWay way = new OSMWay();
     private final OSMRelation relation = new OSMRelation();
-    private OSMElement current;
     private final List<SlimOSMNode> wayNdList = new ArrayList<>();
+    private InputStream stream;
+    private int cur = 0;
+    private OSMElement current;
     private boolean atTag;
 
     public OSMReader() {
@@ -377,5 +358,22 @@ public class OSMReader {
             num = num * 10 + buf[off + i] - '0';
         }
         return num;
+    }
+
+    enum Parseable {
+        NODE('n', true),
+        WAY('w', true),
+        RELATION('r', true),
+        TAG('t', false),
+        ND('n', false),
+        MEMBER('m', false);
+
+        final byte b;
+        final boolean isContainer;
+
+        Parseable(char c, boolean isContainer) {
+            b = (byte) c;
+            this.isContainer = isContainer;
+        }
     }
 }

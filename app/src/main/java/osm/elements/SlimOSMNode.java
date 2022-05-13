@@ -1,6 +1,7 @@
 package osm.elements;
 
 import collections.Entity;
+
 import java.io.Serializable;
 
 public final class SlimOSMNode extends Entity implements Serializable {

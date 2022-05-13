@@ -6,7 +6,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class Predicates {
-    private Predicates() {}
+    private Predicates() {
+    }
 
     // Credit: https://www.baeldung.com/java-streams-distinct-by
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {

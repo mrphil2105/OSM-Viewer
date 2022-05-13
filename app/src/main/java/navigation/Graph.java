@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** A directed graph that supports non-indexed vertexes */
+/**
+ * A directed graph that supports non-indexed vertexes
+ */
 class Graph implements Serializable {
     // Use a hashmap to support non-index values.
     private final Map<Long, List<Edge>> adjacentEdges;

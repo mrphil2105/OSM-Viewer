@@ -18,6 +18,7 @@ public class AutofillContextMenu extends ContextMenu {
 
         AddressMenuItem menuItem = (AddressMenuItem) actionEvent.getSource();
         Address menuAddress = menuItem.getAddress();
+        boolean pointOfIntest = (menuAddress.street().toLowerCase().contains(("(point of interest)")));
 
         AddressBuilder parsed = AddressDatabase.parse(inputText);
         assert parsed != null;
@@ -32,20 +33,15 @@ public class AutofillContextMenu extends ContextMenu {
         }
         if (address.houseNumber() != null) {
             stringBuilder.append(menuAddress.houseNumber()).append(" ");
-        } else if (appendCity) {
+        } else if (appendCity && !pointOfIntest) {
             stringBuilder.append("House No. ");
         }
-        if (address.floor() != null)
-            stringBuilder.append(address.floor()).append(" ");
-        if (address.side() != null)
-            stringBuilder.append(address.side()).append(" ");
-        if (address.postcode() != null)
-            stringBuilder.append(menuAddress.postcode()).append(" ");
-        if (address.city() != null || appendCity)
-            stringBuilder.append(menuAddress.city()).append(" ");
+
+        if (address.postcode() != null) stringBuilder.append(menuAddress.postcode()).append(" ");
+        if (address.city() != null || appendCity) stringBuilder.append(menuAddress.city()).append(" ");
 
         text.setText(stringBuilder.toString());
-        if (appendCity && address.houseNumber() == null) {
+        if (appendCity && address.houseNumber() == null && !pointOfIntest) {
             for (int i = 0; i < menuAddress.street().split(" ").length; i++) {
                 text.nextWord();
             }

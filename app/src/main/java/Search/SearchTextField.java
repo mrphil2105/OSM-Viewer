@@ -1,52 +1,17 @@
 package Search;
 
-import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.TextField;
 import view.Model;
+import java.util.List;
+
 
 public class SearchTextField extends TextField {
     AutofillContextMenu popupEntries;
     Address currentSearch;
     AddressDatabase addressDatabase;
 
-    public void init(Model model) {
-        var addressDatabase = model.getAddresses();
-        this.addressDatabase = addressDatabase;
-        popupEntries = new AutofillContextMenu(this, addressDatabase);
-        currentSearch=null;
-    }
-
-    public List<Address> handleSearch(Address parsedAddress) {
-        popupEntries.hide();
-        if (parsedAddress == null) return null;
-        return addressDatabase.search(parsedAddress);
-    }
-
-    public void showMenuItems(ObservableList<Address> itemsToShow) {
-            popupEntries.hide();
-
-            boolean showStreet = (currentSearch.street() != null);
-            boolean showHouse = (currentSearch.houseNumber() != null);
-            boolean showCity = (currentSearch.city() != null);
-            boolean showPostcode = (currentSearch.postcode() != null);
-            if (currentSearch.street() != null) showCity = true;
-
-            popupEntries.getItems().clear();
-
-            for (Address a : itemsToShow) {
-                if (a == null) continue;
-                var item = new AddressMenuItem(a, showStreet, showHouse, showCity, showPostcode);
-                item.setOnAction(popupEntries::onMenuClick);
-                popupEntries.getItems().add(item);
-            }
-            showCurrentAddresses();
-    }
-
-    public void setCurrentSearch(Address currentSearch) {
-        this.currentSearch = currentSearch;
-    }
 
     public static String reformat(String string) {
         if (string == null) return null;
@@ -65,6 +30,45 @@ public class SearchTextField extends TextField {
         return stringBuilder.toString().trim();
     }
 
+    public void init(Model model) {
+        var addressDatabase = model.getAddresses();
+        this.addressDatabase = addressDatabase;
+        popupEntries = new AutofillContextMenu(this, addressDatabase);
+        currentSearch = null;
+
+    }
+
+    public List<Address> handleSearch(Address parsedAddress) {
+        popupEntries.hide();
+        if (parsedAddress == null) return null;
+        return addressDatabase.search(parsedAddress);
+    }
+
+    public void showMenuItems(ObservableList<Address> itemsToShow) {
+
+        popupEntries.hide();
+
+        boolean showStreet = (currentSearch.street() != null);
+        boolean showHouse = (currentSearch.houseNumber() != null);
+        boolean showCity = (currentSearch.city() != null);
+        boolean showPostcode = (currentSearch.postcode() != null);
+        if (currentSearch.street() != null) showCity = true;
+
+        popupEntries.getItems().clear();
+
+        for (Address a : itemsToShow) {
+            if (a == null) continue;
+            var item = new AddressMenuItem(a, showStreet, showHouse, showCity, showPostcode);
+            item.setOnAction(popupEntries::onMenuClick);
+            popupEntries.getItems().add(item);
+        }
+        showCurrentAddresses();
+    }
+
+    public void setCurrentSearch(Address currentSearch) {
+        this.currentSearch = currentSearch;
+    }
+
     public Address parseAddress() {
         var searchedAddressBuilder = AddressDatabase.parse(getText());
 
@@ -79,7 +83,8 @@ public class SearchTextField extends TextField {
     }
 
     public void showCurrentAddresses() {
-        if(getText().isBlank()) {
+
+        if (getText().isBlank()) {
             popupEntries.hide();
             return;
         }

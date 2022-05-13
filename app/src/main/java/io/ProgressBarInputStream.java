@@ -1,10 +1,11 @@
 package io;
 
+import javafx.application.Platform;
+import javafx.scene.control.ProgressBar;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import javafx.application.Platform;
-import javafx.scene.control.ProgressBar;
 
 public class ProgressBarInputStream extends FilterInputStream {
     private final ProgressBar bar;

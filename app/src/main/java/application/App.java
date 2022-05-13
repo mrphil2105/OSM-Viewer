@@ -2,10 +2,11 @@ package application;
 
 import features.FeatureSet;
 import io.FileParser;
-import java.io.File;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import view.Model;
+
+import java.io.File;
 
 public class App extends Application {
     @Override

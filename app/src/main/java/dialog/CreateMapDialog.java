@@ -1,16 +1,8 @@
 package dialog;
 
-import static util.TimeFormat.formatDuration;
-
 import features.Feature;
 import features.FeatureSet;
 import io.FileParser;
-import java.io.File;
-import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalTime;
-import java.util.EnumSet;
-import java.util.Set;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -25,22 +17,54 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import osm.ReaderStats;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.EnumSet;
+import java.util.Set;
+
+import static util.TimeFormat.formatDuration;
+
 public class CreateMapDialog extends Dialog {
     private Set<Feature> set;
     private File file;
 
-    @FXML private Label header;
-    @FXML private VBox checkboxes;
-    @FXML private GridPane statsGrid;
-    @FXML private Button next;
-    @FXML private Label nodeTotal;
-    @FXML private Label nodeThroughput;
-    @FXML private Label wayTotal;
-    @FXML private Label wayThroughput;
-    @FXML private Label relationTotal;
-    @FXML private Label relationThroughput;
-    @FXML private ProgressBar progress;
-    @FXML private Label timer;
+    @FXML
+    private Label header;
+    @FXML
+    private VBox checkboxes;
+    @FXML
+    private GridPane statsGrid;
+    @FXML
+    private Button next;
+    @FXML
+    private Label nodeTotal;
+    @FXML
+    private Label nodeThroughput;
+    @FXML
+    private Label wayTotal;
+    @FXML
+    private Label wayThroughput;
+    @FXML
+    private Label relationTotal;
+    @FXML
+    private Label relationThroughput;
+    @FXML
+    private ProgressBar progress;
+    @FXML
+    private Label timer;
+
+    public static File showDialog(File file) throws IOException {
+        var diag = (CreateMapDialog) load("CreateMapDialog.fxml");
+
+        diag.setSet(EnumSet.allOf(Feature.class));
+        diag.file = file;
+
+        diag.showAndWait();
+
+        return diag.file;
+    }
 
     private void setSet(Set<Feature> set) {
         this.set = set;
@@ -58,17 +82,6 @@ public class CreateMapDialog extends Dialog {
 
             checkboxes.getChildren().add(cb);
         }
-    }
-
-    public static File showDialog(File file) throws IOException {
-        var diag = (CreateMapDialog) load("CreateMapDialog.fxml");
-
-        diag.setSet(EnumSet.allOf(Feature.class));
-        diag.file = file;
-
-        diag.showAndWait();
-
-        return diag.file;
     }
 
     @FXML

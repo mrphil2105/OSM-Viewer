@@ -7,14 +7,17 @@ import com.jogamp.newt.event.MouseListener;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
-import drawing.Category;
+import drawing.Drawable;
 import geometry.Point;
 import geometry.Rect;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.*;
+import javafx.beans.property.FloatProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
@@ -29,6 +32,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MapCanvas extends Region implements MouseListener {
+    // TODO: Add all if necessary
+    public final ObjectProperty<EventHandler<MouseEvent>> mapMouseClickedProperty =
+            new SimpleObjectProperty<>();
+    public final ObjectProperty<EventHandler<MouseEvent>> mapMouseMovedProperty =
+            new SimpleObjectProperty<>();
+    public final ObjectProperty<EventHandler<MouseEvent>> mapMouseWheelProperty =
+            new SimpleObjectProperty<>();
+    public final FloatProperty fpsProperty = new SimpleFloatProperty();
+    public final ObservableEnumFlags<Drawable.Category> categories = new ObservableEnumFlags<>();
     final Affine transform = new Affine();
     private Animator animator;
     private GLWindow window;
@@ -38,25 +50,47 @@ public class MapCanvas extends Region implements MouseListener {
     private Point2D lastMouse;
     private CanvasFocusListener canvasFocusListener;
     private ZoomHandler zoomHandler;
-
+    private Timer resizeHeightTimer = new Timer();
+    private TimerTask resizeHeightTimerTask;
     private final ChangeListener<Number> HEIGHT_LISTENER =
-            (observable, oldValue, newValue) ->
-                    window.setSize(window.getWidth(), Math.max(1, newValue.intValue()));
+            (observable, oldValue, newValue) -> {
+                if (resizeHeightTimerTask != null) {
+                    resizeHeightTimerTask.cancel();
+                }
+
+                resizeHeightTimerTask =
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                Platform.runLater(
+                                        () -> window.setSize(window.getWidth(), Math.max(1, newValue.intValue())));
+                            }
+                        };
+                resizeHeightTimer.schedule(resizeHeightTimerTask, 50);
+            };
+    private Timer resizeWidthTimer = new Timer();
+    private TimerTask resizeWidthTimerTask;
     private final ChangeListener<Number> WIDTH_LISTENER =
-            (observable, oldValue, newValue) ->
-                    window.setSize(Math.max(1, newValue.intValue()), window.getHeight());
+            (observable, oldValue, newValue) -> {
+                if (resizeWidthTimerTask != null) {
+                    resizeWidthTimerTask.cancel();
+                }
 
-    // TODO: Add all if necessary
-    public final ObjectProperty<EventHandler<MouseEvent>> mapMouseClickedProperty =
-            new SimpleObjectProperty<>();
-    public final ObjectProperty<EventHandler<MouseEvent>> mapMouseMovedProperty =
-            new SimpleObjectProperty<>();
-    public final ObjectProperty<EventHandler<MouseEvent>> mapMouseWheelProperty =
-            new SimpleObjectProperty<>();
-
-    public final FloatProperty fpsProperty = new SimpleFloatProperty();
-
-    public final ObservableEnumFlags<Category> categories = new ObservableEnumFlags<>();
+                resizeWidthTimerTask =
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                Platform.runLater(
+                                        () -> {
+                                            // We need to do this twice, because otherwise it does not resize on maximize
+                                            // on some systems.
+                                            window.setSize(Math.max(1, newValue.intValue()), window.getHeight());
+                                            window.setSize(Math.max(1, newValue.intValue()), window.getHeight());
+                                        });
+                            }
+                        };
+                resizeWidthTimer.schedule(resizeWidthTimerTask, 50);
+            };
     private Timeline fpsUpdater;
 
     public void setModel(Model model) {
@@ -84,6 +118,9 @@ public class MapCanvas extends Region implements MouseListener {
                                 JFXAccessor.runOnJFXThread(false, this::giveFocus);
                             }
                         });
+
+        resizeHeightTimer = new Timer();
+        resizeWidthTimer = new Timer();
 
         // Resize window when region resizes
         heightProperty().addListener(HEIGHT_LISTENER);
@@ -120,6 +157,9 @@ public class MapCanvas extends Region implements MouseListener {
             if (canvasFocusListener != null) window.removeWindowListener(canvasFocusListener);
         }
 
+        heightProperty().removeListener(HEIGHT_LISTENER);
+        widthProperty().removeListener(WIDTH_LISTENER);
+
         if (animator != null) animator.stop();
 
         if (fpsUpdater != null) fpsUpdater.stop();
@@ -131,6 +171,9 @@ public class MapCanvas extends Region implements MouseListener {
         }
 
         if (model != null) model.dispose();
+
+        if (resizeHeightTimer != null) resizeHeightTimer.cancel();
+        if (resizeWidthTimer != null) resizeWidthTimer.cancel();
     }
 
     public Point canvasToMap(Point point) {
@@ -182,6 +225,7 @@ public class MapCanvas extends Region implements MouseListener {
         center(point);
     }
 
+
     public void smoothZoomTo(float zoom,Point center){
         float delay = 1000/60;
         Timer timer = new Timer();
@@ -193,6 +237,7 @@ public class MapCanvas extends Region implements MouseListener {
         transform.setMxx(zoom);
         transform.setMyy(zoom);
     }
+
 
     public void zoomChange(boolean positive) {
         Point point = new Point(640, 360);
@@ -211,6 +256,11 @@ public class MapCanvas extends Region implements MouseListener {
 
     public float getZoom() {
         return (float) (transform.getMxx() / startZoom);
+    }
+
+    public void setZoom(float zoom) {
+        transform.setMxx(zoom);
+        transform.setMyy(zoom);
     }
 
     public void setZoomHandler(Rect bounds) {
@@ -244,10 +294,12 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
     @Override
-    public void mouseEntered(MouseEvent mouseEvent) {}
+    public void mouseEntered(MouseEvent mouseEvent) {
+    }
 
     @Override
-    public void mouseExited(MouseEvent mouseEvent) {}
+    public void mouseExited(MouseEvent mouseEvent) {
+    }
 
     @Override
     public void mousePressed(MouseEvent mouseEvent) {
@@ -255,7 +307,8 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
     @Override
-    public void mouseReleased(MouseEvent mouseEvent) {}
+    public void mouseReleased(MouseEvent mouseEvent) {
+    }
 
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
@@ -293,12 +346,38 @@ public class MapCanvas extends Region implements MouseListener {
     }
 
 
+
     public Point getCenterPoint(){
         var x = -(transform.getTx() - getWidth()/2) / transform.getMxx();
         var y = -(transform.getTy() - getHeight()/2) / transform.getMyy();
         return new Point((float) x, (float) y);
     }
+  
 
+    /**
+     * Get the currently shown area as a lat/lon rect.
+     *
+     * @return Rect of lat/lon area shown by the canvas.
+     */
+    public Rect screenBounds() {
+        return new Rect(
+                Point.mapToGeo(canvasToMap(new Point(0, (float) getHeight()))),
+                Point.mapToGeo(canvasToMap(new Point((float) getWidth(), 0))));
+    }
 
+    /**
+     * Get all currently shown chunks.
+     *
+     * @return All chunks currently on screen.
+     */
+    public Iterable<Chunk> getChunks() {
+        return model.getChunks(chunkSize()).range(screenBounds());
+    }
+
+    public float chunkSize() {
+        var left = Point.mapToGeo(canvasToMap(new Point(0, 0)));
+        var right = Point.mapToGeo(canvasToMap(new Point((float) getWidth(), 0)));
+        return (right.x() - left.x()) / 2; // 2 is how many chunks we want on the x-axis
+    }
 
 }

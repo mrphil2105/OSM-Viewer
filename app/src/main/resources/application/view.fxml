@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 
 
@@ -7,6 +8,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import pointsOfInterest.PointsOfInterestVBox?>
 <?import Search.SearchTextField?>
 <Scene xmlns="http://javafx.com/javafx"
@@ -20,7 +23,7 @@
                 <padding>
                     <Insets top="10" bottom="10" left="10" right="10"/>
                 </padding>
-                <GridPane alignment="center" hgap="10" vgap="10">
+                <GridPane fx:id="searchPane" alignment="center" hgap="10" vgap="10">
                     <SearchTextField fx:id="searchTextField" promptText="Search an address" GridPane.columnIndex="0"
                                      GridPane.rowIndex="0" onAction="#handleSearchClick"
                                      onKeyTyped="#handleSearchKeyTyped"
@@ -33,16 +36,14 @@
                                      GridPane.rowIndex="2" onKeyTyped="#handleFromKeyTyped" onMouseClicked="#handleFromInFocus"/>
                     <SearchTextField fx:id="toRouteTextField" promptText="To" GridPane.columnIndex="0"
                                      GridPane.rowIndex="3" onKeyTyped="#handleToKeyTyped" onMouseClicked="#handleToInFocus"/>
-                    <HBox spacing="10" alignment="bottom_right" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                    <ComboBox fx:id="navigationModeBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <HBox spacing="10" alignment="center_left" GridPane.columnIndex="0" GridPane.rowIndex="5">
+                        <Button fx:id="instructionsButton" onAction="#handleInstructions" text="Copy"/>
+                        <Region HBox.hgrow="ALWAYS"/>
                         <Button fx:id="routeButton" id="allButtons" text="Find route" onAction="#handleRouteClick"/>
                     </HBox>
-                    <HBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="5">
-                        <fx:define>
-                            <ToggleGroup fx:id="groupRoute"/>
-                        </fx:define>
-                        <RadioButton fx:id="radioButtonCar" text="Car" toggleGroup="$groupRoute" selected="true"/>
-                        <RadioButton fx:id="radioButtonBikeOrWalk" text="Bike or walk" toggleGroup="$groupRoute"/>
-                    </HBox>
+                    <Label fx:id="routeErrorLabel" GridPane.columnIndex="0" GridPane.rowIndex="6"
+                           textFill="RED" wrapText="true" visible="false" />
                 </GridPane>
             </VBox>
         </left>
@@ -84,7 +85,7 @@
         </top>
         <center>
             <VBox fx:id="middleVBox">
-                <MapCanvas fx:id="canvas" prefWidth="1280" prefHeight="720"/>
+                <MapCanvas fx:id="canvas" VBox.vgrow="ALWAYS" prefWidth="1280" prefHeight="720"/>
                 <HBox alignment="center" fx:id="middleHBox" maxHeight="20">
                     <padding>
                         <Insets left="20" right="10"/>
@@ -134,3 +135,4 @@
         </bottom>
     </BorderPane>
 </Scene>
+

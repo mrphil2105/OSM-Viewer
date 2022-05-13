@@ -12,11 +12,6 @@ public final class Vector2D {
         init(x, y);
     }
 
-    private void init(double x, double y) {
-        this.x = x;
-        this.y = y;
-    }
-
     public static Vector2D create(double x, double y) {
         if (cache.isEmpty()) {
             return new Vector2D(x, y);
@@ -29,6 +24,11 @@ public final class Vector2D {
 
     public static Vector2D create(Point point) {
         return create(point.x(), point.y());
+    }
+
+    private void init(double x, double y) {
+        this.x = x;
+        this.y = y;
     }
 
     /**

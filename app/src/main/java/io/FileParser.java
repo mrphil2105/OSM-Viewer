@@ -2,11 +2,6 @@ package io;
 
 import features.Feature;
 import features.FeatureSet;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.zip.ZipFile;
 import javafx.application.Platform;
 import javafx.scene.control.ProgressBar;
 import javafx.util.Pair;
@@ -19,8 +14,14 @@ import osm.OSMObserver;
 import osm.OSMReader;
 import osm.elements.OSMBounds;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.zip.ZipFile;
+
 // TODO: Use a custom exception type instead of RuntimeException for when parsing fails.
-public class FileParser implements IOConstants {
+public class FileParser {
     public static final String EXT = ".map";
     private static final String FEATURES = "FEATURES";
     private static final String BOUNDS = "BOUNDS";
@@ -71,8 +72,7 @@ public class FileParser implements IOConstants {
     private static void createMapFromWriters(File outfile, List<Pair<String, Writer>> pairs)
             throws IOException {
         try (var tarStream =
-                new TarArchiveOutputStream(
-                        new BufferedOutputStream(new FileOutputStream(outfile), BUFFER_SIZE))) {
+                     new TarArchiveOutputStream(new BufferedOutputStream(new FileOutputStream(outfile)))) {
             for (var pair : pairs) {
                 var file = writeToFile(pair.getValue());
                 var entry = tarStream.createArchiveEntry(file, pair.getKey());
@@ -128,7 +128,7 @@ public class FileParser implements IOConstants {
             size = file.length();
         }
 
-        stream = new BufferedInputStream(stream, BUFFER_SIZE);
+        stream = new BufferedInputStream(stream);
 
         if (bar != null) stream = new ProgressBarInputStream(stream, bar, size);
 
