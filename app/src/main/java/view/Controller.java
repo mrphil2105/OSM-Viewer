@@ -312,6 +312,7 @@ public class Controller {
         if (model.supports(Feature.ADDRESS_SEARCH)) {
             searchTextField.init(model);
             searchTextField.setDisable(false);
+            searchButton.setDisable(false);
             lastDrawnAddress = null;
 
             model
@@ -329,6 +330,9 @@ public class Controller {
             fromRouteTextField.init(model);
             toRouteTextField.setDisable(false);
             fromRouteTextField.setDisable(false);
+            routeButton.setDisable(false);
+            instructionsButton.setDisable(false);
+            navigationModeBox.setDisable(false);
             model
                     .getObservableToSuggestions()
                     .addListener(
@@ -363,12 +367,18 @@ public class Controller {
         rightVBox.setDisable(true);
 
         searchTextField.setDisable(true);
+        searchButton.setDisable(true);
 
         toRouteTextField.setDisable(true);
         fromRouteTextField.setDisable(true);
+        routeButton.setDisable(true);
+        instructionsButton.setDisable(true);
+        navigationModeBox.setDisable(true);
 
         nearestRoadLabel.setVisible(false);
         middleHBox.setDisable(true);
+
+        
     }
 
     public void dispose() {
