@@ -566,7 +566,7 @@ public class Controller {
         }
     }
 
-    public static void delay(long milliseconds, Runnable continuation) {
+    private void delay(long milliseconds, Runnable continuation) {
         Task<Void> sleeper = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
