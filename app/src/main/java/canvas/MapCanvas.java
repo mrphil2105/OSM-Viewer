@@ -32,7 +32,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MapCanvas extends Region implements MouseListener {
-    // TODO: Add all if necessary
     public final ObjectProperty<EventHandler<MouseEvent>> mapMouseClickedProperty =
             new SimpleObjectProperty<>();
     public final ObjectProperty<EventHandler<MouseEvent>> mapMouseMovedProperty =
