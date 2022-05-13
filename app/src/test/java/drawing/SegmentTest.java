@@ -35,7 +35,7 @@ public class SegmentTest {
     @Test
     public void testLast() {
         assertEquals(two, segment1.last());
-        assertEquals(one, segment3.last());
+        assertEquals(one, segment2.last());
     }
 
     @Test
